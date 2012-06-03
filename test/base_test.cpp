@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include "proton/base.hpp"
 #include "proton/detail/unit_test.hpp"
 
@@ -11,13 +12,23 @@ int test_log()
 
 int test_assert()
 {
-    PROTON_THROW_IF(1, "hi world!");
+    try{
+        PROTON_THROW_IF(1, "hi world!");
+    }
+    catch(const proton::err& e){
+        PROTON_THROW_IF(std::string("assert")!=e.what(), "bad exception!");
+    }
     return 0;
 }
 
 int test_err()
 {
-    PROTON_ERR("we get the world~");
+    try{
+        PROTON_ERR("we get the world~");
+    }
+    catch(const proton::err& e){
+        PROTON_THROW_IF(std::string("err")!=e.what(), "bad exception!");
+    }
     return 0;
 }
 
@@ -28,7 +39,6 @@ int main()
     std::vector<proton::detail::unittest_t> ut=
         {test_log, test_assert, test_err};
     proton::detail::unittest_run(ut);
-    std::cout << "Don't worry. We are testing PROTON_THROW_IF & PROTON_ERR." << std::endl;
     return 0;
 }
 
