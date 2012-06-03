@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <string>
 #include "proton/base.hpp"
 #include "proton/detail/unit_test.hpp"

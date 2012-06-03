@@ -43,7 +43,7 @@ int detail::unittest_run(vector<unittest_t>& ut)
         std::cout << "-> success" << std::endl;
     }
 
-    std::cout << "\n>>> end, total : " << i << ", fail : " << fail
+    std::cout << "\n>>> end, total : " << i+1 << ", fail : " << fail
          << ", fatal : " << fatal << std::endl;
 
     if(fail==0 && fatal ==0)

@@ -29,12 +29,10 @@ inline const char* filename(const char* pathname)
 inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln)
 {
     std::ios_base::fmtflags ff=o.flags();
-    time_t now;
-    time(&now);
+    time_t now=time(NULL);
     struct tm* ti=localtime(&now);
     o << std::dec << std::right << "[";
-    o << ti->tm_year+1900 << "-"
-      << ti->tm_mon+1 << "-" << ti->tm_mday;
+    o << ti->tm_year+1900 << "-" << ti->tm_mon+1 << "-" << ti->tm_mday;
     o << " " << std::setw(2) << ti->tm_hour << ":" << std::setw(2) << ti->tm_min
       << ":" << std::setw(2) << ti->tm_sec << "] "
       << type << " " <<  filename(fn) << "#" << ln;
