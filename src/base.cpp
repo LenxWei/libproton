@@ -1,124 +1,27 @@
-#include "base.hpp"
-#include "string.hpp"
-
-#ifdef _MSC_VER
-#include <windows.h>
-#include <process.h>
-#else
-#include <unistd.h>
-#endif
+#include "proton/base.hpp"
+#include "proton/detail/unit_test.hpp"
+#include <map>
+#include <list>
+#include <string>
 
 using namespace std;
 
 namespace proton {
 
 int debug_level = 0;
-int output_level = 1;
+bool log_console=true;
 int wait_on_err = 2;
 
-class init_dumb{} dumb;
+class init_alloc{} alloc;
 
-/////////////////////////////////////////////
-// string utils
-
-std::string basename_of(const char* orig_fn)
+int detail::unittest_run(vector<unittest_t>& ut)
 {
-    string fn=orig_fn;
-    int dot_pos=fn.find_last_of(".");
-    if(dot_pos<=0)
-        return fn;
-    return fn.substr(0,dot_pos);
-}
-
-std::string basename_of(const std::string& orig_fn)
-{
-    return basename_of(orig_fn.c_str());
-}
-
-///////////////////////////////////////////
-// log utils
-
-ofstream g_logger;
-bool is_log_console=true;
-void log_console(bool flag)
-{
-    is_log_console=flag;
-}
-
-void log_open(const char* orig_fn, bool add_pid/*=false*/)
-{
-    if(output_level>0){
-        string log_fn=basename_of(orig_fn)+(add_pid?(string("_")+to_<string>(getpid())):"")+".log";
-    #ifdef WIN32
-        g_logger.open(log_fn.c_str(),ios::out, _SH_DENYWR);
-    #else
-        g_logger.open(log_fn.c_str(),ios::out);
-    #endif
-    }
-}
-
-void log_close()
-{
-    if(output_level>0){
-        g_logger.flush();
-        g_logger.close();
-    }
-}
-
-#ifdef _MSC_VER // if using Microsoft C++ compiler
-#pragma warning( disable : 4996 ) // disable warning C4200
-#endif
-
-bool log_warn()
-{
-    static bool warn=true;
-    if(warn){
-        warn=!warn;
-    }
-    return warn;
-}
-
-#if 0
-void __log(const char* msg)
-{
-    time_t ti=time(NULL);
-    char* t=ctime(&ti);
-    char* p=strchr('\n');
-    if(!p)
-        *p='\0';
-
-    if(is_log_console)
-        cerr << "[" << t << "] " << msg << endl;
-    if(output_level>0){
-        if(g_logger.is_open()){
-            try{
-                g_logger << "[" << t << "] " << msg << endl;
-                g_logger.flush();
-            }
-            catch(...)
-            {
-                cerr << "[" << t << "] " << "An exception happened when writing log !!!" << endl;
-            }
-        }
-        else{
-            static bool warn=true;
-            if(warn){
-                cerr << "[" << t << "] " << "The log file is not opened !!!" << endl;
-                warn=false;
-            }
-        }
-    }
-}
-#endif
-
-int unittest_run(unittest_t ut[])
-{
-    int i, r, fail = 0, fatal=0;
+    int i=-1, r, fail = 0, fatal=0;
     unittest_t f;
 
     //SCPT_RT_D_STDERR_OUTPUT = 0;
-
-    for(i=0; (f=ut[i])!=NULL; i++){
+    for(auto f:ut){
+        i++;
         std::cout << "\n>>> test case : " << i << std::endl;
         try{
             if((r=f())!=0){

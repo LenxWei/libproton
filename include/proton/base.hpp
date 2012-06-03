@@ -4,7 +4,8 @@
 #include <iostream>
 #include <time.h>
 #include <string.h>
-#include <string>
+#include <iomanip>
+#include <stdio.h>
 
 namespace proton{
 
@@ -32,14 +33,12 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
     time(&now);
     struct tm* ti=localtime(&now);
     o << std::dec << std::right << "[";
-    long w=o.width();
     o << ti->tm_year+1900 << "-"
       << ti->tm_mon+1 << "-" << ti->tm_mday;
-    o.width(2);
-    o << " " << ti->tm_hour << ":" << ti->tm_min << ":" << ti->tm_sec << "] "
+    o << " " << std::setw(2) << ti->tm_hour << ":" << std::setw(2) << ti->tm_min
+      << ":" << std::setw(2) << ti->tm_sec << "] "
       << type << " " <<  filename(fn) << "#" << ln;
     o.flags(ff);
-    o.width(w);
 }
 
 }
@@ -53,19 +52,19 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
     {\
         if ( proton::log_console && (lvl) <= proton::debug_level ) {\
             proton::detail::output_ts(std::cerr, "LOG", __FILE__, __LINE__);\
-            std::cerr << " : \t" << out << std::endl;\
+            std::cerr << " : " << out << std::endl;\
         }\
     }
 #define PROTON_THROW_IF(cond, out)\
     {\
         if (cond) {\
             if(proton::log_console){\
-                proton::detail::output_ts(std::cerr, "ASSERT", __FILE__, __LINE__);\
-                std::cerr << " : \t" << out << std::endl;\
+                proton::detail::output_ts(std::cerr, "BAD", __FILE__, __LINE__);\
+                std::cerr << " : " << out << std::endl;\
             }\
             if(proton::wait_on_err>=2){\
                 std::cout << "Assert failed. Waiting, press any key to continue..." << std::endl;\
-                getchar();\
+                ::getchar();\
             }\
             throw proton::err("assert");\
         }\
@@ -79,9 +78,9 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
     {\
         if(proton::log_console){\
             proton::detail::output_ts(std::cerr, "ERR", __FILE__, __LINE__);\
-            std::cerr << " : \t" << out << std::endl;\
+            std::cerr << " : " << out << std::endl;\
         }\
-        if(proton::detail::wait_on_err>=1){\
+        if(proton::wait_on_err>=1){\
             std::cout << "An error has happened. Waiting, press any key to continue..." << std::endl;\
             ::getchar();\
         }\
