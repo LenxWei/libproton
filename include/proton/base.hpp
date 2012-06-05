@@ -2,10 +2,10 @@
 #define PROTON_H
 
 #include <iostream>
-#include <time.h>
-#include <string.h>
+#include <ctime>
+#include <cstring>
 #include <iomanip>
-#include <stdio.h>
+#include <cstdio>
 
 namespace proton{
 
@@ -62,7 +62,7 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
             }\
             if(proton::wait_on_err>=2){\
                 std::cout << "Assert failed. Waiting, press any key to continue..." << std::endl;\
-                ::getchar();\
+                getchar();\
             }\
             throw proton::err("assert");\
         }\
