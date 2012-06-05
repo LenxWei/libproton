@@ -1,23 +1,22 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.59)
-AC_INIT(proton, 1.0, lenx.wei@gmail.com)
+AC_PREREQ(2.68)
+AC_INIT(proton, 1.1.0, lenx.wei@gmail.com)
 AC_CONFIG_SRCDIR([src/base.cpp])
-AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
+# AC_CONFIG_HEADER([include/proton/config.h])
 
 AM_INIT_AUTOMAKE(libproton.la, 1.1.0)
 
 # Checks for programs.
+AC_LANG([C++])
 AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
+AX_CXX_COMPILE_STDCXX_11([noext])
+# AX_CHECK_COMPILE_FLAG([-std=c++0x], [CXXFLAGS="$CXXFLAGS -std=c++0x"])
 AC_PROG_INSTALL
-AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
-
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
