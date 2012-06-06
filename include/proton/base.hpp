@@ -99,6 +99,7 @@ public:
     err& operator=(const err& e) throw()
     {
         _msg=e._msg;
+        return *this;
     }
 
     const char* what()const throw()

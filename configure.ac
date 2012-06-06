@@ -14,6 +14,10 @@ AM_INIT_AUTOMAKE(libproton.la, 1.1.0)
 AC_LANG([C++])
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([noext])
+AX_CHECK_COMPILE_FLAG([-Wall -Wextra -Wno-unused-variable -Wno-unused-but-set-variable \
+    -Wno-unused-parameter],\
+    [CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wno-unused-variable -Wno-unused-but-set-variable \
+    -Wno-unused-parameter"])
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
