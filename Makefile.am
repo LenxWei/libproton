@@ -1,10 +1,10 @@
 ACLOCAL_AMFLAGS = -I m4
 
-protonincludedir=$(includedir)/proton/
-protoninclude_HEADERS=$(top_srcdir)/include/proton/*.hpp $(top_srcdir)/include/proton/detail/*.hpp
-#include_HEADERS=$(top_srcdir)/include/scpt.hpp
+proton_includedir=$(includedir)/proton/
+proton_include_HEADERS=$(top_srcdir)/include/proton/*.hpp
+protondetail_includedir=$(includedir)/proton/detail/
+protondetail_include_HEADERS=$(top_srcdir)/include/proton/detail/*.hpp
 
 SUBDIRS = src test
 #examples
-DIST_SUBDIRS = src
-
+DIST_SUBDIRS = src test
