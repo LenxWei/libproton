@@ -50,6 +50,9 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 
 }
 
+/** Control debug macros.
+ * 1: enable PROTON_LOG/PROTON_THROW_IF/PROTON_ERR, 0: disable them.
+ */
 #ifndef PROTON_DEBUG_OPT
 #define PROTON_DEBUG_OPT 1
 #endif
