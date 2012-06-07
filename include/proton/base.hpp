@@ -46,6 +46,14 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 #endif
 
 #if PROTON_DEBUG_OPT
+
+/**
+ * \def PROTON_LOG( lvl, out )
+ * log messages to cerr.
+ * @param lvl   the log level, output messages when lvl <= proton::debug_level.
+ * @param out   messages to be outputed, they can be concatenated using "<<".
+ * @return none
+ */
 #define PROTON_LOG( lvl, out )\
     {\
         if ( proton::log_console && (lvl) <= proton::debug_level ) {\
