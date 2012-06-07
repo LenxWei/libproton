@@ -1,18 +1,27 @@
 #ifndef PROTON_H
 #define PROTON_H
 
+/** @file base.hpp
+ *  @brief the basic header for Proton Library
+ */
+
 #include <iostream>
 #include <ctime>
 #include <cstring>
 #include <iomanip>
 #include <cstdio>
 
+/** The main proton namespace.
+ */
 namespace proton{
 
-extern int debug_level; ///< for LOG() macro
-extern bool log_console; ///< false: no console output, true: output
-extern int wait_on_err; ///< 0: nonstop, 1: stop on ERR, 2: stop on THROW_IF assert
+extern int debug_level; ///< The level controls output of PROTON_LOG().
+extern bool log_console; ///< true: PROTON_LOG/PROTON_THROW_IF/PROTON_ERR will output to console, false: no console output for these macros.
+extern int wait_on_err; ///< 0: nonstop, 1: stop on PROTON_ERR, 2: stop on PROTON_THROW_IF assert
 
+/** The implementation namespace of proton.
+ * Any thing in this namespace should not be considered as a part of interfaces of Proton.
+ */
 namespace detail{
 
 inline const char* filename(const char* pathname)
@@ -47,12 +56,10 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 
 #if PROTON_DEBUG_OPT
 
-/**
- * \def PROTON_LOG( lvl, out )
- * log messages to cerr.
- * @param lvl   the log level, output messages when lvl <= proton::debug_level.
+/** Log messages to cerr.
+ * Output messages when lvl <= proton::debug_level.
+ * @param lvl   the log level.
  * @param out   messages to be outputed, they can be concatenated using "<<".
- * @return none
  */
 #define PROTON_LOG( lvl, out )\
     {\
@@ -61,6 +68,14 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
             std::cerr << " : " << out << std::endl;\
         }\
     }
+
+/** Proton's inverse assert.
+ * Throw if cond is true, and output the reason.
+ * If proton::wait_on_err >= 2, it will hold the program and wait for any key.
+ * You can use gdb to attach the process to check what's happened.
+ * @param cond  the condition to check, throw proton::err("assert") if it's true.
+ * @param out   the message describing what's happened.
+ */
 #define PROTON_THROW_IF(cond, out)\
     {\
         if (cond) {\
@@ -80,6 +95,12 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 #define PROTON_THROW_IF(cond, out)
 #endif
 
+/** Throw an err.
+ * Throw a proton::err("err"), and output a message.
+ * If proton::wait_on_err >= 1, it will hold the program and wait for any key.
+ * You can use gdb to attach the process to check what's happened.
+ * @param out   the message describing what's happened.
+ */
 #define PROTON_ERR(out)\
     {\
         if(proton::log_console){\
@@ -93,11 +114,16 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
         throw proton::err("err");\
     }
 
-// exception class
+/** The exception class.
+ * The exception class used by PROTON_THROW_IF and PROTON_ERR.
+ */
 class err: public std::exception{
 protected:
     const char* _msg;
 public:
+    /** ctor
+     * @param msg the message showed in what().
+     */
     err(const char* msg) throw():_msg(msg)
     {}
 
@@ -110,6 +136,9 @@ public:
         return *this;
     }
 
+    /** get message
+     * @return the message used in ctor.
+     */
     const char* what()const throw()
     {
         return _msg;

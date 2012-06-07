@@ -7,9 +7,9 @@ namespace proton{
 namespace detail{
 
 /////////////////////////////
-/// unittest
+// unittest
 
-///@return 0 - success
+//@return 0 - success
 typedef int (*unittest_t)();
 
 int unittest_run(std::vector<unittest_t>& ut);
