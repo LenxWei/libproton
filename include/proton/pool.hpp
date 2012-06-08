@@ -8,6 +8,7 @@ struct tag_pool_temp{};
 
 struct tag_pool_pers{};
 
+namespace detail{
 class pool_block;
 class seg_pool;
 class mem_pool;
@@ -64,8 +65,8 @@ public:
 
     void insert_after(list_header* prev)
     {
-        THROW_IF(_prev, "invalid prev");
-        THROW_IF(_next, "invalid next");    
+        PROTON_THROW_IF(_prev, "invalid prev");
+        PROTON_THROW_IF(_next, "invalid next");
 
         _prev=prev;
         if(prev){
@@ -78,8 +79,8 @@ public:
 
     void insert_before(list_header* next)
     {
-        THROW_IF(_prev, "invalid prev");
-        THROW_IF(_next, "invalid next");    
+        PROTON_THROW_IF(_prev, "invalid prev");
+        PROTON_THROW_IF(_next, "invalid next");
 
         _next=next;
         if(_next){
@@ -104,7 +105,7 @@ protected:
 
     seg_pool* _parent;
     size_t _block_size; // 4
-    size_t _chunk_size; 
+    size_t _chunk_size;
     size_t _chunk_cap;
 
     size_t _chunk_cnt;
@@ -212,12 +213,13 @@ public:
     void get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, size_t& full_cnt);
     void print_info(bool print_null);
 };
+}
 
 #define handy_meta_block_max 128
 
 class mem_pool {
 protected:
-    seg_pool _segs[handy_meta_block_max+1]; 
+    seg_pool _segs[handy_meta_block_max+1];
     size_t _seg_cnt;
     size_t _seg_linear_cnt;
 
@@ -245,7 +247,7 @@ public:
     {
         return _segs[_seg_cnt-1].chunk_size();
     }
-    
+
     size_t get_seg_total(); ///< get total memory usage of seg pools
     size_t get_seg_free();  ///< get total free allocatable memory of seg pools
 
@@ -329,7 +331,7 @@ public:
     static pointer allocate(size_type n)
     {
         static seg_pool* meta=get_pool_<pool_tag>()->get_seg(sizeof(value_type));
-        pointer r=(pointer)meta->malloc(sizeof(T), n); 
+        pointer r=(pointer)meta->malloc(sizeof(T), n);
         if(!r)
             throw std::bad_alloc();
         return r;

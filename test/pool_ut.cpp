@@ -16,17 +16,17 @@ void output_malloc_info()
 {
     struct mallinfo m;
     m=mallinfo();
-    LOG(1, "=================");
-    LOG(1, "arena:"<<m.arena );
-    LOG(1, "ordblks:"<<m.ordblks);
+    PROTON_LOG(1, "=================");
+    PROTON_LOG(1, "arena:"<<m.arena );
+    PROTON_LOG(1, "ordblks:"<<m.ordblks);
 //    cout << "smblks:"<<m.smblks<<endl;
-    LOG(1, "hblks:"<<m.hblks);
-    LOG(1,"hblkhd:"<<m.hblkhd);
+    PROTON_LOG(1, "hblks:"<<m.hblks);
+    PROTON_LOG(1,"hblkhd:"<<m.hblkhd);
 //    cout << "usmblks:"<<m.usmblks<<endl;
 //    cout << "fsmblks:"<<m.fsmblks<<endl;
-    LOG(1,"uordblks:"<<m.uordblks);
-    LOG(1, "fordblks:"<<m.fordblks);
-    LOG(1,"keepcost:"<<m.keepcost);
+    PROTON_LOG(1,"uordblks:"<<m.uordblks);
+    PROTON_LOG(1, "fordblks:"<<m.fordblks);
+    PROTON_LOG(1,"keepcost:"<<m.keepcost);
 }
 
 size_t get_mem()
@@ -44,7 +44,7 @@ size_t get_mem()
 
     line=strip(readline<string>(f));
     if(line!="RSS"){
-        LOG(1, "bad rss:"<<line);
+        PROTON_LOG(1, "bad rss:"<<line);
     }
 
     line=strip(readline<string>(f));
@@ -53,7 +53,7 @@ size_t get_mem()
         return (size_t)rss;
     }
     else{
-        ERR("bad rss value:"<<line);
+        PROTON_ERR("bad rss value:"<<line);
     }
 #endif
 }
@@ -64,19 +64,19 @@ int list_header_ut()
     list_header a(1),b,c;
     b.insert_after(&a);
     c.insert_before(&a);
-    THROW_IF(a.next()!=&b, "bad");
-    THROW_IF(a.prev()!=&c, "bad");
-    THROW_IF(c.prev()!=&b, "bad");
-    THROW_IF(c.next()!=&a, "bad");
-    THROW_IF(b.prev()!=&a, "bad");
-    THROW_IF(b.next()!=&c, "bad");
+    PROTON_THROW_IF(a.next()!=&b, "bad");
+    PROTON_THROW_IF(a.prev()!=&c, "bad");
+    PROTON_THROW_IF(c.prev()!=&b, "bad");
+    PROTON_THROW_IF(c.next()!=&a, "bad");
+    PROTON_THROW_IF(b.prev()!=&a, "bad");
+    PROTON_THROW_IF(b.next()!=&c, "bad");
     b.erase_from_list();
-    THROW_IF(a.next()!=&c, "bad");
-    THROW_IF(a.prev()!=&c, "bad");
-    THROW_IF(c.prev()!=&a, "bad");
-    THROW_IF(c.next()!=&a, "bad");
-    THROW_IF(b.prev()!=NULL, "bad");
-    THROW_IF(b.next()!=NULL, "bad");
+    PROTON_THROW_IF(a.next()!=&c, "bad");
+    PROTON_THROW_IF(a.prev()!=&c, "bad");
+    PROTON_THROW_IF(c.prev()!=&a, "bad");
+    PROTON_THROW_IF(c.next()!=&a, "bad");
+    PROTON_THROW_IF(b.prev()!=NULL, "bad");
+    PROTON_THROW_IF(b.next()!=NULL, "bad");
 
     return 0;
 }
@@ -95,11 +95,11 @@ int pool_ut()
     g0->print_info();
 
     if(sizeof(long)==8){
-        THROW_IF(g0->get_seg_cnt()!=63, "err");
-        THROW_IF(g0->get_seg(0)->chunk_size()!=8, "err");
-        THROW_IF(g0->get_max_chunk_size()!=138728, "err");
+        PROTON_THROW_IF(g0->get_seg_cnt()!=63, "err");
+        PROTON_THROW_IF(g0->get_seg(0)->chunk_size()!=8, "err");
+        PROTON_THROW_IF(g0->get_max_chunk_size()!=138728, "err");
     }
-    THROW_IF(g0->get_seg(g0->get_max_chunk_size()+1)->chunk_size()!=0, "err");
+    PROTON_THROW_IF(g0->get_seg(g0->get_max_chunk_size()+1)->chunk_size()!=0, "err");
 
     void* p=g0->malloc(103,3);
     g0->print_info();
@@ -107,43 +107,43 @@ int pool_ut()
     seg_pool* ma=g0->get_seg(103*3);
     ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
     n=free_cap;
-    THROW_IF(free_cnt!=1, "err");
-    THROW_IF(empty_cap!=0, "err");
-    THROW_IF(full_cnt!=0, "err");
+    PROTON_THROW_IF(free_cnt!=1, "err");
+    PROTON_THROW_IF(empty_cap!=0, "err");
+    PROTON_THROW_IF(full_cnt!=0, "err");
 
     pool_free(p);
     g0->print_info();
     ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-    THROW_IF(free_cnt!=0, "err");
-    THROW_IF(empty_cap!=n, "err");
-    THROW_IF(full_cnt!=0, "err");
+    PROTON_THROW_IF(free_cnt!=0, "err");
+    PROTON_THROW_IF(empty_cap!=n, "err");
+    PROTON_THROW_IF(full_cnt!=0, "err");
 
     g0->purge();
     g0->print_info();
     ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-    THROW_IF(free_cnt!=0, "err");
-    THROW_IF(empty_cap!=0, "err");
-    THROW_IF(full_cnt!=0, "err");
+    PROTON_THROW_IF(free_cnt!=0, "err");
+    PROTON_THROW_IF(empty_cap!=0, "err");
+    PROTON_THROW_IF(full_cnt!=0, "err");
 
     void* q[10240];
     q[0]=g0->malloc(1,1);
     ma=g0->get_seg(1);
     ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-    THROW_IF(free_cnt!=1, "err");
+    PROTON_THROW_IF(free_cnt!=1, "err");
     n=free_cap;
-    THROW_IF(empty_cap!=0, "err");
-    THROW_IF(full_cnt!=0, "err");
+    PROTON_THROW_IF(empty_cap!=0, "err");
+    PROTON_THROW_IF(full_cnt!=0, "err");
 
     if(n*2+1<10240){
         for(int i=1; i<n*2+1; i++)
             q[i]=g0->malloc(0,1);
         g0->print_info();
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-        THROW_IF(free_cnt!=1, "err");
+        PROTON_THROW_IF(free_cnt!=1, "err");
         m=free_cap;
-        THROW_IF(free_cap < n*2, "err");
-        THROW_IF(empty_cap!=0, "err");
-        THROW_IF(full_cnt!=n*2, "err");
+        PROTON_THROW_IF(free_cap < n*2, "err");
+        PROTON_THROW_IF(empty_cap!=0, "err");
+        PROTON_THROW_IF(full_cnt!=n*2, "err");
 
         for(int i=10; i<n*2+1; i++)
             pool_free(q[i]);
@@ -151,32 +151,32 @@ int pool_ut()
             q[i]=g0->malloc(4,1);
         g0->print_info();
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-        THROW_IF(free_cnt!=100, "err");
-        THROW_IF(free_cap != n, "err");
-        THROW_IF(empty_cap!= m, "err");
-        THROW_IF(full_cnt!=0, "err");
+        PROTON_THROW_IF(free_cnt!=100, "err");
+        PROTON_THROW_IF(free_cap != n, "err");
+        PROTON_THROW_IF(empty_cap!= m, "err");
+        PROTON_THROW_IF(full_cnt!=0, "err");
 
         void* r=g0->malloc(128*1024);
         for(int i=0; i<100; i++)
             pool_free(q[i]);
         g0->print_info();
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-        THROW_IF(free_cnt!=0, "err");
-        THROW_IF(free_cap != 0, "err");
-        THROW_IF(empty_cap!= m, "err");
-        THROW_IF(full_cnt!=0, "err");
+        PROTON_THROW_IF(free_cnt!=0, "err");
+        PROTON_THROW_IF(free_cap != 0, "err");
+        PROTON_THROW_IF(empty_cap!= m, "err");
+        PROTON_THROW_IF(full_cnt!=0, "err");
 
         ma=g0->get_seg(128*1024);
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
-        THROW_IF(free_cnt!=0, "err");
-        THROW_IF(free_cap != 0, "err");
-        THROW_IF(empty_cap!= 0, "err");
-        THROW_IF(full_cnt!=1, "err");
+        PROTON_THROW_IF(free_cnt!=0, "err");
+        PROTON_THROW_IF(free_cap != 0, "err");
+        PROTON_THROW_IF(empty_cap!= 0, "err");
+        PROTON_THROW_IF(full_cnt!=1, "err");
 
         pool_free(r);
     }
     else{
-        LOG(0, "too big to test:"<<n);
+        PROTON_LOG(0, "too big to test:"<<n);
     }
     cout <<"step1:"<<get_mem()<<endl;
     g0->destroy();
@@ -323,44 +323,44 @@ int string_op_ut()
     cout << "-> string_op_ut" << endl;
 
     tstring a=" adsf 123 456 ";
-    THROW_IF(strip(a)!="adsf 123 456", "err");
+    PROTON_THROW_IF(strip(a)!="adsf 123 456", "err");
 
     tlist(tstring) l;
     split(l, a);
     tstring r=join(" ", l);
-    THROW_IF(r!="adsf 123 456", "err");
-    THROW_IF(!startswith(r,"adsf"), "err");
-    THROW_IF(startswith(r,"123"), "err");
-    THROW_IF(!startswith(r,tstring("adsf")), "err");
-    THROW_IF(startswith(r,tstring("123")), "err");
-    THROW_IF(!endswith(r,"456"), "err");
-    THROW_IF(endswith(r,"123"), "err");
-    THROW_IF(!endswith(r,tstring("456")), "err");
-    THROW_IF(endswith(r,tstring("123")), "err");
+    PROTON_THROW_IF(r!="adsf 123 456", "err");
+    PROTON_THROW_IF(!startswith(r,"adsf"), "err");
+    PROTON_THROW_IF(startswith(r,"123"), "err");
+    PROTON_THROW_IF(!startswith(r,tstring("adsf")), "err");
+    PROTON_THROW_IF(startswith(r,tstring("123")), "err");
+    PROTON_THROW_IF(!endswith(r,"456"), "err");
+    PROTON_THROW_IF(endswith(r,"123"), "err");
+    PROTON_THROW_IF(!endswith(r,tstring("456")), "err");
+    PROTON_THROW_IF(endswith(r,tstring("123")), "err");
 
     split(l, a, "a14");
-    THROW_IF(l.size()!=4, "err");
+    PROTON_THROW_IF(l.size()!=4, "err");
 
     tstring n=to_<tstring>(16, 16);
-    THROW_IF(n!="0x10", "err");
+    PROTON_THROW_IF(n!="0x10", "err");
 
     long k;
-    THROW_IF(!get_int(k, n, 16), "err");
-    THROW_IF(k!=16, "err");
+    PROTON_THROW_IF(!get_int(k, n, 16), "err");
+    PROTON_THROW_IF(k!=16, "err");
 
     unsigned long u;
-    THROW_IF(!get_unsigned(u, n, 16), "err");
-    THROW_IF(u!=16, "err");
+    PROTON_THROW_IF(!get_unsigned(u, n, 16), "err");
+    PROTON_THROW_IF(u!=16, "err");
 
-    THROW_IF(to_lower(r)!="adsf 123 456", "err");
-    THROW_IF(to_upper(r)!="ADSF 123 456", "err");
+    PROTON_THROW_IF(to_lower(r)!="adsf 123 456", "err");
+    PROTON_THROW_IF(to_upper(r)!="ADSF 123 456", "err");
     std::string r1="ABC";
-    THROW_IF(to_lower(r1)!="abc", "err");
-    THROW_IF(to_upper(r1)!="ABC", "err");
+    PROTON_THROW_IF(to_lower(r1)!="abc", "err");
+    PROTON_THROW_IF(to_upper(r1)!="ABC", "err");
     {
         string a="abcdef";
-        THROW_IF(!istartswith(a, "ABc"), "err");
-        THROW_IF(!iendswith(a, "dEf"), "err");
+        PROTON_THROW_IF(!istartswith(a, "ABc"), "err");
+        PROTON_THROW_IF(!iendswith(a, "dEf"), "err");
     }
     return 0;
 }
@@ -377,7 +377,7 @@ int trav_dir_ut()
             found=true;
         }
     }
-    THROW_IF(!found, "err");
+    PROTON_THROW_IF(!found, "err");
     return 0;
 }
 
@@ -419,7 +419,7 @@ struct obj_derived:obj_test{
 class derived:public vref_<obj_derived, test>{
 public:
     DEF_VCTOR(derived)
-        
+
     void init(string a, int b, string c)
     {
         test::init(a,b);
@@ -465,7 +465,7 @@ int ref_ut()
     catch(err&){
         k1=true;
     }
-    THROW_IF(!k1, "no cast err detected!");
+    PROTON_THROW_IF(!k1, "no cast err detected!");
 
     der f(dumb);
     f->a="abc"; f->b=2; f->c="def";
@@ -518,14 +518,14 @@ int ref_test_ut()
             as.push_back(a);
         }
         //std::cout << refc_count << std::endl;
-        THROW_IF(refc_count!=10, "bad refc_count");
+        PROTON_THROW_IF(refc_count!=10, "bad refc_count");
         ref_test b;
         b=as[0];
         as.clear();
         //std::cout << refc_count << std::endl;
-        THROW_IF(refc_count!=1, "bad refc_count");
+        PROTON_THROW_IF(refc_count!=1, "bad refc_count");
         b.release();
-        THROW_IF(refc_count!=0, "bad refc_count");
+        PROTON_THROW_IF(refc_count!=0, "bad refc_count");
     }
     //std::cout << "refc_count:"<<refc_count << std::endl;
     return 0;
@@ -539,7 +539,7 @@ int string_cast_ut()
     estring b=to_<estring>(a);
 
     std::cout <<  b << endl;
-    THROW_IF(strcmp(a.c_str(), b.c_str())!=0, "err");
+    PROTON_THROW_IF(strcmp(a.c_str(), b.c_str())!=0, "err");
 
     return 0;
 }
@@ -550,15 +550,15 @@ int pool_idx_ut()
     mem_pool* g0=get_pool_<tmp_pool>();
     seg_pool* seg;
     seg=g0->get_seg(0);
-    THROW_IF(seg->chunk_min_size()>0, "err");
-    size_t i=0; 
+    PROTON_THROW_IF(seg->chunk_min_size()>0, "err");
+    size_t i=0;
     while(1){
         seg=g0->get_seg(i);
         if(seg->chunk_size()==0){
             std::cout << "max:"<<i<<std::endl;
             break;
         }
-        THROW_IF(seg->chunk_min_size()>i || i> seg->chunk_size(), "err:"<<i<<"("<<seg->chunk_min_size()<<","<<seg->chunk_size()<<")");
+        PROTON_THROW_IF(seg->chunk_min_size()>i || i> seg->chunk_size(), "err:"<<i<<"("<<seg->chunk_min_size()<<","<<seg->chunk_size()<<")");
         i++;
     }
     return 0;
@@ -611,11 +611,11 @@ int functor_ut()
     functor_<int(int)> k=fc::k_fp(f);
     functor_<void()> t=fc::n_fp(f);
     std::cout << k(3) << std::endl;
-    THROW_IF(k(3)!=3, "err");
+    PROTON_THROW_IF(k(3)!=3, "err");
     t();
 
     functor_<int(int,int)> s=fc::m_fp(f);
-    THROW_IF(s(3,4)!=7, "err");
+    PROTON_THROW_IF(s(3,4)!=7, "err");
 
     k=k1;
     functor_<int(int)> bf=k1;
@@ -627,10 +627,10 @@ int functor_ut()
     std::cout << bf(3) << std::endl;
 
     //std::cout << (bf==k )<< std::endl;
-    THROW_IF(!(bf==k), "err");
-    THROW_IF(bf!=k, "err");
+    PROTON_THROW_IF(!(bf==k), "err");
+    PROTON_THROW_IF(bf!=k, "err");
 
-    THROW_IF(sizeof(t)!=sizeof(s),"err");
+    PROTON_THROW_IF(sizeof(t)!=sizeof(s),"err");
     return 0;
 }
 

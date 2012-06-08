@@ -89,7 +89,7 @@ int getopt(map<char, string>& optlist, list<string>& arglist,
             continue;
         }
         else if(argv[i][1]=='-'){
-            //LOG(0, "Long options are not supported yet!");
+            //PROTON_LOG(0, "Long options are not supported yet!");
             return -3;
         }
         else{

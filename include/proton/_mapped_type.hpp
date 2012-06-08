@@ -7,7 +7,7 @@ template <typename mapT, typename K>
 typename mapT::mapped_type get(const mapT& x, K&& key)
 {
     auto it=x.find(key);
-    THROW_IF(it==x.end(), "can't find the key in a map");
+    PROTON_THROW_IF(it==x.end(), "can't find the key in a map");
     return it->second;
 }
 

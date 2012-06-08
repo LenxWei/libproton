@@ -34,9 +34,36 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="AUTHORS" />
+		<Unit filename="COPYING" />
+		<Unit filename="ChangeLog" />
+		<Unit filename="Makefile.am" />
+		<Unit filename="NEWS" />
+		<Unit filename="README" />
+		<Unit filename="bootstrap.sh" />
+		<Unit filename="configure.ac" />
+		<Unit filename="dox\Doxyfile" />
+		<Unit filename="include\proton\_mapped_type.hpp" />
+		<Unit filename="include\proton\base.hpp" />
+		<Unit filename="include\proton\detail\atomic.hpp" />
+		<Unit filename="include\proton\detail\unit_test.hpp" />
+		<Unit filename="include\proton\getopt.hpp" />
+		<Unit filename="include\proton\list.hpp" />
+		<Unit filename="include\proton\map.hpp" />
+		<Unit filename="include\proton\pool.hpp" />
+		<Unit filename="include\proton\ref.hpp" />
+		<Unit filename="include\proton\set.hpp" />
+		<Unit filename="include\proton\string.hpp" />
+		<Unit filename="include\proton\unordered_map.hpp" />
+		<Unit filename="include\proton\unordered_set.hpp" />
+		<Unit filename="include\proton\vector.hpp" />
+		<Unit filename="src\Makefile.am" />
+		<Unit filename="src\base.cpp" />
+		<Unit filename="src\pool.cpp" />
+		<Unit filename="test\Makefile.am" />
+		<Unit filename="test\base_test.cpp" />
+		<Unit filename="test\pool_ut.cpp" />
+		<Unit filename="test\test.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

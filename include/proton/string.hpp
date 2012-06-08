@@ -168,7 +168,7 @@ template<typename ostream> void set_base(ostream& s, int base, bool is_num=false
                 s<< "0x";
             break;
         default:
-            LOG(0, "unsupported base : " << base );
+            PROTON_LOG(0, "unsupported base : " << base );
     }
 }
 
@@ -256,7 +256,7 @@ template<typename string> string to_lower(const string& s)
 	    return r;
     }
     else{
-        ERR("bad alloc:" << length);
+        PROTON_ERR("bad alloc:" << length);
     }
 }
 
@@ -281,7 +281,7 @@ template<typename string>string to_upper(const string& s)
 	    return r;
     }
     else{
-        ERR("bad alloc:" << length);
+        PROTON_ERR("bad alloc:" << length);
     }
 }
 
@@ -306,7 +306,7 @@ C get(const std::basic_string<C,T,A>& x, long i)
     if(i<0)
         i=s+i;
     if(i<0 || (unsigned long)i >= s )
-        ERR("out of range: look up "<<i<<" in vector whose size is " << s);
+        PROTON_ERR("out of range: look up "<<i<<" in vector whose size is " << s);
     return x[i];
 }
 

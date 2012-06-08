@@ -67,7 +67,7 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 #define PROTON_LOG( lvl, out )\
     {\
         if ( proton::log_console && (lvl) <= proton::debug_level ) {\
-            proton::detail::output_ts(std::cerr, "LOG", __FILE__, __LINE__);\
+            proton::detail::output_ts(std::cerr, "PROTON_LOG", __FILE__, __LINE__);\
             std::cerr << " : " << out << std::endl;\
         }\
     }

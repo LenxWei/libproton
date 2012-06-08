@@ -24,7 +24,7 @@ std::list<T,A>& operator<<(std::list<T,A>& x, V&& val)
 template <typename T, typename A, typename V>
 std::list<T,A>& operator>>(std::list<T,A>& x, V& val)
 {
-    THROW_IF(x.empty(), "want to pop an empty list.");
+    PROTON_THROW_IF(x.empty(), "want to pop an empty list.");
     val=x.back();
     x.pop_back();
     return x;
@@ -94,7 +94,7 @@ T& get(std::list<T,A>& x, long i)
             }
         }
         if(it==end){
-            ERR("out of range: look up "<<i<<" in a list whose size is " << j);
+            PROTON_ERR("out of range: look up "<<i<<" in a list whose size is " << j);
         }
         return *it;
     }
@@ -103,7 +103,7 @@ T& get(std::list<T,A>& x, long i)
         auto it=x.end(),begin=x.begin();
         for(; j>i; --j,--it){
             if(it==begin){
-                ERR("out of range: look up "<<-j+i<<" in a list whose size is " << -j);
+                PROTON_ERR("out of range: look up "<<-j+i<<" in a list whose size is " << -j);
             }
         }
         return *it;
@@ -122,7 +122,7 @@ const T& get(const std::list<T,A>& x, long i)
             }
         }
         if(it==end){
-            ERR("out of range: look up "<<i<<" in a list whose size is " << j);
+            PROTON_ERR("out of range: look up "<<i<<" in a list whose size is " << j);
         }
         return *it;
     }
@@ -131,7 +131,7 @@ const T& get(const std::list<T,A>& x, long i)
         auto it=x.end(),begin=x.begin();
         for(; j>i; --j,--it){
             if(it==begin){
-                ERR("out of range: look up "<<-j+i<<" in a list whose size is " << -j);
+                PROTON_ERR("out of range: look up "<<-j+i<<" in a list whose size is " << -j);
             }
         }
         return *it;

@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include "proton/base.hpp"
-#include "proton/pool.hpp"
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
 
 #ifdef __GNUC__
 #include <sys/mman.h>
 #endif
 
-namespace proton{
+using namespace proton;
+using namespace proton::detail;
 
 size_t block_size_initial=8*1024; // 8K
 size_t block_size_max=512*1024; // 512K
@@ -30,7 +30,7 @@ void* mmalloc(size_t s)
         return (void*)(r+1);
     }
     else{
-        LOG(0, "mmap failed");
+        PROTON_LOG(0, "mmap failed");
         return NULL;
     }
 }
@@ -40,10 +40,10 @@ void mmfree(void* p)
     mmheader* r=((mmheader*)p)-1;
     int ret=munmap((void*)r, r->len);
     if(ret){
-        LOG(0, "munmap failed:"<<ret);
+        PROTON_LOG(0, "munmap failed:"<<ret);
     }
 }
-    
+
 size_t get_heap_header_size()
 {
     return sizeof(mmheader);
@@ -56,7 +56,7 @@ size_t get_heap_header_size()
             free(p);
         }
         else{
-            LOG(0, "err: can't malloc() during get_libc_heap_header_size()");
+            PROTON_LOG(0, "err: can't malloc() during get_heap_header_size()");
             size=32;
         }
     }
@@ -70,7 +70,7 @@ size_t get_heap_header_size()
 mem_pool::mem_pool(size_t max/*=32*1024*/, size_t factor/*=8*/)
     :_seg_cnt(0), _seg_linear_cnt(0)
 {
-    compute_sizes(max, CHUNK_ALIGN, factor);    
+    compute_sizes(max, CHUNK_ALIGN, factor);
 }
 
 mem_pool::~mem_pool()
@@ -96,8 +96,8 @@ void mem_pool::compute_sizes(size_t max, size_t align, size_t factor)
         _seg_cnt++;
         if(s-i <= align)
             _seg_linear_cnt++;
-        if(_seg_cnt>=handy_meta_block_max){
-            LOG(0, "mem_pool compute_sizes handy_meta_block_max is not enough");
+        if(_seg_cnt>=PROTON_META_BLOCK_MAX){
+            PROTON_LOG(0, "mem_pool::compute_sizes PROTON_META_BLOCK_MAX is not enough");
             break;
         }
         i=s+1;
@@ -153,7 +153,7 @@ seg_pool* mem_pool::get_seg(size_t size)
         return &_segs[_seg_cnt];
     }
     else{
-        size_t begin=_seg_linear_cnt-1; /// > 
+        size_t begin=_seg_linear_cnt-1; /// >
         size_t end=_seg_cnt-1; /// <=
         while(begin+1!=end){
             size_t mid=(end+begin)/2;
@@ -171,11 +171,11 @@ void* mem_pool::malloc(size_t size, size_t n/*=1*/)
     size_t real_size;
     if(n==1)
         real_size=size;
-    else{ 
+    else{
         real_size=size*n;
 
         if(n!=0 && real_size/n!=size){
-            LOG(0, "size overflow:"<<size<<"*"<<n);
+            PROTON_LOG(0, "size overflow:"<<size<<"*"<<n);
             return NULL;
         }
     }
@@ -256,7 +256,7 @@ void* seg_pool::malloc(size_t size, size_t n)
         else if(n>1){
             size_t real_size=size*n;
             if(real_size/n!=size){
-                LOG(0, "overflow:"<<size<<"*"<<n);
+                PROTON_LOG(0, "overflow:"<<size<<"*"<<n);
                 return NULL;
             }
             if(real_size >= _chunk_min_size && real_size<=_chunk_size)
@@ -275,7 +275,7 @@ void* seg_pool::malloc(size_t size, size_t n)
         else if(n>1) {
             real_size=size*n;
             if( real_size/n!=size){
-                LOG(0, "overflow:"<<size<<"*"<<n);
+                PROTON_LOG(0, "overflow:"<<size<<"*"<<n);
                 return NULL;
             }
         }
@@ -290,7 +290,7 @@ void* seg_pool::malloc(size_t size, size_t n)
 
 void seg_pool::free_chunk(chunk_header* ch)
 {
-    pool_block* ba=ch->parent; 
+    pool_block* ba=ch->parent;
     // ASSERT ba->parent()==this
     bool f=ba->full();
     ba->free_chunk(ch);
@@ -329,19 +329,19 @@ void seg_pool::malloc_block()
 
 void seg_pool::reg_free_block(pool_block* p)
 {
-    THROW_IF(p->full(), "try to reg a full block:"<<p);
+    PROTON_THROW_IF(p->full(), "try to reg a full block:"<<p);
     p->insert_before(&_free_blocks);
 }
 
 void seg_pool::reg_full_block(pool_block* p)
 {
-    THROW_IF(!p->full(), "try to reg a not full block into full_blocks:"<<p);
+    PROTON_THROW_IF(!p->full(), "try to reg a not full block into full_blocks:"<<p);
     p->insert_after(&_full_blocks);
 }
 
 void seg_pool::reg_empty_block(pool_block* p)
 {
-    THROW_IF(!p->empty(), "try to reg a not empty block into empty_blocks:"<<p);
+    PROTON_THROW_IF(!p->empty(), "try to reg a not empty block into empty_blocks:"<<p);
     if(_empty_blocks.empty()){
         p->insert_after(&_empty_blocks);
         return;
@@ -408,7 +408,7 @@ void seg_pool::get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, si
             chunk_total+=ba->_chunk_cap;
             lh=lh->next();
         }
-        THROW_IF(chunk_cnt!=chunk_total, "bad full");
+        PROTON_THROW_IF(chunk_cnt!=chunk_total, "bad full");
         full_cnt=chunk_cnt;
     }
     {
@@ -420,7 +420,7 @@ void seg_pool::get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, si
             chunk_total+=ba->_chunk_cap;
             lh=lh->next();
         }
-        THROW_IF(chunk_cnt!=0, "bad empty");
+        PROTON_THROW_IF(chunk_cnt!=0, "bad empty");
         empty_cap=chunk_total;
     }
 }
@@ -472,19 +472,17 @@ void* pool_block::malloc_one()
         return (void*)(p+1);
     }
     else{
-        LOG(0, "bad alloc in a full block");
+        PROTON_LOG(0, "bad alloc in a full block");
         return NULL;
     }
 }
 
 void pool_block::free_chunk(chunk_header *ch)
 {
-    THROW_IF(ch->parent!=this, "unmatched:"<<ch->parent<<" vs. "<<this);
+    PROTON_THROW_IF(ch->parent!=this, "unmatched:"<<ch->parent<<" vs. "<<this);
 
     ch->next_free=_free_header;
     _free_header=ch;
     _chunk_cnt--;
 }
-
-};
 

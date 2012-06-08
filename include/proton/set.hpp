@@ -23,7 +23,7 @@ std::set<T,C,A>& operator<<(std::set<T,C,A>& x, V&& val)
 template <typename T, typename C, typename A, typename V >
 std::set<T,C,A>& operator>>(std::set<T,C,A>& x, V& val)
 {
-    THROW_IF(x.empty(), "want to pop an empty set.");
+    PROTON_THROW_IF(x.empty(), "want to pop an empty set.");
     val=*x.begin();
     x.erase(x.begin());
     return x;

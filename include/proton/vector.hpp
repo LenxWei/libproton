@@ -23,7 +23,7 @@ std::vector<T,A>& operator<<(std::vector<T,A>& x, V&& val)
 template <typename T, typename A, typename V>
 std::vector<T,A>& operator>>(std::vector<T,A>& x, V& val)
 {
-    THROW_IF(x.empty(), "want to pop an empty vector.");
+    PROTON_THROW_IF(x.empty(), "want to pop an empty vector.");
     val=x.back();
     x.pop_back();
     return x;
@@ -88,7 +88,7 @@ T& get(std::vector<T,A>& x, long i)
     if(i<0)
         i=s+i;
     if(i<0 || (unsigned long)i >= s )
-        ERR("out of range: look up "<<i<<" in vector whose size is " << s);
+        PROTON_ERR("out of range: look up "<<i<<" in vector whose size is " << s);
     return x[i];
 }
 
@@ -99,7 +99,7 @@ const T& get(const std::vector<T,A>& x, long i)
     if(i<0)
         i=s+i;
     if(i<0 || (unsigned long)i >= s )
-        ERR("out of range: look up "<<i<<" in vector whose size is " << s);
+        PROTON_ERR("out of range: look up "<<i<<" in vector whose size is " << s);
     return x[i];
 }
 
