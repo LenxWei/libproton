@@ -1,14 +1,13 @@
-#include "HandyUtils.hpp"
-#include "handy_pool.hpp"
-#include "handy_pool_types.hpp"
-#include "handy_ref.hpp"
-#include "handy_string.hpp"
-#include "handy_functor.hpp"
-#include <deque>
-#include <list>
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
+#include <proton/ref.hpp>
+#include <proton/string.hpp>
+#include <proton/deque.hpp>
+#include <proton/list.hpp>
 
 using namespace std;
-using namespace handy_utils;
+using namespace proton;
+using namespace proton::detail;
 
 #include <malloc.h>
 

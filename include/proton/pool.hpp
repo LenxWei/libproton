@@ -2,16 +2,26 @@
 #define PROTON_POOL_HEADER
 #include <new>
 
+#ifndef PROTON_POOL_DEBUG
+#define PROTON_POOL_DEBUG 1
+#endif
+
+#if PROTON_POOL_DEBUG
+#define PROTON_POOL_THROW_IF PROTON_THROW_IF
+#else
+#define PROTON_POOL_THROW_IF(cond, out)
+#endif
+
 namespace proton{
 
-struct tag_pool_temp{};
-
-struct tag_pool_pers{};
+class mem_pool;
 
 namespace detail{
+
 class pool_block;
 class seg_pool;
-class mem_pool;
+
+void mmfree(void* p);
 
 union chunk_header{
     chunk_header* next_free;
@@ -50,23 +60,26 @@ public:
 
     ~list_header()
     {
-        erase_from_list();
+        if(_prev)
+            _prev->_next=_next;
+        if(_next)
+            _next->_prev=_prev;
     }
 
-    list_header* next()
+    list_header* next()const
     {
         return _next;
     }
 
-    list_header* prev()
+    list_header* prev()const
     {
         return _prev;
     }
 
     void insert_after(list_header* prev)
     {
-        PROTON_THROW_IF(_prev, "invalid prev");
-        PROTON_THROW_IF(_next, "invalid next");
+        PROTON_POOL_THROW_IF(_prev, "invalid prev");
+        PROTON_POOL_THROW_IF(_next, "invalid next");
 
         _prev=prev;
         if(prev){
@@ -79,8 +92,8 @@ public:
 
     void insert_before(list_header* next)
     {
-        PROTON_THROW_IF(_prev, "invalid prev");
-        PROTON_THROW_IF(_next, "invalid next");
+        PROTON_POOL_THROW_IF(_prev, "invalid prev");
+        PROTON_POOL_THROW_IF(_next, "invalid next");
 
         _next=next;
         if(_next){
@@ -92,7 +105,6 @@ public:
         }
     }
 };
-
 
 inline pool_block* get_block(list_header* lh)
 {
@@ -213,13 +225,14 @@ public:
     void get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, size_t& full_cnt);
     void print_info(bool print_null);
 };
-}
 
-#define handy_meta_block_max 128
+} // namespace detail
+
+#define PROTON_META_BLOCK_MAX 128
 
 class mem_pool {
 protected:
-    seg_pool _segs[handy_meta_block_max+1];
+    detail::seg_pool _segs[PROTON_META_BLOCK_MAX+1];
     size_t _seg_cnt;
     size_t _seg_linear_cnt;
 
@@ -237,7 +250,7 @@ public:
 
     void* malloc(size_t size, size_t n=1); // malloc size*n
 
-    seg_pool* get_seg(size_t size);
+    detail::seg_pool* get_seg(size_t size);
 
     size_t get_seg_cnt()const
     {
@@ -254,7 +267,16 @@ public:
     void print_info();
 };
 
-void pool_free(void* p);
+inline void pool_free(void *p)
+{
+    detail::chunk_header* ch=(detail::chunk_header*)(p)-1;
+    if(ch->parent){
+        ch->parent->parent()->free_chunk(ch);
+    }
+    else{
+        detail::mmfree((void*)ch);
+    }
+}
 
 /////////////////////////////////////////////////////
 // pools
@@ -286,9 +308,10 @@ template<typename T> void pool_delete(T* p)
     pool_free((void*)p);
 }
 
-//////////////////////////////////////////////////////////
-//  STL allocator
-
+/** An extended allocator using memory pool.
+ * Beside normal functions of std::allocator, meta_allocator also supports confiscate() as
+ * a general free function to deallocate memory blocks not dependable on T.
+ */
 template<class T, typename pool_tag=tmp_pool> class meta_allocator {
 public:
     typedef size_t      size_type;
@@ -343,6 +366,18 @@ public:
     }
 
     static void deallocate(pointer p, size_type n)
+    {
+        if(p)
+            pool_free(p);
+    }
+
+    /** Free a memory block not dependable on T.
+     * Different with deallocate(), confiscate() doesn't depend on type T information.
+     * confiscate() CAN safely free any pointer to memory blocks allocated by the same
+     * template of allocator, no matter what T is.
+     * @param p pointer to the memory block to be freed
+     */
+    static void confiscate(void* p)
     {
         if(p)
             pool_free(p);
