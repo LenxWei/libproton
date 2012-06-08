@@ -2,8 +2,9 @@
 #include <proton/pool.hpp>
 #include <proton/ref.hpp>
 #include <proton/string.hpp>
-#include <proton/deque.hpp>
+#include <deque>
 #include <proton/list.hpp>
+#include "pool_types.hpp"
 
 using namespace std;
 using namespace proton;
