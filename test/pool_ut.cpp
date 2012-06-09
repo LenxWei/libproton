@@ -207,7 +207,7 @@ int vector_ut()
 {
     cout << "-> vector_ut" << endl;
     mem_pool* g0=get_pool_<tmp_pool>();
-    //vector<tstring, meta_allocator<tstring, tmp_pool> > v;
+    //vector<tstring, smart_allocator<tstring, tmp_pool> > v;
     tvector(tstring) v;
     cout << v.capacity() << endl;
     v.push_back("abc");

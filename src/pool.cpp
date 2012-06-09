@@ -190,7 +190,7 @@ void mem_pool::print_info()
     printf("=mem pool== %d ( %d )==========================\n", get_seg_total(),get_seg_free());
     if(print_null)
         printf("_seg_cnt: %d\n", _seg_cnt);
-    for(int i=0; i<=_seg_cnt; i++){
+    for(size_t i=0; i<=_seg_cnt; i++){
         _segs[i].print_info(print_null);
     }
     print_null=false;
@@ -202,8 +202,8 @@ namespace detail{
 /// seg_pool
 
 seg_pool::seg_pool()
-    :_parent(NULL), _chunk_size(0), _free_blocks(1),
-        _full_blocks(1), _total_block_size(0), _empty_blocks(1)
+    :_parent(NULL), _chunk_size(0), _free_blocks(1), _empty_blocks(1),
+        _full_blocks(1), _total_block_size(0)
 {}
 
 seg_pool::~seg_pool()

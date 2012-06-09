@@ -1,6 +1,7 @@
 #ifndef PROTON_POOL_HEADER
 #define PROTON_POOL_HEADER
 #include <new>
+#include <cstddef>
 
 #ifndef PROTON_POOL_DEBUG
 #define PROTON_POOL_DEBUG 1
@@ -15,6 +16,7 @@
 namespace proton{
 
 class mem_pool;
+void pool_free(void* p);
 
 namespace detail{
 
@@ -167,8 +169,8 @@ public:
 
 class seg_pool {
     friend class pool_block;
-    friend class mem_pool;
-    friend void pool_free(void* p);
+    friend class proton::mem_pool;
+    friend void proton::pool_free(void* p);
 protected:
     mem_pool* _parent;
 
@@ -269,12 +271,14 @@ public:
 
 inline void pool_free(void *p)
 {
-    detail::chunk_header* ch=(detail::chunk_header*)(p)-1;
-    if(ch->parent){
-        ch->parent->parent()->free_chunk(ch);
-    }
-    else{
-        detail::mmfree((void*)ch);
+    if(p){
+        detail::chunk_header* ch=(detail::chunk_header*)(p)-1;
+        if(ch->parent){
+            ch->parent->parent()->free_chunk(ch);
+        }
+        else{
+            detail::mmfree((void*)ch);
+        }
     }
 }
 
@@ -309,10 +313,10 @@ template<typename T> void pool_delete(T* p)
 }
 
 /** An extended allocator using memory pool.
- * Beside normal functions of std::allocator, meta_allocator also supports confiscate() as
+ * Beside normal functions of std::allocator, smart_allocator also supports confiscate() as
  * a general free function to deallocate memory blocks not dependable on T.
  */
-template<class T, typename pool_tag=tmp_pool> class meta_allocator {
+template<class T, typename pool_tag=tmp_pool> class smart_allocator {
 public:
     typedef size_t      size_type;
     typedef ptrdiff_t   difference_type;
@@ -322,10 +326,10 @@ public:
     typedef const T&    const_reference;
     typedef T           value_type;
     template<class U>struct rebind{
-        typedef meta_allocator<U, pool_tag> other;
+        typedef smart_allocator<U, pool_tag> other;
     };
 
-    meta_allocator()
+    smart_allocator()
     {
     }
 
@@ -333,7 +337,7 @@ public:
     // default assignment operator
     // default destructor
 
-    template<class U> meta_allocator(const meta_allocator<U, pool_tag>&)
+    template<class U> smart_allocator(const smart_allocator<U, pool_tag>&)
     {
     }
 
@@ -353,7 +357,7 @@ public:
 
     static pointer allocate(size_type n)
     {
-        static seg_pool* meta=get_pool_<pool_tag>()->get_seg(sizeof(value_type));
+        static detail::seg_pool* meta=get_pool_<pool_tag>()->get_seg(sizeof(value_type));
         pointer r=(pointer)meta->malloc(sizeof(T), n);
         if(!r)
             throw std::bad_alloc();
@@ -379,8 +383,7 @@ public:
      */
     static void confiscate(void* p)
     {
-        if(p)
-            pool_free(p);
+        pool_free(p);
     }
 
     static void construct(pointer p, const T& val)
@@ -393,34 +396,34 @@ public:
         p->~T();
     }
 
-    bool operator==(const meta_allocator &) const
+    bool operator==(const smart_allocator &) const
     { return true; }
 
-    bool operator!=(const meta_allocator &) const
+    bool operator!=(const smart_allocator &) const
     { return false; }
 
 };
 
 template<class _Ty, class _Other, typename pool_type> inline
-	bool operator==(const meta_allocator<_Ty,pool_type>&, const meta_allocator<_Other,pool_type>&)
+	bool operator==(const smart_allocator<_Ty,pool_type>&, const smart_allocator<_Other,pool_type>&)
 	{	// test for allocator equality (always true)
 	return (true);
 	}
 
 template<class _Ty, class _Other, typename pool_type> inline
-	bool operator!=(const meta_allocator<_Ty,pool_type>&, const meta_allocator<_Other,pool_type>&)
+	bool operator!=(const smart_allocator<_Ty,pool_type>&, const smart_allocator<_Other,pool_type>&)
 	{	// test for allocator inequality (always false)
 	return (false);
 	}
 
-template<typename pool_tag>class meta_allocator<void, pool_tag>
+template<typename pool_tag>class smart_allocator<void, pool_tag>
 {
 public:
     typedef void*       pointer;
     typedef const void* const_pointer;
     typedef void        value_type;
     template <class U> struct rebind {
-        typedef meta_allocator<U, pool_tag> other;
+        typedef smart_allocator<U, pool_tag> other;
     };
 };
 

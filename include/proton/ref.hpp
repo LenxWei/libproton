@@ -1,5 +1,6 @@
 #ifndef PROTON_REF_HEADER
 #define PROTON_REF_HEADER
+
 #include <memory>
 #include <utility>
 #include <functional>
@@ -9,15 +10,13 @@
 
 namespace proton{
 
-#define meta_allocator std::allocator
-
 //////////////////////////////
 // lite ref obj
 // TODO: o() valid check, object counting
 
 class refc_t {
 private:
-    int __r;
+    long __r;
 public:
     refc_t():__r(0)
     {}
@@ -30,27 +29,27 @@ public:
         return *this;
     }
 
-    bool operator<(int i)const
+    bool operator<(long i)const
     {
         return __r < i;
     }
 
-    bool operator==(int i)const
+    bool operator==(long i)const
     {
         return __r == i;
     }
 
-    int enter()
+    long enter()
     {
         return ++__r;
     }
 
-    int release()
+    long release()
     {
         return --__r;
     }
 
-    int count() const
+    long count() const
     {
         return __r;
     }
@@ -78,14 +77,17 @@ template<typename refT> bool is_valid(const refT& x)
     return x.__rp()!=NULL;
 }
 
+/** Generate a copy of object.
+ * [FIXME] need to be rewrited to support derived types
+ */
 template<typename refT> refT copy(const refT& x)
 {
     if(is_null(x))
-        return dumb;
+        return refT;
     typename refT::refc_obj_t* p;
-    refT::alloc(p);
+    refT::allocate(p);
     new (p) (typename refT::refc_obj_t)(x.__o());
-    return refT(dumb,p);
+    return refT(alloc,p);
 }
 
 template<typename refT> void reset(refT& x)
@@ -101,7 +103,10 @@ template<typename refT> int ref_count(const refT& x)
         return 0;
 }
 
-template<typename objT, typename allocator=meta_allocator<objT> > struct ref_ {
+/** The core reference support template.
+ * @param allocator must support confiscate(), see smart_allocator in <proton/pool.hpp>
+ */
+template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 public:
     typedef ref_ proton_ref_self_t;
     typedef std::ostream proton_ostream_t;
@@ -109,20 +114,23 @@ public:
     typedef objT obj_t;
 
     /// when is_new is false, deallocate the pointer
-    inline static void alloc(refc_obj_t* & ptr, bool is_new=true)
+    inline static void allocate(refc_obj_t* & ptr)
     {
         static typename allocator::template rebind<refc_obj_t>::other a;
-        if(is_new)
-            ptr=a.allocate(1);
-        else
-            a.deallocate(ptr,1);
+        ptr=a.allocate(1);
+    }
+
+    inline static void deallocate(refc_t* ptr)
+    {
+        allocator::confiscate((void*)ptr);
     }
 
 protected:
-    refc_obj_t * _rp;
+    refc_t * _rp;
+    objT*    _p;
 
 protected:
-    void enter(refc_obj_t* p)
+    void enter(refc_t* p)
     {
         _rp=p;
         if(_rp)
@@ -144,8 +152,8 @@ public:
         if(_rp){
             int r=_rp->__r.release();
             if(!r){
-                _rp->~refc_obj_t();
-                alloc(_rp,false);
+                _p->~objT();
+                deallocate(_rp);
             }
             _rp=NULL;
         }
@@ -153,15 +161,25 @@ public:
 
 public:
     // ctors
-    ref_(init_dumb):_rp(NULL)
+    ref_():_rp(NULL)
     {}
 
-    ref_(init_dumb, refc_obj_t* p)
+    ref_(init_alloc, refc_t* rp, objT* p):_p(p)
     {
-        enter(p);
+        enter(rp);
     }
 
-    template<typename ...argT> ref_(argT&& ...a)
+    template<typename ...argT> explicit ref_(argT&& ...a)
+    {
+        refc_obj_t* p;
+        alloc(p);
+        new (p) refc_obj_t(a...);
+        if(p){
+            enter(p);
+        }
+    }
+
+    template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
         refc_obj_t* p;
         alloc(p);
