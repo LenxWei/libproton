@@ -636,8 +636,8 @@ int functor_ut()
 
 int ut()
 {
-
-    unittest_t a[]={list_header_ut,
+    // [TODO] add ut for pool_dup()
+    vector<unittest_t> a={list_header_ut,
                     pool_ut,
                     string_ut,
                     vector_ut,
@@ -652,8 +652,8 @@ int ut()
                     ref_test_ut,
                     string_cast_ut,
                     pool_idx_ut,
-                    functor_ut,
-                    NULL};
+                    functor_ut
+                    };
 
     int r= unittest_run(a);
     return r;

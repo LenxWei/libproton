@@ -39,9 +39,9 @@ public:
         return __r == i;
     }
 
-    long enter()
+    void enter()
     {
-        return ++__r;
+        ++__r;
     }
 
     long release()
@@ -84,10 +84,11 @@ template<typename refT> refT copy(const refT& x)
 {
     if(is_null(x))
         return refT;
-    typename refT::refc_obj_t* p;
-    refT::allocate(p);
-    new (p) (typename refT::refc_obj_t)(x.__o());
-    return refT(alloc,p);
+    refc_t* p=(refc_t*)(typename refT::alloc_t)::duplicate(x.__rp());
+    new (p) refc_t();
+    typename refT::obj_t q=(typename refT::obj_t *)(p+1);
+    x->copy_to((void*)q);
+    return refT(alloc,p,q);
 }
 
 template<typename refT> void reset(refT& x)
@@ -110,20 +111,8 @@ template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 public:
     typedef ref_ proton_ref_self_t;
     typedef std::ostream proton_ostream_t;
-    typedef __refc_<objT> refc_obj_t;
     typedef objT obj_t;
-
-    /// when is_new is false, deallocate the pointer
-    inline static void allocate(refc_obj_t* & ptr)
-    {
-        static typename allocator::template rebind<refc_obj_t>::other a;
-        ptr=a.allocate(1);
-    }
-
-    inline static void deallocate(refc_t* ptr)
-    {
-        allocator::confiscate((void*)ptr);
-    }
+    typedef allocator alloc_t;
 
 protected:
     refc_t * _rp;
@@ -134,7 +123,7 @@ protected:
     {
         _rp=p;
         if(_rp)
-            _rp->__r.enter();
+            _rp->enter();
     }
 
     void assign(refc_obj_t* p)
@@ -150,10 +139,10 @@ public:
     void __release()
     {
         if(_rp){
-            int r=_rp->__r.release();
+            int r=_rp->release();
             if(!r){
                 _p->~objT();
-                deallocate(_rp);
+                alloc_t::confiscate(_rp);
             }
             _rp=NULL;
         }
@@ -161,45 +150,56 @@ public:
 
 public:
     // ctors
-    ref_():_rp(NULL)
+    ref_():_rp(NULL), _p(NULL)
     {}
 
-    ref_(init_alloc, refc_t* rp, objT* p):_p(p)
+    ref_(init_alloc, refc_t* rp, objT* p):_rp(rp), _p(p)
     {
-        enter(rp);
+        if(_rp)
+            _rp->enter();
     }
 
     template<typename ...argT> explicit ref_(argT&& ...a)
     {
-        refc_obj_t* p;
-        alloc(p);
-        new (p) refc_obj_t(a...);
+        struct ref_obj_t{
+            refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            enter(p);
+            new (&(p->r)) refc_t();
+            new (&p->o) obj_t(a...);
+            enter(&(p->r));
         }
     }
 
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
-        refc_obj_t* p;
-        alloc(p);
-        new (p) refc_obj_t(a...);
+        struct ref_obj_t{
+            refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            enter(p);
+            new (&(p->r)) refc_t();
+            new (&p->o) obj_t(a...);
+            enter(&(p->r));
         }
     }
 
-    ref_(const ref_& r)
+    ref_(const ref_& r):_p(r._p)
     {
         enter(r.__rp());
     }
 
-    ref_(ref_& r)
+    ref_(ref_& r):_p(r._p)
     {
         enter(r.__rp());
     }
 
-    ref_(ref_&& r)
+    ref_(ref_&& r):_p(r._p)
     {
         _rp=r._rp;
         r._rp=NULL;
@@ -207,6 +207,7 @@ public:
 
     ref_& operator=(const ref_& r)
     {
+        _p=r._p;
         assign(r.__rp());
         return *this;
     }
@@ -220,12 +221,12 @@ public:
 public:
     objT& __o()
     {
-        return _rp->o;
+        return *_p;
     }
 
     const objT& __o()const
     {
-        return _rp->o;
+        return *_p;
     }
 
     objT& operator *()
@@ -250,21 +251,15 @@ public:
 
     objT* __p()
     {
-        if(_rp)
-            return &__o();
-        else
-            return NULL;
+        return _p;
     }
 
     const objT* __p()const
     {
-        if(_rp)
-            return &__o();
-        else
-            return NULL;
+        return _p;
     }
 
-    refc_obj_t* __rp()const
+    refc_t* __rp()const
     {
         return _rp;
     }
