@@ -217,8 +217,8 @@ public:
      */
     template<typename baseT> operator const baseT& () const
 	{
-		static_assert(is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
-		static_assert(is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
+		static_assert(std::is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
 		static_assert(static_cast<typename baseT::obj_t*>((obj_t*)4096)==(typename baseT::obj_t*)4096, "can not convert to a non-first-base ref_");
 		return reinterpret_cast<const baseT&>(*this);
 	}
@@ -227,8 +227,8 @@ public:
      */
 	template<typename baseT> operator baseT () const
 	{
-		static_assert(is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
-		static_assert(is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
+		static_assert(std::is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
 		return baseT(alloc, x._rp, x._p);
 	}
 
