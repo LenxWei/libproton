@@ -447,8 +447,8 @@ void seg_pool::print_info(bool print_null)
 /// pool_block
 
 pool_block::pool_block(size_t chunk_size, size_t block_size, seg_pool* parent)
-    : _chunk_size(chunk_size), _block_size(block_size), _parent(parent),
-     _chunk_max(0), _chunk_cnt(0), _free_header(NULL)
+    : _parent(parent), _block_size(block_size), _chunk_size(chunk_size),
+     _chunk_cnt(0), _chunk_max(0), _free_header(NULL)
 {
     _chunk_cap=(block_size-sizeof(pool_block))/(_chunk_size+sizeof(chunk_header));
     _unalloc_chunk=(char*)(this+1);

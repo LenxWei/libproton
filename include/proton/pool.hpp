@@ -125,6 +125,7 @@ class pool_block:public list_header {
 protected:
 
     seg_pool* _parent;
+
     size_t _block_size; // 4
     size_t _chunk_size;
     size_t _chunk_cap;
@@ -186,8 +187,8 @@ protected:
     size_t _chunk_min_size; ///< _chunk_min_size <= real_size <=_chunk_size
 
     list_header _free_blocks;
-    list_header _full_blocks;
     list_header _empty_blocks;
+    list_header _full_blocks;
 
     size_t _total_block_size;
     size_t _min_block_size;
