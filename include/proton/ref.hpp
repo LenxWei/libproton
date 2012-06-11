@@ -101,7 +101,7 @@ template<typename refT> int ref_count(const refT& x)
  * @param allocator must support confiscate(), see smart_allocator in <proton/pool.hpp>
  */
 template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
-friend void reset<ref_>(void* p);
+friend void reset<ref_>(ref_& x);
 
 public:
     typedef ref_ proton_ref_self_t;
