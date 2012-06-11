@@ -430,6 +430,10 @@ struct obj_de{
     string a;
     int b;
     string c;
+    void copy_to(void* p)const
+    {
+        new (p) obj_de(*this);
+    }
 };
 typedef ref_<obj_de> de;
 
