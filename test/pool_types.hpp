@@ -6,7 +6,7 @@
 
 namespace proton{
 
-#define smart_allocator meta_allocator
+#define meta_allocator smart_allocator
 
 typedef std::basic_string<char, std::string::traits_type,
             smart_allocator<char, tmp_pool> > tstring;
