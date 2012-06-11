@@ -211,6 +211,26 @@ public:
         __release();
     }
 
+public:
+    /** conversion to const baseT&.
+     * Notice! NEVER convert to a non-const ref!
+     */
+    template<typename baseT> operator const baseT& () const
+	{
+		static_assert(is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
+		static_assert(static_cast<typename baseT::obj_t*>((obj_t*)4096)==(typename baseT::obj_t*)4096, "can not convert to a non-first-base ref_");
+		return reinterpret_cast<const baseT&>(*this);
+	}
+
+    /** conversion to baseT.
+     */
+	template<typename baseT> operator baseT () const
+	{
+		static_assert(is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
+		return baseT(alloc, x._rp, x._p);
+	}
 
 public:
     objT& __o()
@@ -260,7 +280,10 @@ public:
 
 };
 
-/// need obj_t to implenment "ostream& output(ostream&)const"
+/** general output for ref_<> objects.
+ * Need obj_t to implenment the method: void output(std::ostream& s)const.
+ * Don't forget virtual when needed.
+ */
 template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
                                    const T& y)
 {

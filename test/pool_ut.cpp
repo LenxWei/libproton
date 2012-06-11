@@ -386,52 +386,37 @@ int trav_dir_ut()
 struct obj_test{
     string a;
     int b;
-
+    virtual void output(ostream& s)const
+    {
+        s << a << ","<< b << std::endl;
+    }
 };
 
 typedef ref_<obj_test> test;
 
-ostream& operator<<(ostream& s, const test& t)
-{
-    s << t->a << ","<< t->b << std::endl;
-    return s;
-}
-
 struct obj_derived:obj_test{
     string c;
-};
-
-class derived:public vref_<obj_derived, test>{
-public:
-    DEF_VCTOR(derived)
-
-    void init(string a, int b, string c)
+    void output(ostream& s)const
     {
-        test::init(a,b);
-        DEF_SELF;
-        self.c=c;
+        s << a << ","<< b << "," << c << std::endl;
     }
 
-    derived(string a, int b, string c)
+    void copy_to(void* p)const
     {
-        init(a,b,c);
+        new (p) obj_derived(*this);
     }
 };
 
-DEF_VCLASS(der, obj_derived);
+typedef ref_<obj_derived> derived;
+
+typedef ref_<obj_derived> der;
 
 struct obj_de{
     string a;
     int b;
     string c;
 };
-DEF_CLASS(de, obj_de);
-
-ostream& operator<<(ostream& s, const derived& t)
-{
-    s << t->a << ","<< t->b << "," << t->c << std::endl;
-    return s;
-}
+typedef ref_<obj_de> de;
 
 int ref_ut()
 {
@@ -440,7 +425,7 @@ int ref_ut()
     test t("c",10);
     std::cout << t;
 
-    derived d("a",1,"daf"), e(d.copy());
+    derived d("a",1,"daf"), e(copy(d));
     std::cout << d << e;
 
     bool k1=false;
