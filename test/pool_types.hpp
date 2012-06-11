@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <set>
-#inlcude <deque>
+#include <deque>
 #include <vector>
 
 #include <proton/pool.hpp>
