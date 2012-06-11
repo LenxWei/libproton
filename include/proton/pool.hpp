@@ -24,12 +24,17 @@ class pool_block;
 class seg_pool;
 
 void mmfree(void* p);
+void* __mmdup(void* p);
 
+/** header of chunk, the basic of memory block.
+ */
 union chunk_header{
     chunk_header* next_free;
     pool_block* parent; ///< NULL means being malloc-ed directly
 };
 
+/** basic list header for pool_block.
+ */
 class list_header {
 protected:
     list_header* _prev;
@@ -113,6 +118,8 @@ inline pool_block* get_block(list_header* lh)
     return (pool_block*)(lh);
 }
 
+/** pool contains many chunks.
+ */
 class pool_block:public list_header {
     friend class seg_pool;
 protected:
@@ -166,7 +173,8 @@ public:
 
 };
 
-
+/** seg contains many pools for a same size range.
+ */
 class seg_pool {
     friend class pool_block;
     friend class proton::mem_pool;
@@ -174,8 +182,8 @@ class seg_pool {
 protected:
     mem_pool* _parent;
 
-    size_t _chunk_size; // 0 means: new directly
-    size_t _chunk_min_size; // _chunk_min_size <= real_size <=_chunk_size
+    size_t _chunk_size; ///< 0 means: new directly
+    size_t _chunk_min_size; ///< _chunk_min_size <= real_size <=_chunk_size
 
     list_header _free_blocks;
     list_header _full_blocks;
@@ -193,7 +201,7 @@ protected:
             return get_block(p);
     }
 
-    void malloc_block();
+    void malloc_block(); ///< get a new pool_block
     void release_block(pool_block* p);
 
     void reg_free_block(pool_block* p);
@@ -223,6 +231,7 @@ public:
     }
 
     void* malloc(size_t size, size_t n=1);
+    void* malloc_one(); ///< alloc a block
 
     void get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, size_t& full_cnt);
     void print_info(bool print_null);
@@ -232,6 +241,8 @@ public:
 
 #define PROTON_META_BLOCK_MAX 128
 
+/** mem_pool contains many segs.
+ */
 class mem_pool {
 protected:
     detail::seg_pool _segs[PROTON_META_BLOCK_MAX+1];
@@ -282,6 +293,23 @@ inline void pool_free(void *p)
     }
 }
 
+inline void* pool_dup(void *p)
+{
+    if(p){
+        detail::chunk_header* ch=(detail::chunk_header*)(p)-1;
+        if(ch->parent){
+            return ch->parent->parent()->malloc_one();
+        }
+        else{
+            detail::chunk_header* q=(detail::chunk_header*)detail::__mmdup((void*)ch);
+            q->parent=NULL;
+            return (void*)(q+1);
+        }
+    }
+    else
+        return NULL;
+}
+
 /////////////////////////////////////////////////////
 // pools
 
@@ -313,8 +341,10 @@ template<typename T> void pool_delete(T* p)
 }
 
 /** An extended allocator using memory pool.
- * Beside normal functions of std::allocator, smart_allocator also supports confiscate() as
- * a general free function to deallocate memory blocks not dependable on T.
+ * Beside normal functions of std::allocator, smart_allocator also supports confiscate() and
+ * duplicate(), while confiscate(),duplicate() and allocate() must be static in smart_allocator.
+ * confiscate() is a general free function to deallocate memory blocks not dependable on T.
+ * duplicate() is a function to allocate a new memory block which size is the same as an given allocated block.
  */
 template<class T, typename pool_tag=tmp_pool> class smart_allocator {
 public:
@@ -384,6 +414,17 @@ public:
     static void confiscate(void* p)
     {
         pool_free(p);
+    }
+
+    /** Free a memory block not dependable on T.
+     * Different with deallocate(), confiscate() doesn't depend on type T information.
+     * confiscate() CAN safely free any pointer to memory blocks allocated by the same
+     * template of allocator, no matter what T is.
+     * @param p pointer to the memory block to be freed
+     */
+    static void* duplicate(void* p)
+    {
+        pool_dup(p);
     }
 
     static void construct(pointer p, const T& val)

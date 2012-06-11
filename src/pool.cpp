@@ -36,6 +36,13 @@ void* mmalloc(size_t s)
     }
 }
 
+void* __mmdup(void* p)
+{
+    mmheader* q=((mmheader*)p)-1;
+    size_t s=q->len;
+    return mmalloc(s-sizeof(mmheader));
+}
+
 void mmfree(void* p)
 {
     mmheader* r=((mmheader*)p)-1;
@@ -154,8 +161,8 @@ seg_pool* mem_pool::get_seg(size_t size)
         return &_segs[_seg_cnt];
     }
     else{
-        size_t begin=_seg_linear_cnt-1; /// >
-        size_t end=_seg_cnt-1; /// <=
+        size_t begin=_seg_linear_cnt-1; // >
+        size_t end=_seg_cnt-1; // <=
         while(begin+1!=end){
             size_t mid=(end+begin)/2;
             if(size>_segs[mid].chunk_size())
@@ -181,6 +188,7 @@ void* mem_pool::malloc(size_t size, size_t n/*=1*/)
         }
     }
     seg_pool* meta=get_seg(real_size);
+    // [TODO] optimize to use malloc_one
     return meta->malloc(real_size);
 }
 
@@ -225,25 +233,29 @@ void seg_pool::init(size_t chunk_size, size_t chunk_min_size, mem_pool* parent)
         _min_block_size=block_size_initial;
 }
 
+void* seg_pool::malloc_one()
+{
+    pool_block* ba=get_free_block();
+    if(!ba){
+        malloc_block();
+        ba=get_free_block();
+        if(!ba)
+            return NULL;
+    }
+    void* p=ba->malloc_one();
+
+    if(ba->full()){
+        ba->erase_from_list();
+        reg_full_block(ba);
+    }
+    return p;
+}
+
 void* seg_pool::malloc(size_t size, size_t n)
 {
     if(_chunk_size>0){
         if(n==1 && size >= _chunk_min_size && size <= _chunk_size){
-    malloc_one:
-            pool_block* ba=get_free_block();
-            if(!ba){
-                malloc_block();
-                ba=get_free_block();
-                if(!ba)
-                    return NULL;
-            }
-            void* p=ba->malloc_one();
-
-            if(ba->full()){
-                ba->erase_from_list();
-                reg_full_block(ba);
-            }
-            return p;
+            return malloc_one();
         }
         else if(n>1){
             size_t real_size=size*n;
@@ -252,7 +264,7 @@ void* seg_pool::malloc(size_t size, size_t n)
                 return NULL;
             }
             if(real_size >= _chunk_min_size && real_size<=_chunk_size)
-                goto malloc_one;
+                return malloc_one();
             else
                 return _parent->malloc(real_size);
         }
@@ -333,6 +345,8 @@ void seg_pool::reg_full_block(pool_block* p)
 
 void seg_pool::reg_empty_block(pool_block* p)
 {
+    // keep only one largest empty block.
+    // [TODO] use simpler structure to record empty block.
     PROTON_POOL_THROW_IF(!p->empty(), "try to reg a not empty block into empty_blocks:"<<p);
     if(_empty_blocks.empty()){
         p->insert_after(&_empty_blocks);
