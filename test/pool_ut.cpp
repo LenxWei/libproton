@@ -2,6 +2,7 @@
 #include <proton/pool.hpp>
 #include <proton/ref.hpp>
 #include <proton/string.hpp>
+#include <proton/detail/unit_test.hpp>
 #include <deque>
 #include <proton/list.hpp>
 #include "pool_types.hpp"
@@ -437,11 +438,11 @@ int ref_ut()
     }
     PROTON_THROW_IF(!k1, "no cast err detected!");
 
-    der f();
+    der f(alloc);
     f->a="abc"; f->b=2; f->c="def";
     std::cout << f->a << ", " << f->b << ", " << f->c << std::endl;
 
-    de g();
+    de g(alloc);
     g->a="dkf"; g->b=3; g->c="dfe";
     de j(g), k(copy(g));
     std::cout << g->a << ", " << g->b << ", " << g->c << std::endl;

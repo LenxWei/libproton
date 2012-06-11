@@ -229,7 +229,7 @@ public:
 	{
 		static_assert(std::is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
-		return baseT(alloc, x._rp, x._p);
+		return baseT(alloc, _rp, _p);
 	}
 
 public:
