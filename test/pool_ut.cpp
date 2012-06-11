@@ -49,7 +49,7 @@ size_t get_mem()
 
     line=strip(readline<string>(f));
     f.close();
-    if(get_unsigned(rss, line)){
+    if(get_int(rss, line)){
         return (size_t)rss;
     }
     else{
@@ -135,7 +135,7 @@ int pool_ut()
     PROTON_THROW_IF(full_cnt!=0, "err");
 
     if(n*2+1<10240){
-        for(int i=1; i<n*2+1; i++)
+        for(size_t i=1; i<n*2+1; i++)
             q[i]=g0->malloc(0,1);
         g0->print_info();
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
@@ -145,7 +145,7 @@ int pool_ut()
         PROTON_THROW_IF(empty_cap!=0, "err");
         PROTON_THROW_IF(full_cnt!=n*2, "err");
 
-        for(int i=10; i<n*2+1; i++)
+        for(size_t i=10; i<n*2+1; i++)
             pool_free(q[i]);
         for(int i=10; i<100; i++)
             q[i]=g0->malloc(4,1);

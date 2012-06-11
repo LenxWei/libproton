@@ -2,6 +2,11 @@
 #define HANDY_TMP_TYPES_HEADER
 
 #include <string>
+#include <map>
+#include <set>
+#inlcude <deque>
+#include <vector>
+
 #include <proton/pool.hpp>
 
 namespace proton{
