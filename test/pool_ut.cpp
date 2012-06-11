@@ -387,6 +387,9 @@ int trav_dir_ut()
 struct obj_test{
     string a;
     int b;
+    obj_test(const string& a1, int b1):a(a1),b(b1)
+    {}
+
     virtual void output(ostream& s)const
     {
         s << a << ","<< b << std::endl;
@@ -396,7 +399,12 @@ struct obj_test{
 typedef ref_<obj_test> test;
 
 struct obj_derived:obj_test{
+
     string c;
+
+    obj_derived(const string& a1, int b1, const string& c1):obj_test(a1,b1), c(c1)
+    {}
+
     void output(ostream& s)const
     {
         s << a << ","<< b << "," << c << std::endl;
