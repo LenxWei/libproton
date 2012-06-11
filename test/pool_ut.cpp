@@ -349,7 +349,7 @@ int string_op_ut()
     PROTON_THROW_IF(k!=16, "err");
 
     unsigned long u;
-    PROTON_THROW_IF(!get_unsigned(u, n, 16), "err");
+    PROTON_THROW_IF(!get_int(u, n, 16), "err");
     PROTON_THROW_IF(u!=16, "err");
 
     PROTON_THROW_IF(to_lower(r)!="adsf 123 456", "err");
@@ -365,6 +365,7 @@ int string_op_ut()
     return 0;
 }
 
+/*
 int trav_dir_ut()
 {
     cout << "-> trav_dir_ut" << endl;
@@ -380,7 +381,7 @@ int trav_dir_ut()
     PROTON_THROW_IF(!found, "err");
     return 0;
 }
-
+*/
 
 struct obj_test:obj_vref{
     string a;
@@ -647,7 +648,7 @@ int ut()
                     comp_ut,
                     new_ut,
                     string_op_ut,
-                    trav_dir_ut,
+                    //trav_dir_ut,
                     ref_ut,
                     ref_test_ut,
                     string_cast_ut,
