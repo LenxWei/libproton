@@ -383,29 +383,13 @@ int trav_dir_ut()
 }
 */
 
-struct obj_test:obj_vref{
+struct obj_test{
     string a;
     int b;
-};
-
-class test:public vref_<obj_test>{
-public:
-    DEF_VCTOR(test)
-
-    void init(string a, int b)
-    {
-        enter_new();
-        DEF_SELF;
-        self.a=a;
-        self.b=b;
-    }
-
-    test(string a, int b)
-    {
-        init(a,b);
-    }
 
 };
+
+typedef ref_<obj_test> test;
 
 ostream& operator<<(ostream& s, const test& t)
 {

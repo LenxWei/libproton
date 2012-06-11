@@ -55,15 +55,6 @@ public:
     }
 };
 
-template<typename objT> class __refc_{
-public:
-    refc_t __r;
-    objT o;
-
-    template<typename ...argT> __refc_(argT&& ...a):o(a...)
-    {}
-};
-
 class init_alloc{};
 extern init_alloc alloc;
 
@@ -78,7 +69,9 @@ template<typename refT> bool is_valid(const refT& x)
 }
 
 /** Generate a copy of object.
- * [FIXME] need to be rewrited to support derived types
+ * Note: the alloc_t of refT must support duplicate() like smart_allocator.
+ * @param x an obj supporting the method: void copy_to(void* new_addr)const
+ * @return a cloned obj of x
  */
 template<typename refT> refT copy(const refT& x)
 {
@@ -86,7 +79,7 @@ template<typename refT> refT copy(const refT& x)
         return refT();
     refc_t* p=(refc_t*)typename refT::alloc_t::duplicate(x.__rp());
     new (p) refc_t();
-    typename refT::obj_t q=(typename refT::obj_t *)(p+1);
+    typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
     return refT(alloc,p,q);
 }
@@ -108,6 +101,8 @@ template<typename refT> int ref_count(const refT& x)
  * @param allocator must support confiscate(), see smart_allocator in <proton/pool.hpp>
  */
 template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
+friend void reset<ref_>(void* p);
+
 public:
     typedef ref_ proton_ref_self_t;
     typedef std::ostream proton_ostream_t;
@@ -135,7 +130,6 @@ protected:
         }
     }
 
-public:
     void __release()
     {
         if(_rp){
