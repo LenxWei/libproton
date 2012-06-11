@@ -126,7 +126,7 @@ protected:
             _rp->enter();
     }
 
-    void assign(refc_obj_t* p)
+    void assign(refc_t* p)
     {
         if(p!=_rp){
             // [TODO] change to swap mechanism
