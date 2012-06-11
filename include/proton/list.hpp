@@ -35,12 +35,12 @@ std::ostream& operator<<(std::ostream& s, std::list<T,A>& x)
 {
     s << "[";
     bool first=true;
-    each(it, x){
+    for(auto& i:x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << *it;
+        s << i;
     }
     s << "]";
     return s;

@@ -83,8 +83,8 @@ template<typename refT> bool is_valid(const refT& x)
 template<typename refT> refT copy(const refT& x)
 {
     if(is_null(x))
-        return refT;
-    refc_t* p=(refc_t*)(typename refT::alloc_t)::duplicate(x.__rp());
+        return refT();
+    refc_t* p=(refc_t*)typename refT::alloc_t::duplicate(x.__rp());
     new (p) refc_t();
     typename refT::obj_t q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);

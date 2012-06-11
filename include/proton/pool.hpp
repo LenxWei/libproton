@@ -425,7 +425,7 @@ public:
      */
     static void* duplicate(void* p)
     {
-        pool_dup(p);
+        return pool_dup(p);
     }
 
     static void construct(pointer p, const T& val)
