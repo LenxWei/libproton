@@ -145,6 +145,7 @@ template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 friend void reset<ref_>(ref_& x);
 friend ref_ copy<ref_>(const ref_& x);
 friend long ref_count<ref_>(const ref_& x);
+template<typename T, typename ref_>friend  T cast(const ref_& x);
 
 public:
     typedef ref_ proton_ref_self_t;

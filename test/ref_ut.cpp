@@ -151,6 +151,10 @@ int reset_ut()
 int cast_ut()
 {
     cout << "-> cast_ut" << endl;
+    test a, c;
+    derived b(alloc);
+    a=b;
+    c=cast<test>(b);
     return 0;
 }
 
@@ -159,7 +163,7 @@ int main()
     proton::debug_level=1;
     proton::wait_on_err=0;
     std::vector<proton::detail::unittest_t> ut=
-        {ref_ut, ref_test_ut, reset_ut};
+        {ref_ut, ref_test_ut, reset_ut, cast_ut};
     proton::detail::unittest_run(ut);
     return 0;
 }
