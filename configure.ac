@@ -23,7 +23,8 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
-BOOST_REQUIRE([1.48])
+# BOOST_REQUIRE([1.48])
+AX_BOOST_BASE([1.48])
 
 # Checks for header files.
 AC_HEADER_STDC

@@ -6,11 +6,7 @@
 #include <sstream>
 #include <string>
 #include <string.h>
-
-#ifndef __linux__
-#define strncasecmp strnicmp
-#define strcasecmp _stricmp
-#endif
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace proton{
 
@@ -97,58 +93,24 @@ template<typename string_list>
     }
 }
 
-template<typename string> bool startswith(const string& s, const string& sub)
+template<typename str1, typename str2> bool startswith(const str1& s,const str2& sub)
 {
-    long s0=s.length(), s1=sub.length();
-    if(s0<s1)
-        return false;
-
-    return (s.compare(0, s1, sub)==0);
+    return boost::algorithm::starts_with(s, sub);
 }
 
-template<typename string> bool istartswith(const string& s, const char* sub)
+template<typename str1, typename str2> bool istartswith(const str1& s,const str2& sub)
 {
-    long s0=s.length(), s1=strlen(sub);
-    if(s0<s1)
-        return false;
-
-    return (strncasecmp(s.c_str(), sub, s1)==0);
+    return boost::algorithm::istarts_with(s, sub);
 }
 
-template<typename string> bool startswith(const string& s, const char* sub)
+template<typename str1, typename str2> bool endswith(const str1& s,const str2& sub)
 {
-    long s0=s.length(), s1=strlen(sub);
-    if(s0<s1)
-        return false;
-
-    return (s.compare(0, s1, sub, s1)==0);
+    return boost::algorithm::ends_with(s, sub);
 }
 
-template<typename string> bool endswith(const string& s, const string& sub)
+template<typename str1, typename str2> bool iendswith(const str1& s,const str2& sub)
 {
-    long s0=s.length(), s1=sub.length();
-    if(s0<s1)
-        return false;
-
-    return (s.compare(s0-s1, s1, sub)==0);
-}
-
-template<typename string> bool endswith(const string& s, const char* sub)
-{
-    long s0=s.length(), s1=strlen(sub);
-    if(s0<s1)
-        return false;
-
-    return (s.compare(s0-s1, s1, sub, s1)==0);
-}
-
-template<typename string> bool iendswith(const string& s, const char* sub)
-{
-    long s0=s.length(), s1=strlen(sub);
-    if(s0<s1)
-        return false;
-
-    return (strncasecmp(s.c_str()+s0-s1, sub, s1)==0);
+    return boost::algorithm::iends_with(s, sub);
 }
 
 template<typename ostream> void set_base(ostream& s, int base, bool is_num=false)

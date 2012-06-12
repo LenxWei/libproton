@@ -433,6 +433,11 @@ public:
         new (p) T(val);
     }
 
+    static void construct(pointer p)
+    {
+        new (p) T();
+    }
+
     static void destroy(pointer p)
     {
         p->~T();
