@@ -477,7 +477,9 @@ volatile int refc_count=0;
 struct obj_refc_test{
     int a;
     obj_refc_test(int x):a(x)
-    {}
+    {
+        refc_count++;
+    }
 
     obj_refc_test():a(0)
     {
