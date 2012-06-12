@@ -60,12 +60,12 @@ extern init_alloc alloc;
 
 template<typename refT> bool is_null(const refT& x)
 {
-    return x.__rp()==NULL;
+    return &x.__o()==NULL;
 }
 
 template<typename refT> bool is_valid(const refT& x)
 {
-    return x.__rp()!=NULL;
+    return &x.__o()!=NULL;
 }
 
 /** Generate a copy of object.
@@ -78,7 +78,7 @@ template<typename refT> refT copy(const refT& x)
     if(is_null(x))
         return refT();
     typedef typename refT::alloc_t alloc_t;
-    refc_t* p=(refc_t*)alloc_t::duplicate(x.__rp());
+    refc_t* p=(refc_t*)alloc_t::duplicate(x._rp);
     new (p) refc_t();
     typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
@@ -103,6 +103,7 @@ template<typename refT> int ref_count(const refT& x)
  */
 template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 friend void reset<ref_>(ref_& x);
+friend ref_ copy<ref_>(const ref_& x);
 
 public:
     typedef ref_ proton_ref_self_t;
@@ -140,6 +141,7 @@ protected:
                 alloc_t::confiscate(_rp);
             }
             _rp=NULL;
+            _p=NULL;
         }
     }
 
@@ -188,12 +190,12 @@ public:
 
     ref_(const ref_& r):_p(r._p)
     {
-        enter(r.__rp());
+        enter(r._rp);
     }
 
     ref_(ref_& r):_p(r._p)
     {
-        enter(r.__rp());
+        enter(r._rp);
     }
 
     ref_(ref_&& r):_p(r._p)
@@ -205,7 +207,7 @@ public:
     ref_& operator=(const ref_& r)
     {
         _p=r._p;
-        assign(r.__rp());
+        assign(r._rp);
         return *this;
     }
 
@@ -236,15 +238,16 @@ public:
 	}
 
 public:
+    const objT& __o()const
+    {
+        return *_p;
+    }
+
     objT& __o()
     {
         return *_p;
     }
 
-    const objT& __o()const
-    {
-        return *_p;
-    }
 
     objT& operator *()
     {
@@ -265,22 +268,6 @@ public:
     {
         return &__o();
     }
-
-    objT* __p()
-    {
-        return _p;
-    }
-
-    const objT* __p()const
-    {
-        return _p;
-    }
-
-    refc_t* __rp()const
-    {
-        return _rp;
-    }
-
 };
 
 /** general output for ref_<> objects.
