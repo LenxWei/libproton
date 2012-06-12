@@ -37,7 +37,6 @@ int main()
     proton::wait_on_err=0;
     std::vector<proton::detail::unittest_t> ut=
         {test_log, test_assert, test_err};
-    proton::detail::unittest_run(ut);
-    return 0;
+    return proton::detail::unittest_run(ut);
 }
 

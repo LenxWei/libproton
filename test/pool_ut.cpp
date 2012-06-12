@@ -529,8 +529,9 @@ int main()
     proton::wait_on_err=0;
     mem_pool* g=get_pool_<tmp_pool>();
     cout <<"begin:"<<get_mem()<<endl;
-    ut();
+    int r=ut();
     cout << "sizeof(mem_pool):"<<sizeof(mem_pool)<<endl;
     cout << "sizeof(size_t):"<<sizeof(size_t)<<endl;
     cout <<"end:"<<get_mem()<<endl;
+    return r;
 }

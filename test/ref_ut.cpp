@@ -152,9 +152,16 @@ int cast_ut()
 {
     cout << "-> cast_ut" << endl;
     test a, c;
-    derived b(alloc);
+    derived b(alloc),d;
     a=b;
+    PROTON_THROW_IF(&a.__o()!=&b.__o(),"err");
+
     c=cast<test>(b);
+    PROTON_THROW_IF(&c.__o()!=&b.__o(),"err");
+
+    d=cast<derived>(copy(a));
+    cout << d << endl;
+    PROTON_THROW_IF(&d.__o()==&b.__o(),"err");
     return 0;
 }
 
@@ -164,7 +171,6 @@ int main()
     proton::wait_on_err=0;
     std::vector<proton::detail::unittest_t> ut=
         {ref_ut, ref_test_ut, reset_ut, cast_ut};
-    proton::detail::unittest_run(ut);
-    return 0;
+    return proton::detail::unittest_run(ut);
 }
 
