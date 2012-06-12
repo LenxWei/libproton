@@ -70,7 +70,7 @@ template<typename refT> bool is_valid(const refT& x)
 
 /** Generate a copy of object.
  * Note: the alloc_t of refT must support duplicate() like smart_allocator.
- * @param x an obj supporting the method: void copy_to(void* new_addr)const
+ * @param x a ref to an obj supporting the method: void copy_to(void* new_addr)const
  * @return a cloned obj of x
  */
 template<typename refT> refT copy(const refT& x)
@@ -116,19 +116,29 @@ protected:
     objT*    _p;
 
 protected:
-    void enter(refc_t* p)
+    void enter(refc_t* rp)
     {
-        _rp=p;
+        _rp=rp;
         if(_rp)
             _rp->enter();
     }
 
-    void assign(refc_t* p)
+    void assign(refc_t* rp, objT* p)
     {
-        if(p!=_rp){
-            // [TODO] change to swap mechanism
-            __release();
-            enter(p);
+        if(rp!=_rp){
+            refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(rp);
+            _p=p;
+
+            if(rp_old){
+                int r=rp_old->release();
+                if(!r){
+                    p_old->~objT();
+                    alloc_t::confiscate(rp_old);
+                }
+            }
         }
     }
 
@@ -206,8 +216,7 @@ public:
 
     ref_& operator=(const ref_& r)
     {
-        _p=r._p;
-        assign(r._rp);
+        assign(r._rp,r._p);
         return *this;
     }
 
