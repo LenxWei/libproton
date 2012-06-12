@@ -166,7 +166,8 @@ int pool_ut()
         PROTON_THROW_IF(empty_cap!= m, "err");
         PROTON_THROW_IF(full_cnt!=0, "err");
 
-        void* r=g0->malloc(128*1024);
+        long s=sizeof(long)*16*1024;
+        void* r=g0->malloc(s);
         for(int i=0; i<100; i++)
             pool_free(q[i]);
         g0->print_info();
@@ -176,7 +177,7 @@ int pool_ut()
         PROTON_THROW_IF(empty_cap!= m, "err");
         PROTON_THROW_IF(full_cnt!=0, "err");
 
-        ma=g0->get_seg(128*1024);
+        ma=g0->get_seg(s);
         ma->get_info(free_cnt, free_cap, empty_cap, full_cnt);
         PROTON_THROW_IF(free_cnt!=0, "err");
         PROTON_THROW_IF(free_cap != 0, "err");
