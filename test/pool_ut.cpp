@@ -172,7 +172,7 @@ int pool_ut()
         PROTON_THROW_IF(free_cnt!=0, "err");
         PROTON_THROW_IF(free_cap != 0, "err");
         PROTON_THROW_IF(empty_cap!= 0, "err");
-        PROTON_THROW_IF(full_cnt!=1, "err");
+        PROTON_THROW_IF(full_cnt!=1, "err:" << full_cnt);
 
         pool_free(r);
     }
