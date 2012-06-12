@@ -41,6 +41,12 @@ struct obj_derived:obj_test{
         s << a << ","<< b << "," << c << std::endl;
     }
 
+    typedef obj_derived keyed_self_t;
+    tuple<const string&,int,const string&> key()const
+    {
+        return tuple<const string&, int,const string&>(a,b,c);
+    }
+
     PROTON_COPY_DECL(obj_derived);
 };
 
@@ -152,7 +158,7 @@ int cast_ut()
 {
     cout << "-> cast_ut" << endl;
     test a, c;
-    derived b(alloc),d;
+    derived b(alloc, "abc",3,"def"),d;
     a=b;
     PROTON_THROW_IF(&a.__o()!=&b.__o(),"err");
 
@@ -162,6 +168,7 @@ int cast_ut()
     d=cast<derived>(copy(a));
     cout << d << endl;
     PROTON_THROW_IF(&d.__o()==&b.__o(),"err");
+    PROTON_THROW_IF(b!=d, "err");
     return 0;
 }
 
