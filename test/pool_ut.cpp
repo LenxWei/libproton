@@ -40,7 +40,7 @@ size_t get_mem()
     unsigned long rss=0;
     string pid=to_<string>(getpid());
     string memfn=string("memchk.")+pid;
-    system((string("ps -o rss -p ")+pid+" > "+memfn).c_str());
+    int sr=system((string("ps -o rss -p ")+pid+" > "+memfn).c_str());
     fstream f(memfn.c_str(), ios_base::in);
     string line;
 
