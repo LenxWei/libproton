@@ -11,6 +11,8 @@ using namespace std;
 using namespace proton;
 using namespace proton::detail;
 
+#ifdef __linux__
+
 #include <malloc.h>
 
 void output_malloc_info()
@@ -33,7 +35,6 @@ void output_malloc_info()
 size_t get_mem()
 {
 //    return 0;
-#if 1
     //output_malloc_info();
 
     unsigned long rss=0;
@@ -56,8 +57,16 @@ size_t get_mem()
     else{
         PROTON_ERR("bad rss value:"<<line);
     }
-#endif
 }
+#else
+void output_malloc_info()
+{}
+
+size_t get_mem()
+{
+    return 0;
+}
+#endif
 
 int list_header_ut()
 {
