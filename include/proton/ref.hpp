@@ -181,6 +181,7 @@ public:
         if(p){
             new (&(p->r)) refc_t();
             new (&p->o) obj_t(a...);
+            _p=&(p->o);
             enter(&(p->r));
         }
     }
