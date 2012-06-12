@@ -7,6 +7,5 @@ if test ! -f configure; then
     autoconf
     libtoolize
     automake --add-missing
-else
-    autoreconf
 fi
+autoreconf

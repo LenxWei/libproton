@@ -7,7 +7,7 @@
 #include <string>
 #include <string.h>
 
-#ifdef _MSC_VER
+#ifndef __linux__
 #define strncasecmp strnicmp
 #define strcasecmp _stricmp
 #endif

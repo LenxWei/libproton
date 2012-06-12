@@ -3,6 +3,7 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="libproton" />
+		<Option makefile_is_custom="1" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -34,6 +35,9 @@
 				</Linker>
 			</Target>
 		</Build>
+		<Compiler>
+			<Add directory="D:\projects\gcc\libproton\include" />
+		</Compiler>
 		<Unit filename="AUTHORS" />
 		<Unit filename="COPYING" />
 		<Unit filename="ChangeLog" />

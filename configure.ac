@@ -23,10 +23,11 @@ AC_PROG_MAKE_SET
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
+BOOST_REQUIRE([1.48])
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([ctime cstring cstdio])
+AC_CHECK_HEADERS([ctime cstring cstdio cstdlib])
 
 # Checks for typedefs, structures, and compiler characteristics.
 

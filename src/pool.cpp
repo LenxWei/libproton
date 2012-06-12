@@ -1,8 +1,12 @@
+#include <cstdlib>
 #include <proton/base.hpp>
 #include <proton/pool.hpp>
 
-#ifdef __GNUC__
+#ifdef __linux__
 #include <sys/mman.h>
+#else
+#define mmap(a, s, b, c, d, e) malloc(s)
+#define MAP_FAILED NULL
 #endif
 
 using namespace proton::detail;
@@ -31,7 +35,7 @@ void* mmalloc(size_t s)
         return (void*)(r+1);
     }
     else{
-        PROTON_LOG(0, "mmap failed");
+        PROTON_LOG(0, "mmalloc failed");
         return NULL;
     }
 }
@@ -46,16 +50,21 @@ void* __mmdup(void* p)
 void mmfree(void* p)
 {
     mmheader* r=((mmheader*)p)-1;
+#ifdef __linux__
     int ret=munmap((void*)r, r->len);
     if(ret){
         PROTON_LOG(0, "munmap failed:"<<ret);
     }
+#else
+    free(r);
+#endif
 }
 
 size_t get_heap_header_size()
 {
+#ifdef __linux__
     return sizeof(mmheader);
-#if 0
+#else
     static int size=-1;
     if(size<0){
         void* p = malloc(block_size_initial);
