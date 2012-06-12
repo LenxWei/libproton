@@ -18,6 +18,7 @@ const size_t block_size_max=512*1024; // 512K
 const size_t page_align=4096;
 const size_t chunk_align=(2*sizeof(long));
 
+namespace detail{
 /////////////////////////////////////////////////
 /// utils
 
@@ -80,6 +81,7 @@ size_t get_heap_header_size()
     return size;
 #endif
 }
+} // ns detail
 
 /////////////////////////////////////////////////
 /// mem_pool
