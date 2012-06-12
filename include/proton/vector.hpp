@@ -34,12 +34,12 @@ std::ostream& operator<<(std::ostream& s, std::vector<T,A>& x)
 {
     s << "[";
     bool first=true;
-    each(it, x){
+    for(auto& t: x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << *it;
+        s << t;
     }
     s << "]";
     return s;

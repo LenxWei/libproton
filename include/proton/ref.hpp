@@ -1,6 +1,10 @@
 #ifndef PROTON_REF_HEADER
 #define PROTON_REF_HEADER
 
+/** @file ref.hpp
+ *  @brief the core header for reference support.
+ */
+
 #include <memory>
 #include <utility>
 #include <functional>
@@ -68,9 +72,29 @@ template<typename refT> bool is_valid(const refT& x)
     return &x.__o()!=NULL;
 }
 
+/** declare copy_to().
+ * For object classes which need to support copy().
+ */
+#define PROTON_COPY_DECL(type)\
+    virtual void copy_to(void* p)const\
+    {\
+        new (p) type(*this);\
+    }
+
+/** declare copy_to() without virtual.
+ * For object classes which need to support copy(), without inheritance.
+ */
+#define PROTON_COPY_DECL_NV(type)\
+    void copy_to(void* p)const\
+    {\
+        new (p) type(*this);\
+    }
+
 /** Generate a copy of object.
  * Note: the alloc_t of refT must support duplicate() like smart_allocator.
- * @param x a ref to an obj supporting the method: void copy_to(void* new_addr)const
+ * @param x a ref to an obj supporting the method: void copy_to(void* new_addr)const.
+ *          You can use PROTON_COPY_DECL() or PROTON_COPY_DECL_NV() to declare copy_to()
+ *          in the obj class.
  * @return a cloned obj of x
  */
 template<typename refT> refT copy(const refT& x)

@@ -525,7 +525,8 @@ int ut()
 
 int main()
 {
-    debug_level=1;
+    proton::debug_level=1;
+    proton::wait_on_err=0;
     mem_pool* g=get_pool_<tmp_pool>();
     cout <<"begin:"<<get_mem()<<endl;
     ut();

@@ -34,12 +34,12 @@ std::ostream& operator<<(std::ostream& s, const std::set<T,C,A>& x)
 {
     s << "{";
     bool first=true;
-    each(it, x){
+    for(auto& t: x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << *it;
+        s << t;
     }
     s << "}";
     return s;
@@ -80,8 +80,8 @@ std::set<T,C,A> operator|(const std::set<T,C,A>& x, const std::set<T,C,A>& y)
 template <typename T, typename C, typename A>
 std::set<T,C,A>& operator|=(std::set<T,C,A>& x, const std::set<T,C,A>& y)
 {
-    each(it, y){
-        x << *it;
+    for(auto& t: y){
+        x << t;
     }
     return x;
 }

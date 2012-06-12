@@ -1,16 +1,14 @@
 #include <iostream>
-#include <boost/timer/timer.hpp>
-#include <boost/thread/thread.hpp>
 
-#include "../base.hpp"
-#include "../ref.hpp"
-#include "../map.hpp"
-#include "../unordered_map.hpp"
-#include "../vector.hpp"
-#include "../string.hpp"
-#include "../set.hpp"
-#include "../unordered_set.hpp"
-#include "../list.hpp"
+#include "proton/base.hpp"
+#include "proton/ref.hpp"
+#include "proton/map.hpp"
+#include "proton/unordered_map.hpp"
+#include "proton/vector.hpp"
+#include "proton/string.hpp"
+#include "proton/set.hpp"
+#include "proton/unordered_set.hpp"
+#include "proton/list.hpp"
 
 using namespace std;
 using namespace proton;
@@ -39,6 +37,11 @@ public:
     int key()const
     {
         return _i;
+    }
+
+    void copy_to(void* p)const
+    {
+        new (p) _tt(*this);
     }
 /*
     bool operator==(const _tt& t)
@@ -130,21 +133,6 @@ typedef ref_<_tt2> tt2;
 int main(int argc, char** argv)
 {
     wait_on_err=0;
-    boost::timer::auto_cpu_timer timer;
-    log_open(argv[0]);
-    {
-        vector<int> a={1,2,3,4};
-        const map<int,string> b={{5,"a"},{6,"b"},{7,"c"},{8,"d"}};
-        each(it, a){
-            cout << *it;
-        }
-        cout << endl;
-        each(it, b){
-            cout << it->first <<":"<<it->second<<" ";
-        }
-        cout << endl;
-
-    }
     {
         list<int> a={1,2,3}, b={4,5,6};
         a.splice(a.end(), b);
@@ -159,8 +147,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!has(a,"5"), "");
 
         vector<string> b;
-        each(it,a){
-            b << *it;
+        for(auto& t: a){
+            b << t;
         }
         PROTON_THROW_IF(a!=b, "");
     }
@@ -172,7 +160,7 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!has(a,5), "");
     }
     {
-        tt t(2), t1(dumb), t2(3);
+        tt t(2), t1, t2(3);
         PROTON_THROW_IF(t>t2,"");
         PROTON_THROW_IF(t.__o()==t2.__o(),"");
         PROTON_THROW_IF(t==t2,"");
@@ -191,17 +179,17 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!is_null(t), "t is not null after resetting");
     }
     {
-        tt t1(34), t2(345), t0(dumb);
+        tt t1(34), t2(345), t0;
         unordered_set<tt, key_hash<tt> > s={t1,t2,t0};
         PROTON_THROW_IF(s.size()!=3,"");
     }
     {
-        tt1 t1(34), t2(345), t0(dumb);
+        tt1 t1(34), t2(345), t0;
         set<tt1> s={t1,t2,t0};
         PROTON_THROW_IF(s.size()!=3,"");
     }
     {
-        tt2 t1(34), t2(345), t0(dumb);
+        tt2 t1(34), t2(345), t0;
         unordered_set<tt2, subkey_hash<tt2> > s={t1,t2,t0};
         PROTON_THROW_IF(s.size()!=3,"");
     }
@@ -506,11 +494,6 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(a2!=a3,"");
         PROTON_THROW_IF(a2!="234", "");
     }
-
-    boost::this_thread::sleep(boost::posix_time::seconds(1));
-    log_console(true);
-    PROTON_LOG(0,"hello");
-    log_close();
     cout << endl << ".-=<{ All unit tests passed. }>=-." << endl;
     return 0;
 }

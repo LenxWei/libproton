@@ -39,10 +39,7 @@ struct obj_derived:obj_test{
         s << a << ","<< b << "," << c << std::endl;
     }
 
-    void copy_to(void* p)const
-    {
-        new (p) obj_derived(*this);
-    }
+    PROTON_COPY_DECL(obj_derived);
 };
 
 typedef ref_<obj_derived> derived;
@@ -53,10 +50,7 @@ struct obj_de{
     string a;
     int b;
     string c;
-    void copy_to(void* p)const
-    {
-        new (p) obj_de(*this);
-    }
+    PROTON_COPY_DECL_NV(obj_de);
 };
 typedef ref_<obj_de> de;
 
@@ -151,6 +145,12 @@ int reset_ut()
     PROTON_THROW_IF(ref_count(t)!=0, "err");
     PROTON_THROW_IF(&t.__o()!=NULL, "err");
 
+    return 0;
+}
+
+int cast_ut()
+{
+    cout << "-> cast_ut" << endl;
     return 0;
 }
 

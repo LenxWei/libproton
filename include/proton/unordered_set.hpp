@@ -34,12 +34,12 @@ std::ostream& operator<<(std::ostream& s, const std::unordered_set<T,H,C,A>& x)
 {
     s << "{";
     bool first=true;
-    each(it, x){
+    for(auto& t: x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << *it;
+        s << t;
     }
     s << "}";
     return s;
@@ -50,16 +50,16 @@ std::unordered_set<T,H,C,A> operator&(const std::unordered_set<T,H,C,A>& x, cons
 {
     std::unordered_set<T,H,C,A> z;
     if(x.size()<y.size()){
-        each(it,x){
-            if(has(y,*it))
-                z << *it;
+        for(auto& t:x){
+            if(has(y,t))
+                z << t;
         }
         return z;
     }
     else{
-        each(it,y){
-            if(has(x,*it))
-                z << *it;
+        for(auto& t: y){
+            if(has(x,t))
+                z << t;
         }
         return z;
     }
@@ -69,11 +69,11 @@ template <typename T, typename H, typename C, typename A>
 std::unordered_set<T,H,C,A> operator|(const std::unordered_set<T,H,C,A>& x, const std::unordered_set<T,H,C,A>& y)
 {
     std::unordered_set<T,H,C,A> z;
-    each(it, x){
-        z << *it;
+    for(auto& t: x){
+        z << t;
     }
-    each(it, y){
-        z << *it;
+    for(auto& t: y){
+        z << t;
     }
     return z;
 }
@@ -99,8 +99,8 @@ template <typename T, typename H, typename C, typename A>
 std::unordered_set<T,H,C,A>& operator|=(std::unordered_set<T,H,C,A>& x,
                                         const std::unordered_set<T,H,C,A>& y)
 {
-    each(it, y){
-        x << *it;
+    for(auto& t: y){
+        x << t;
     }
     return x;
 }

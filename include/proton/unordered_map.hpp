@@ -29,12 +29,12 @@ std::ostream& operator<<(std::ostream& s, const std::unordered_map<K,V,H,E,A>& x
 {
     s << "{";
     bool first=true;
-    each(it, x){
+    for(auto& t: x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << it->first << " : "<<it->second;
+        s << t.first << " : "<<t.second;
     }
     s << "}";
     return s;

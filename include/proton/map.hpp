@@ -29,12 +29,12 @@ std::ostream& operator<<(std::ostream& s, const std::map<_Key, _Tp, _Cmp, _Alloc
 {
     s << "{";
     bool first=true;
-    each(it, x){
+    for(auto& t: x){
         if(first)
             first=false;
         else
             s <<", ";
-        s << it->first << " : "<<it->second;
+        s << t.first << " : "<<t.second;
     }
     s << "}";
     return s;
