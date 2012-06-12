@@ -164,7 +164,8 @@ public:
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
             new (&(p->r)) refc_t();
-            new (&p->o) obj_t(a...);
+            new (&(p->o)) obj_t(a...);
+            _p=&(p->o);
             enter(&(p->r));
         }
     }
