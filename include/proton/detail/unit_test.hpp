@@ -1,6 +1,10 @@
 #ifndef PROTON_UT_H
 #define PROTON_UT_H
 
+/** @file unit_test.hpp
+ *  @brief a lite unit test framework.
+ */
+
 #include <vector>
 
 namespace proton{
