@@ -62,6 +62,9 @@ public:
 class init_alloc{};
 extern init_alloc alloc;
 
+class init_alloc_inner{};
+extern init_alloc_inner alloc_inner;
+
 template<typename refT> bool is_null(const refT& x)
 {
     return &x.__o()==NULL;
@@ -106,7 +109,7 @@ template<typename refT> refT copy(const refT& x)
     new (p) refc_t();
     typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
-    return refT(alloc,p,q);
+    return refT(alloc_inner,p,q);
 }
 
 template<typename refT> void reset(refT& x)
@@ -127,11 +130,11 @@ template<typename T, typename refT> T cast(const refT& x)
     static_assert(std::is_class<typename T::proton_ref_self_t>(), "The target type is not a ref_ type");
     typedef typename T::obj_t target_t;
     if(std::is_base_of<target_t, typename refT::obj_t>())
-        return T(alloc, x._rp, static_cast<target_t*>(x._p));
+        return T(alloc_inner, x._rp, static_cast<target_t*>(x._p));
     else{
         target_t* p=dynamic_cast<target_t*>(x._p);
         if(p)
-            return T(alloc, x._rp, p);
+            return T(alloc_inner, x._rp, p);
         else
             throw std::bad_cast();
     }
@@ -202,7 +205,7 @@ public:
     ref_():_rp(NULL), _p(NULL)
     {}
 
-    ref_(init_alloc, refc_t* rp, objT* p):_rp(rp), _p(p)
+    ref_(init_alloc_inner, refc_t* rp, objT* p):_rp(rp), _p(p)
     {
         if(_rp)
             _rp->enter();
@@ -285,7 +288,7 @@ public:
 	{
 		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
-		return baseT(alloc, _rp, static_cast<typename baseT::obj_t*>(_p));
+		return baseT(alloc_inner, _rp, static_cast<typename baseT::obj_t*>(_p));
 	}
 
 public:

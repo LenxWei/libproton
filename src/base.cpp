@@ -13,6 +13,7 @@ bool log_console=true;
 int wait_on_err = 2;
 
 class init_alloc{} alloc;
+class init_alloc_inner{} alloc_inner;
 
 int detail::unittest_run(vector<unittest_t>& ut)
 {
