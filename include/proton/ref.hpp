@@ -87,7 +87,7 @@ template<typename refT> refT copy(const refT& x)
 
 template<typename refT> void reset(refT& x)
 {
-    x.__release();
+    x.release();
 }
 
 template<typename refT> int ref_count(const refT& x)
@@ -133,19 +133,19 @@ protected:
             _p=p;
 
             if(rp_old){
-                int r=rp_old->release();
+                long r=rp_old->release();
                 if(!r){
-                    p_old->~objT();
+                    p_old->~objT(); // may throw
                     alloc_t::confiscate(rp_old);
                 }
             }
         }
     }
 
-    void __release()
+    void release()
     {
         if(_rp){
-            int r=_rp->release();
+            long r=_rp->release();
             if(!r){
                 _p->~objT();
                 alloc_t::confiscate(_rp);
@@ -222,7 +222,7 @@ public:
 
     ~ref_()
     {
-        __release();
+        release();
     }
 
 public:
