@@ -138,7 +138,8 @@ template<typename T, typename refT> T cast(const refT& x)
 }
 
 /** The core reference support template.
- * @param allocator must support confiscate(), see smart_allocator in <proton/pool.hpp>
+ * @param allocator It must support confiscate(), and allocator::allocate() must be static.
+ *                  See smart_allocator in <proton/pool.hpp>
  */
 template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 friend void reset<ref_>(ref_& x);
