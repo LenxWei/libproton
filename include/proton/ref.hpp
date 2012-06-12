@@ -90,12 +90,27 @@ template<typename refT> void reset(refT& x)
     x.release();
 }
 
-template<typename refT> int ref_count(const refT& x)
+template<typename refT> long ref_count(const refT& x)
 {
-    if(x.__rp())
-        return x.__rp()->__r.count();
+    if(x._rp)
+        return x._rp->count();
     else
         return 0;
+}
+
+template<typename T, typename refT> T cast(const refT& x)
+{
+    static_assert(std::is_class<typename T::proton_ref_self_t>(), "The target type is not a ref_ type");
+    typedef typename T::obj_t target_t;
+    if(std::is_base_of<target_t, typename refT::obj_t>())
+        return T(alloc, x._rp, static_cast<target_t*>(x._p));
+    else{
+        target_t* p=dynamic_cast<target_t*>(x._p);
+        if(p)
+            return T(alloc, x._rp, p);
+        else
+            throw std::bad_cast();
+    }
 }
 
 /** The core reference support template.
@@ -104,6 +119,7 @@ template<typename refT> int ref_count(const refT& x)
 template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
 friend void reset<ref_>(ref_& x);
 friend ref_ copy<ref_>(const ref_& x);
+friend long ref_count<ref_>(const ref_& x);
 
 public:
     typedef ref_ proton_ref_self_t;
@@ -227,11 +243,11 @@ public:
 
 public:
     /** conversion to const baseT&.
-     * Notice! NEVER convert to a non-const ref!
+     * Notice! NEVER convert to a non-const ref from here!
      */
     template<typename baseT> operator const baseT& () const
 	{
-		static_assert(std::is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
 		static_assert(static_cast<typename baseT::obj_t*>((obj_t*)4096)==(typename baseT::obj_t*)4096, "can not convert to a non-first-base ref_");
 		return reinterpret_cast<const baseT&>(*this);
@@ -241,9 +257,9 @@ public:
      */
 	template<typename baseT> operator baseT () const
 	{
-		static_assert(std::is_class<typename baseT::obj_t>(), "The target type is not a ref_ type");
+		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
-		return baseT(alloc, _rp, _p);
+		return baseT(alloc, _rp, static_cast<typename baseT::obj_t*>(_p));
 	}
 
 public:
