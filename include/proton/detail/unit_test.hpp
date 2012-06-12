@@ -13,10 +13,12 @@ namespace detail{
 /////////////////////////////
 // unittest
 
-//@return 0 - success
+/** the prototype of unit test.
+ * @return 0 - success
+ */
 typedef int (*unittest_t)();
 
-/** a lite unit test framework.
+/** unit test executor.
  * @param ut unit tests need to be tested.
  * @return 0: succes, other: failure
  */
