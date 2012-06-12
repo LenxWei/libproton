@@ -448,6 +448,7 @@ int ref_ut()
     std::cout << d << e;
 
     bool k1=false;
+#if 0
     try{
         e=t;
     }
@@ -455,6 +456,7 @@ int ref_ut()
         k1=true;
     }
     PROTON_THROW_IF(!k1, "no cast err detected!");
+#endif
 
     der f(alloc);
     f->a="abc"; f->b=2; f->c="def";
