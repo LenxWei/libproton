@@ -14,9 +14,7 @@
 
 namespace proton{
 
-//////////////////////////////
-// lite ref obj
-// TODO: o() valid check, object counting
+namespace detail{
 
 class refc_t {
 private:
@@ -58,6 +56,8 @@ public:
         return __r;
     }
 };
+
+} // ns detail
 
 class init_alloc{};
 extern init_alloc alloc;
@@ -105,8 +105,8 @@ template<typename refT> refT copy(const refT& x)
     if(is_null(x))
         return refT();
     typedef typename refT::alloc_t alloc_t;
-    refc_t* p=(refc_t*)alloc_t::duplicate(x._rp);
-    new (p) refc_t();
+    detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(x._rp);
+    new (p) detail::refc_t();
     typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
     return refT(alloc_inner,p,q);
@@ -157,21 +157,21 @@ public:
     typedef allocator alloc_t;
 
 protected:
-    refc_t * _rp;
+    detail::refc_t * _rp;
     objT*    _p;
 
 protected:
-    void enter(refc_t* rp)
+    void enter(detail::refc_t* rp)
     {
         _rp=rp;
         if(_rp)
             _rp->enter();
     }
 
-    void assign(refc_t* rp, objT* p)
+    void assign(detail::refc_t* rp, objT* p)
     {
         if(rp!=_rp){
-            refc_t* rp_old=_rp;
+            detail::refc_t* rp_old=_rp;
             objT* p_old=_p;
 
             enter(rp);
@@ -205,7 +205,7 @@ public:
     ref_():_rp(NULL), _p(NULL)
     {}
 
-    ref_(init_alloc_inner, refc_t* rp, objT* p):_rp(rp), _p(p)
+    ref_(init_alloc_inner, detail::refc_t* rp, objT* p):_rp(rp), _p(p)
     {
         if(_rp)
             _rp->enter();
@@ -214,13 +214,13 @@ public:
     template<typename ...argT> explicit ref_(argT&& ...a)
     {
         struct ref_obj_t{
-            refc_t r;
+            detail::refc_t r;
             obj_t o;
         };
         typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            new (&(p->r)) refc_t();
+            new (&(p->r)) detail::refc_t();
             new (&(p->o)) obj_t(a...);
             _p=&(p->o);
             enter(&(p->r));
@@ -230,13 +230,13 @@ public:
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
         struct ref_obj_t{
-            refc_t r;
+            detail::refc_t r;
             obj_t o;
         };
         typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            new (&(p->r)) refc_t();
+            new (&(p->r)) detail::refc_t();
             new (&p->o) obj_t(a...);
             _p=&(p->o);
             enter(&(p->r));
