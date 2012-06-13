@@ -23,7 +23,12 @@ template<typename string>string strip(const string& x)
     return x.substr(i,j-i+1);
 }
 
-/// @param null_unite: -1: a.c.t. python depent on token, 0: false, 1: true
+/** split a string.
+ * @param r          the output string list, supporting clear() and push_back()
+ * @param s          the input string
+ * @param spc        the delimiters
+ * @param null_unite -1: a.c.t. python depent on token, 0: false, 1: true
+ */
 template<typename string_list, typename string> void split(string_list& r, const string& s, string spc="", int null_unite=-1)
 {
     long pos = 0, begin, end;
@@ -76,6 +81,11 @@ template<typename string_list, typename string>
     return split(r, s, string(spc), null_unite);
 }
 
+/** join a list of strings to one string.
+ * @param token the delimiter
+ * @param r     the input string list
+ * @return the output string
+ */
 template<typename string_list>
     typename string_list::value_type join(const char* token, const string_list& r)
 {
@@ -134,7 +144,12 @@ template<typename ostream> void set_base(ostream& s, int base, bool is_num=false
     }
 }
 
-template<typename string> string to_(long long n, int base=10)
+/** convert a number/object to a string.
+ * @param n    the input value
+ * @param base 10:dec, 16:hex
+ * @return the output string
+ */
+template<typename string, typename T> string to_(T&& n, int base=10)
 {
     std::basic_ostringstream<char, std::char_traits<char>, typename string::allocator_type > s;
     set_base(s, base, true);
@@ -142,15 +157,21 @@ template<typename string> string to_(long long n, int base=10)
     return s.str();
 }
 
+/** get integer (including int/long/unsigned and so on) from string.
+ * @param r the output value
+ * @param s the input string
+ * @param base 10:dec, 16:hex
+ * @return true: success, false: failure
+ */
 template<typename int_t, typename string> bool get_int(int_t& r, const string& s, int base=10)
 {
     bool is_hex= (base==16);
     string v1;
-    if( endswith(s,"h") ){
+    if( iendswith(s,"h") ){
         v1=s.substr(0,s.length()-1);
         is_hex=true;
     }
-    else if( startswith(s,"0x") ){
+    else if( istartswith(s,"0x") ){
         v1=s;
         is_hex=true;
     }
@@ -168,35 +189,6 @@ template<typename int_t, typename string> bool get_int(int_t& r, const string& s
     r=x;
     return true;
 }
-
-/*
-template<typename string> bool get_unsigned(unsigned long& r, const string& s, int base=10)
-{
-    bool is_hex= (base==16);
-    string v1;
-    if( endswith(s,"h") ){
-        v1=s.substr(0,s.length()-1);
-        is_hex=true;
-    }
-    else if( startswith(s,"0x") ){
-        v1=s;
-        is_hex=true;
-    }
-    else{
-        v1=s;
-    }
-    std::basic_istringstream<char, std::char_traits<char>, typename string::allocator_type >
-        i(v1);
-    long long unsigned x;
-    if(is_hex)
-        i >> std::hex;
-    if ( (!(i >> x)) || (i.get()>0) ){
-        return false;
-    }
-    r=(unsigned long)x;
-    return true;
-}
-*/
 
 template<typename string> string to_lower(const string& s)
 {

@@ -242,7 +242,8 @@ public:
 
 #define PROTON_META_BLOCK_MAX 128
 
-/** mem_pool contains many segs.
+/** the main memory pool.
+ * mem_pool contains many seg_pools for different size ranges.
  */
 class mem_pool {
 protected:
