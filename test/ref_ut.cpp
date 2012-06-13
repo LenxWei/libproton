@@ -19,7 +19,6 @@ struct obj_test{
     PROTON_COPY_DECL(obj_test)
     PROTON_KEY_DECL(obj_test)
 
-    //typedef obj_test keyed_self_t;
     virtual tuple<const string&,int> key()const
     {
         return tuple<const string&, int>(a,b);
@@ -48,8 +47,7 @@ struct obj_derived:obj_test{
         s << a << ","<< b << "," << c << std::endl;
     }
 
-    PROTON_KEY_DECL(obj_test)
-    //typedef obj_derived keyed_self_t;
+    PROTON_KEY_DECL(obj_derived)
     virtual tuple<const string&,int> key()const
     {
         return tuple<const string&, int>(a,b);
