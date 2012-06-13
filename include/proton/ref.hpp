@@ -369,7 +369,7 @@ public:
     }
 
     /** general operator== for refs.
-     * Need T::obj_t to implenment operator==.
+     * Need to implement obj_t == T::obj_t.
      */
     template<typename T> bool operator==(const T& x)const
     {
@@ -383,7 +383,7 @@ public:
     }
 
     /** general operator< for refs.
-     * Need T::obj_t to implenment operator<.
+     * Need to implement obj_t < T::obj_t.
      */
     template<typename T> bool operator<(const T& x)const
     {
