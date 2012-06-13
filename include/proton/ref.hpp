@@ -415,7 +415,7 @@ template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
 }
 
 /** general operator< & operator== for objects.
- * Need obj_t to implenment T1 key()const.
+ * Need obj_t to implenment: T1 key()const, and T1 should be comparable.
  * Don't forget virtual when needed.
  * [TODO] need an example.
  */
