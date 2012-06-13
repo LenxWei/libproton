@@ -16,7 +16,14 @@ struct obj_test{
     obj_test(const string& a1, int b1):a(a1),b(b1)
     {}
 
-    PROTON_COPY_DECL(obj_test);
+    PROTON_COPY_DECL(obj_test)
+    PROTON_KEY_DECL(obj_test)
+
+    //typedef obj_test keyed_self_t;
+    virtual tuple<const string&,int> key()const
+    {
+        return tuple<const string&, int>(a,b);
+    }
 
     virtual void output(ostream& s)const
     {
@@ -41,10 +48,11 @@ struct obj_derived:obj_test{
         s << a << ","<< b << "," << c << std::endl;
     }
 
-    typedef obj_derived keyed_self_t;
-    tuple<const string&,int,const string&> key()const
+    PROTON_KEY_DECL(obj_test)
+    //typedef obj_derived keyed_self_t;
+    virtual tuple<const string&,int> key()const
     {
-        return tuple<const string&, int,const string&>(a,b,c);
+        return tuple<const string&, int>(a,b);
     }
 
     PROTON_COPY_DECL(obj_derived);
@@ -87,7 +95,8 @@ int ref_ut()
 
     de g(alloc);
     g->a="dkf"; g->b=3; g->c="dfe";
-    de j(g), k(copy(g));
+    de j(g);
+    de k(copy(g));
     std::cout << g->a << ", " << g->b << ", " << g->c << std::endl;
     std::cout << j->a << ", " << j->b << ", " << j->c << std::endl;
     std::cout << k->a << ", " << k->b << ", " << k->c << std::endl;
@@ -157,18 +166,23 @@ int reset_ut()
 int cast_ut()
 {
     cout << "-> cast_ut" << endl;
-    test a, c;
+    test a;
     derived b(alloc, "abc",3,"def"),d;
     a=b;
+    PROTON_THROW_IF(ref_count(b)!=2, "err");
     PROTON_THROW_IF(&a.__o()!=&b.__o(),"err");
 
-    c=cast<test>(b);
+    test c=b;
     PROTON_THROW_IF(&c.__o()!=&b.__o(),"err");
+    PROTON_THROW_IF(ref_count(b)!=3, "err");
 
     d=cast<derived>(copy(a));
+    PROTON_THROW_IF(ref_count(d)!=1, "err");
     cout << d << endl;
     PROTON_THROW_IF(&d.__o()==&b.__o(),"err");
     PROTON_THROW_IF(b!=d, "err");
+    c=d;
+    PROTON_THROW_IF(!(c==b), "err");
     return 0;
 }
 

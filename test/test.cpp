@@ -33,7 +33,7 @@ public:
         return s;
     }
 
-    typedef _tt keyed_self_t;
+    PROTON_KEY_DECL(_tt)
     int key()const
     {
         return _i;
@@ -110,7 +110,7 @@ public:
         return s;
     }
 
-    typedef _tt2 keyed_self_t;
+    PROTON_KEY_DECL(_tt2)
     tuple<int> key()const
     {
         return tuple<int>{_i};

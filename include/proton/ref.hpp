@@ -199,7 +199,7 @@ protected:
             detail::refc_t* rp_old=_rp;
             objT* p_old=_p;
 
-            enter(rp);
+            _rp=rp;
             _p=p;
 
             if(rp_old){
@@ -291,14 +291,16 @@ public:
     {
         _rp=r._rp;
         r._rp=NULL;
+        r._p=NULL;
     }
 
     /** assign operator.
-     * [TODO] optimize
      */
     ref_& operator=(ref_ r)
     {
         assign(r._rp,r._p);
+        r._rp=NULL;
+        r._p=NULL;
         return *this;
     }
 
@@ -365,6 +367,36 @@ public:
     {
         return &__o();
     }
+
+    /** general operator== for refs.
+     * Need T::obj_t to implenment operator==.
+     */
+    template<typename T> bool operator==(const T& x)const
+    {
+        static_assert(std::is_class<typename T::proton_ref_self_t>(),
+                      "The target type is not a ref_ type");
+        if((void*)&(__o())==(void*)&(x.__o()))
+            return true;
+        if(is_null(*this)||is_null(x))
+            return false;
+        return __o() == x.__o();
+    }
+
+    /** general operator< for refs.
+     * Need T::obj_t to implenment operator<.
+     */
+    template<typename T> bool operator<(const T& x)const
+    {
+        static_assert(std::is_class<typename T::proton_ref_self_t>(),
+                      "The target type is not a ref_ type");
+        if((void*)&(x.__o())==(void*)&(__o()))
+            return false;
+        if(is_null(*this))
+            return true;
+        if(is_null(x))
+            return false;
+        return __o() < x.__o();
+    }
 };
 
 /** general output for refs.
@@ -382,56 +414,21 @@ template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
     return s;
 }
 
-
-/** general operator< for refs.
- * Need T::obj_t to implenment operator<.
- * Don't forget virtual when needed.
- */
-template<typename T>bool operator<(const T&x,
-                                   const typename T::proton_ref_self_t&y)
-{
-    if(is_null(x))
-        return !is_null(y);
-    if(is_null(y))
-        return false;
-    return x.__o() < y.__o();
-}
-
-/** general operator== for refs.
- * Need T::obj_t to implenment operator==.
- * Don't forget virtual when needed.
- */
-template<typename T>bool operator==(const T&x,
-                                    const typename T::proton_ref_self_t&y)
-{
-    if(is_null(x))
-        return is_null(y);
-    if(is_null(y))
-        return false;
-    return x.__o() == y.__o();
-}
-
-/** general operator< for objects.
- * Need obj_t to implenment T1 key()const and define keyed_self_t as itself.
+/** general operator< & operator== for objects.
+ * Need obj_t to implenment T1 key()const.
  * Don't forget virtual when needed.
  * [TODO] need an example.
  */
-template<typename T>bool operator<(const T&x,
-                                   const typename T::keyed_self_t&y)
-{
-    return x.key() < y.key();
-}
-
-/** general operator== for objects.
- * Need obj_t to implenment T1 key()const and define keyed_self_t as itself.
- * Don't forget virtual when needed.
- * [TODO] need an example.
- */
-template<typename T>bool operator==(const T&x,
-                                    const typename T::keyed_self_t&y)
-{
-    return x.key() == y.key();
-}
+#define PROTON_KEY_DECL(type)\
+    bool operator<(const type& y)const\
+    {\
+        return key()<y.key();\
+    }\
+    \
+    bool operator==(const type& y)const\
+    {\
+        return key()==y.key();\
+    }\
 
 /** general key_hash for refs.
  * Need T::obj_t to implenment T1 key()const, and T1 must support std::hash.
