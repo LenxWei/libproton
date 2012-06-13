@@ -15,10 +15,6 @@
  */
 namespace proton{
 
-extern int debug_level; ///< The level controls output of PROTON_LOG().
-extern bool log_console; ///< true: PROTON_LOG/PROTON_THROW_IF/PROTON_ERR will output to console, false: no console output for these macros.
-extern int wait_on_err; ///< 0: nonstop, 1: stop on PROTON_ERR, 2: stop on PROTON_THROW_IF assert
-
 /** The implementation namespace of proton.
  * Any thing in this namespace should not be considered as a part of interfaces of Proton.
  */
@@ -49,6 +45,16 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 }
 
 }
+
+/**
+ * @defgroup debug 0 Debug utilities
+ * Macros, global variables, classes for debug.
+ * @{
+ */
+
+extern int debug_level; ///< The level controls output of PROTON_LOG().
+extern bool log_console; ///< true: PROTON_LOG/PROTON_THROW_IF/PROTON_ERR will output to console, false: no console output for these macros.
+extern int wait_on_err; ///< 0: nonstop, 1: stop on PROTON_ERR, 2: stop on PROTON_THROW_IF assert
 
 /** Control debug macros.
  * 1: enable PROTON_LOG/PROTON_THROW_IF/PROTON_ERR, 0: disable them.
@@ -154,6 +160,9 @@ inline std::ostream& operator<<(std::ostream& o, const err& e)
     return o;
 }
 
+/**
+ * @}
+ */
 }; // namespace proton
 
 #endif // PROTON_H

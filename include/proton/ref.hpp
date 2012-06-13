@@ -59,17 +59,30 @@ public:
 
 } // ns detail
 
+/** @defgroup ref 1 Smart reference
+ * Provide core reference support for proton.
+ * @{
+ */
+
 class init_alloc{};
-extern init_alloc alloc;
+extern init_alloc alloc; ///< explicitly demand to initialize an object.
 
 class init_alloc_inner{};
-extern init_alloc_inner alloc_inner;
+extern init_alloc_inner alloc_inner; //< for inner use of ref_.
 
+/** test a ref null or not.
+ * @param x the ref to be checked
+ * @return true: x doesn't refer to any object, false: x refers to an object.
+ */
 template<typename refT> bool is_null(const refT& x)
 {
     return &x.__o()==NULL;
 }
 
+/** test a ref valid or not.
+ * @param x the ref to be checked
+ * @return true: x refers to an object, false: x doesn't refer to any object.
+ */
 template<typename refT> bool is_valid(const refT& x)
 {
     return &x.__o()!=NULL;
@@ -112,11 +125,18 @@ template<typename refT> refT copy(const refT& x)
     return refT(alloc_inner,p,q);
 }
 
+/** reset a ref to release its object if any.
+ * @param x the ref to be resetted.
+ */
 template<typename refT> void reset(refT& x)
 {
     x.release();
 }
 
+/** get the reference count of the object.
+ * @param x refers to the object
+ * @return the reference count.
+ */
 template<typename refT> long ref_count(const refT& x)
 {
     if(x._rp)
@@ -125,6 +145,11 @@ template<typename refT> long ref_count(const refT& x)
         return 0;
 }
 
+/** cast from a ref type to another.
+ * if casting fails, throw std::bad_cast().
+ * @param x the original ref
+ * @return the casted one
+ */
 template<typename T, typename refT> T cast(const refT& x)
 {
     static_assert(std::is_class<typename T::proton_ref_self_t>(), "The target type is not a ref_ type");
@@ -201,30 +226,17 @@ protected:
     }
 
 public:
-    // ctors
+    /** default ctor.
+     * Doesn't refer to any object.
+     */
     ref_():_rp(NULL), _p(NULL)
     {}
 
+    // inner use
     ref_(init_alloc_inner, detail::refc_t* rp, objT* p):_rp(rp), _p(p)
     {
         if(_rp)
             _rp->enter();
-    }
-
-    template<typename ...argT> explicit ref_(argT&& ...a)
-    {
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
-        ref_obj_t* p=real_alloc::allocate(1);
-        if(p){
-            new (&(p->r)) detail::refc_t();
-            new (&(p->o)) obj_t(a...);
-            _p=&(p->o);
-            enter(&(p->r));
-        }
     }
 
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
@@ -243,28 +255,55 @@ public:
         }
     }
 
+    template<typename ...argT> explicit ref_(argT&& ...a)
+    {
+        struct ref_obj_t{
+            detail::refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
+        if(p){
+            new (&(p->r)) detail::refc_t();
+            new (&(p->o)) obj_t(a...);
+            _p=&(p->o);
+            enter(&(p->r));
+        }
+    }
+
+    /** const copy ctor.
+     */
     ref_(const ref_& r):_p(r._p)
     {
         enter(r._rp);
     }
 
+    /** copy ctor.
+     */
     ref_(ref_& r):_p(r._p)
     {
         enter(r._rp);
     }
 
+    /** move ctor.
+     */
     ref_(ref_&& r):_p(r._p)
     {
         _rp=r._rp;
         r._rp=NULL;
     }
 
-    ref_& operator=(const ref_& r)
+    /** assign operator.
+     * [TODO] optimize
+     */
+    ref_& operator=(ref_ r)
     {
         assign(r._rp,r._p);
         return *this;
     }
 
+    /** dtor.
+     */
     ~ref_()
     {
         release();
@@ -313,19 +352,23 @@ public:
         return __o();
     }
 
+    /** operator-> points to the object refered.
+     */
     objT* operator->()
     {
         return &__o();
     }
 
+    /** operator-> points to the object refered.
+     */
     const objT* operator->()const
     {
         return &__o();
     }
 };
 
-/** general output for ref_<> objects.
- * Need obj_t to implenment the method: void output(std::ostream& s)const.
+/** general output for refs.
+ * Need T::obj_t to implenment the method: void output(std::ostream& s)const.
  * Don't forget virtual when needed.
  */
 template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
@@ -339,18 +382,11 @@ template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
     return s;
 }
 
-template<typename T>bool operator<(const T&x,
-                                   const typename T::keyed_self_t&y)
-{
-    return x.key() < y.key();
-}
 
-template<typename T>bool operator==(const T&x,
-                                    const typename T::keyed_self_t&y)
-{
-    return x.key() == y.key();
-}
-
+/** general operator< for refs.
+ * Need T::obj_t to implenment operator<.
+ * Don't forget virtual when needed.
+ */
 template<typename T>bool operator<(const T&x,
                                    const typename T::proton_ref_self_t&y)
 {
@@ -361,20 +397,47 @@ template<typename T>bool operator<(const T&x,
     return x.__o() < y.__o();
 }
 
+/** general operator== for refs.
+ * Need T::obj_t to implenment operator==.
+ * Don't forget virtual when needed.
+ */
 template<typename T>bool operator==(const T&x,
                                     const typename T::proton_ref_self_t&y)
 {
-    if(is_null(x)){
+    if(is_null(x))
         return is_null(y);
-    }
-    else{
-        if(is_null(y))
-            return false;
-        else
-            return x.__o() == y.__o();
-    }
+    if(is_null(y))
+        return false;
+    return x.__o() == y.__o();
 }
 
+/** general operator< for objects.
+ * Need obj_t to implenment T1 key()const and define keyed_self_t as itself.
+ * Don't forget virtual when needed.
+ * [TODO] need an example.
+ */
+template<typename T>bool operator<(const T&x,
+                                   const typename T::keyed_self_t&y)
+{
+    return x.key() < y.key();
+}
+
+/** general operator== for objects.
+ * Need obj_t to implenment T1 key()const and define keyed_self_t as itself.
+ * Don't forget virtual when needed.
+ * [TODO] need an example.
+ */
+template<typename T>bool operator==(const T&x,
+                                    const typename T::keyed_self_t&y)
+{
+    return x.key() == y.key();
+}
+
+/** general key_hash for refs.
+ * Need T::obj_t to implenment T1 key()const, and T1 must support std::hash.
+ * Don't forget virtual when needed.
+ * [TODO] need an example.
+ */
 template<typename T>struct key_hash{
 public:
     size_t operator()(const T& x)const
@@ -390,6 +453,12 @@ public:
     }
 };
 
+/** general subkey_hash for refs.
+ * Need T::obj_t to implenment T1 key()const, and T1 is a tuple,
+ * and the key_seq item of T1 must support std::hash.
+ * Don't forget virtual when needed.
+ * [TODO] need an example.
+ */
 template<typename T, int key_seq=0>struct subkey_hash{
 public:
     size_t operator()(const T& x)const
@@ -404,6 +473,9 @@ public:
     }
 };
 
+/**
+ * @}
+ */
 };
 
 using namespace std::rel_ops;
