@@ -7,7 +7,6 @@
 
 #include <memory>
 #include <utility>
-#include <functional>
 #include <tuple>
 #include <type_traits>
 #include <proton/pool.hpp>
@@ -382,6 +381,11 @@ public:
         return __o() == x.__o();
     }
 
+    template<typename T> bool operator!=(const T& x)const
+    {
+        return !(*this==x);
+    }
+
     /** general operator< for refs.
      * Need to implement obj_t < T::obj_t.
      */
@@ -396,6 +400,57 @@ public:
         if(is_null(x))
             return false;
         return __o() < x.__o();
+    }
+
+    template<typename T> bool operator>=(const T& x)const
+    {
+        return !(*this < x);
+    }
+
+    template<typename T> bool operator>(const T& x)const
+    {
+        return (x < *this);
+    }
+
+    template<typename T> bool operator<=(const T& x)const
+    {
+        return !(x < *this);
+    }
+
+    /** general operator() const for refs.
+     * Need to implement obj_t() const.
+     */
+    template<typename ...T> auto operator()(T&& ...x)const -> decltype((*_p)(x...))
+    {
+        PROTON_THROW_IF(is_null(*this), "nullptr for ()");
+        return __o()(x...);
+    }
+
+    /** general operator() for refs.
+     * Need to implement obj_t().
+     */
+    template<typename ...T> auto operator()(T&& ...x) -> decltype((*_p)(x...))
+    {
+        PROTON_THROW_IF(is_null(*this), "nullptr for ()");
+        return __o()(x...);
+    }
+
+    /** general operator[] const for refs.
+     * Need to implement obj_t[] const.
+     */
+    template<typename T> auto operator[](T&& x)const -> decltype((*_p)[x])
+    {
+        PROTON_THROW_IF(is_null(*this), "nullptr for []");
+        return __o()[x];
+    }
+
+    /** general operator[] for refs.
+     * Need to implement obj_t[].
+     */
+    template<typename T> auto operator[](T&& x) -> decltype((*_p)[x])
+    {
+        PROTON_THROW_IF(is_null(*this), "nullptr for []");
+        return __o()[x];
     }
 };
 
@@ -474,7 +529,5 @@ public:
  * @}
  */
 };
-
-using namespace std::rel_ops;
 
 #endif // PROTON_REF_HEADER

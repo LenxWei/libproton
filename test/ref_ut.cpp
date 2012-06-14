@@ -28,6 +28,22 @@ struct obj_test{
     {
         s << a << ","<< b << std::endl;
     }
+
+    string operator()(int k)const
+    {
+        if(k==b)
+            return a;
+        else
+            return "";
+    }
+
+    string operator[](int k)const
+    {
+        if(k==b)
+            return a;
+        else
+            return "";
+    }
 };
 
 typedef ref_<obj_test> test;
@@ -181,6 +197,14 @@ int cast_ut()
     PROTON_THROW_IF(b!=d, "err");
     c=d;
     PROTON_THROW_IF(!(c==b), "err");
+    PROTON_THROW_IF(c!=b, "err");
+    PROTON_THROW_IF(c(3)!="abc", "err");
+    PROTON_THROW_IF(c[3]!="abc", "err");
+
+    const test f=c;
+    PROTON_THROW_IF(f(3)!="abc", "err");
+    PROTON_THROW_IF(f[3]!="abc", "err");
+
     return 0;
 }
 
