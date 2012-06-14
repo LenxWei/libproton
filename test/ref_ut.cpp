@@ -3,6 +3,7 @@
 #include <proton/ref.hpp>
 #include <proton/detail/unit_test.hpp>
 #include "pool_types.hpp"
+#include <vector>
 
 using namespace std;
 using namespace proton;
@@ -201,10 +202,21 @@ int cast_ut()
     PROTON_THROW_IF(c(3)!="abc", "err");
     PROTON_THROW_IF(c[3]!="abc", "err");
 
-    const test f=c;
+    const test f=d;
     PROTON_THROW_IF(f(3)!="abc", "err");
     PROTON_THROW_IF(f[3]!="abc", "err");
 
+    return 0;
+}
+
+typedef ref_<vector<int> > vec;
+
+int vector_ut()
+{
+    cout << "-> vector_ut" << endl;
+    vec a(alloc,{1,2,3});
+    a->push_back(4);
+    PROTON_THROW_IF(a[3]!=4, "err");
     return 0;
 }
 
@@ -213,7 +225,7 @@ int main()
     proton::debug_level=1;
     proton::wait_on_err=0;
     std::vector<proton::detail::unittest_t> ut=
-        {ref_ut, ref_test_ut, reset_ut, cast_ut};
+        {ref_ut, ref_test_ut, reset_ut, cast_ut, vector_ut};
     return proton::detail::unittest_run(ut);
 }
 
