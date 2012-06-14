@@ -58,7 +58,7 @@ public:
 
 } // ns detail
 
-/** @defgroup ref 1 Smart reference
+/** @defgroup ref Smart reference
  * Provide core reference support for proton.
  * @{
  */

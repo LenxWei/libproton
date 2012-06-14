@@ -1,18 +1,44 @@
 #ifndef PROTON_VECTOR_HEADER
 #define PROTON_VECTOR_HEADER
 
+
+/** @file vector.hpp
+ *  @brief vector support.
+ *  Please include this header instead of <vector>.
+ */
+
 #include <vector>
 #include <algorithm>
 #include <iostream>
 
 namespace proton{
 
+/** @addtogroup stl Containers
+ * Pack stl containers in new templates following python's habits.
+ *
+ * @{
+ */
+
+/** @defgroup vector Vector
+ * @{
+ */
+
+/** check if x has val.
+ * @param x the container
+ * @param val the value
+ * @return true: has, false: not
+ */
 template <typename T, typename allocT, typename V >
 bool has(const std::vector<T,allocT>& x, V&& val)
 {
     return std::find(x.begin(), x.end(), val)!=x.end();
 }
 
+/** add an item in streaming style.
+ * @param x the vector to be added
+ * @param val the new item
+ * @return the new x
+ */
 template <typename T, typename A, typename V>
 std::vector<T,A>& operator<<(std::vector<T,A>& x, V&& val)
 {
@@ -20,6 +46,11 @@ std::vector<T,A>& operator<<(std::vector<T,A>& x, V&& val)
     return x;
 }
 
+/** pop an item in streaming style.
+ * @param x the vector to be popped from
+ * @param val the popped item
+ * @return the new x
+ */
 template <typename T, typename A, typename V>
 std::vector<T,A>& operator>>(std::vector<T,A>& x, V& val)
 {
@@ -29,6 +60,11 @@ std::vector<T,A>& operator>>(std::vector<T,A>& x, V& val)
     return x;
 }
 
+/** general output for vector.
+ * @param s the output stream
+ * @param x the vector to be outputed
+ * @return s
+ */
 template <typename T, typename A>
 std::ostream& operator<<(std::ostream& s, std::vector<T,A>& x)
 {
@@ -45,42 +81,20 @@ std::ostream& operator<<(std::ostream& s, std::vector<T,A>& x)
     return s;
 }
 
-/*
-template <typename T, typename A>
-bool operator==(const std::vector<T,A>& x, const std::vector<T,A>& y)
-{
-    if(x.size()!=y.size())
-        return false;
-    auto it_y=y.begin();
-    each(it_x,x){
-        if(*it_x!=*it_y)
-            return false;
-        ++it_y;
-    }
-    return true;
-}
-
-template <typename T, typename A>
-bool operator!=(const std::vector<T,A>& x, const std::vector<T,A>& y)
-{
-    if(x.size()!=y.size())
-        return true;
-    auto it_y=y.begin();
-    each(it_x,x){
-        if(*it_x!=*it_y)
-            return true;
-        ++it_y;
-    }
-    return false;
-}
-*/
-
+/** sort a vector
+ * @param x the vector to be sorted
+ */
 template <typename T, typename A>
 void sort(std::vector<T,A>& x)
 {
     std::sort(x.begin(), x.end());
 }
 
+/** get an item like python.
+ * @param x the sequence
+ * @param i the index
+ * @return x[i]
+ */
 template <typename T, typename A>
 T& get(std::vector<T,A>& x, long i)
 {
@@ -92,6 +106,11 @@ T& get(std::vector<T,A>& x, long i)
     return x[i];
 }
 
+/** get a const item like python.
+ * @param x the sequence
+ * @param i the index
+ * @return x[i]
+ */
 template <typename T, typename A>
 const T& get(const std::vector<T,A>& x, long i)
 {
@@ -103,6 +122,11 @@ const T& get(const std::vector<T,A>& x, long i)
     return x[i];
 }
 
+/** get a slice like python.
+ * @param x the sequence
+ * @param first the start
+ * @return x[first:]
+ */
 template <typename T, typename A>
 std::vector<T,A> sub(const std::vector<T,A>& x, long first)
 {
@@ -120,6 +144,12 @@ std::vector<T,A> sub(const std::vector<T,A>& x, long first)
     return r;
 }
 
+/** get a slice like python.
+ * @param x the sequence
+ * @param first the start
+ * @param last  the end
+ * @return x[first:last]
+ */
 template <typename T, typename A>
 std::vector<T,A> sub(const std::vector<T,A>& x, long first, long last)
 {
@@ -144,6 +174,10 @@ std::vector<T,A> sub(const std::vector<T,A>& x, long first, long last)
     return r;
 }
 
+/**
+ * @}
+ * @}
+ */
 }
 
 #endif // PROTON_VECTOR_HEADER
