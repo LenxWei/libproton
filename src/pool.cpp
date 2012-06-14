@@ -86,7 +86,7 @@ size_t get_heap_header_size()
 /////////////////////////////////////////////////
 /// mem_pool
 
-mem_pool::mem_pool(size_t max/*=32*1024*/, size_t factor/*=8*/)
+mem_pool::mem_pool(size_t max/*=32*1024*/, size_t factor/*=16*/)
     :_seg_cnt(0), _seg_linear_cnt(0)
 {
     compute_sizes(max, chunk_align, factor);

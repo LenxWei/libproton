@@ -257,7 +257,7 @@ private:
     mem_pool(const mem_pool& a); ///< disabled
 
 public:
-    mem_pool(size_t max=16*1024*sizeof(long), size_t factor=8);
+    mem_pool(size_t max=16*1024*sizeof(long), size_t factor=16);
     ~mem_pool();
 
     void destroy();

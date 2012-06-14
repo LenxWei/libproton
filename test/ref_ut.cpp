@@ -4,6 +4,7 @@
 #include <proton/detail/unit_test.hpp>
 #include "pool_types.hpp"
 #include <vector>
+#include <map>
 
 using namespace std;
 using namespace proton;
@@ -210,13 +211,22 @@ int cast_ut()
 }
 
 typedef ref_<vector<int> > vec;
+typedef ref_<map<string, int> > mp;
 
-int vector_ut()
+int stl_ut()
 {
-    cout << "-> vector_ut" << endl;
+    cout << "-> stl_ut" << endl;
     vec a(alloc,{1,2,3});
     a->push_back(4);
     PROTON_THROW_IF(a[3]!=4, "err");
+
+    mp m(alloc);
+    *m={{"abc",1},{"cde",2}};
+    string s="abc";
+    PROTON_THROW_IF(m["abc"]!=1,"err");
+    m[s]=2;
+    PROTON_THROW_IF(m[s]!=2, "err");
+
     return 0;
 }
 
@@ -225,7 +235,7 @@ int main()
     proton::debug_level=1;
     proton::wait_on_err=0;
     std::vector<proton::detail::unittest_t> ut=
-        {ref_ut, ref_test_ut, reset_ut, cast_ut, vector_ut};
+        {ref_ut, ref_test_ut, reset_ut, cast_ut, stl_ut};
     return proton::detail::unittest_run(ut);
 }
 
