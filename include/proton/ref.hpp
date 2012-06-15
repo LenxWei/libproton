@@ -290,9 +290,30 @@ public:
 
     /** assign operator.
      */
-    ref_& operator=(ref_ r)
+    ref_& operator=(const ref_& r)
     {
-        PROTON_REF_LOG(9,"assign");
+        PROTON_REF_LOG(9,"assign lvalue");
+        if(r._rp!=_rp){
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(r._rp);
+            _p=r._p;
+
+            if(rp_old){
+                long r=rp_old->release();
+                if(!r){
+                    p_old->~objT(); // may throw
+                    alloc_t::confiscate(rp_old);
+                }
+            }
+        }
+        return *this;
+    }
+
+    ref_& operator=(ref_&& r)
+    {
+        PROTON_REF_LOG(9,"assign rvalue");
         if(r._rp!=_rp){
             detail::refc_t* rp_old=_rp;
             objT* p_old=_p;
