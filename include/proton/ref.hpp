@@ -228,6 +228,9 @@ public:
             _rp->enter();
     }
 
+    /** explicit forward ctor.
+     * Construct an obj_t using give args.
+     */
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
         PROTON_REF_LOG(9,"alloc fwd ctor");
@@ -245,6 +248,10 @@ public:
         }
     }
 
+    /** implicit forward ctor.
+     * Construct an obj_t using give args.
+     * Note: don't conflict with copy ctors. Use the explicit fwd ctor in that case.
+     */
     template<typename ...argT> explicit ref_(argT&& ...a)
     {
         PROTON_REF_LOG(9,"fwd ctor");
