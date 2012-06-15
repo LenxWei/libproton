@@ -158,16 +158,15 @@ template<typename refT> long ref_count(const refT& x)
 template<typename T, typename refT> T cast(const refT& x)
 {
     static_assert(std::is_class<typename T::proton_ref_self_t>(), "The target type is not a ref_ type");
+    if(is_null(x))
+        return T();
     typedef typename T::obj_t target_t;
     if(std::is_base_of<target_t, typename refT::obj_t>())
         return T(alloc_inner, x._rp, static_cast<target_t*>(x._p));
-    else{
-        target_t* p=dynamic_cast<target_t*>(x._p);
-        if(p)
-            return T(alloc_inner, x._rp, p);
-        else
-            throw std::bad_cast();
-    }
+    target_t* p=dynamic_cast<target_t*>(x._p);
+    if(p)
+        return T(alloc_inner, x._rp, p);
+    throw std::bad_cast();
 }
 
 /** The core reference support template.
@@ -228,7 +227,7 @@ public:
             _rp->enter();
     }
 
-    /** explicit forward ctor.
+    /** explicit forwarding ctor.
      * Construct an obj_t using give args.
      */
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
@@ -248,7 +247,7 @@ public:
         }
     }
 
-    /** implicit forward ctor.
+    /** implicit forwarding ctor.
      * Construct an obj_t using give args.
      * Note: don't conflict with copy ctors. Use the explicit fwd ctor in that case.
      */
@@ -321,6 +320,8 @@ public:
         return *this;
     }
 
+    /** assign move operator.
+     */
     ref_& operator=(ref_&& r)
     {
         PROTON_REF_LOG(9,"assign rvalue");
