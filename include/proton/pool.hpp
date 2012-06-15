@@ -240,6 +240,11 @@ public:
 
 } // namespace detail
 
+/** @defgroup pool Smart allocator
+ * A high-performance and smart allocator.
+ * @{
+ */
+
 #define PROTON_META_BLOCK_MAX 128
 
 /** the main memory pool.
@@ -475,5 +480,8 @@ public:
     };
 };
 
+/**
+ * @}
+ */
 };
 #endif // PROTON_POOL_HEADER

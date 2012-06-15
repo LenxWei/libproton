@@ -174,6 +174,21 @@ std::vector<T,A> sub(const std::vector<T,A>& x, long first, long last)
     return r;
 }
 
+template <typename T, typename A>
+struct vector_ : public std::vector<T,A>{
+public:
+    typedef std::vector<T,A> baseT;
+
+    template<typename ...argT> vector_(argT&& ...a):baseT(a...)
+    {}
+
+    void append(T&& x)
+    {
+        push_back(x);
+    }
+
+};
+
 /**
  * @}
  * @}

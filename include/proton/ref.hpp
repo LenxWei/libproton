@@ -192,25 +192,6 @@ protected:
             _rp->enter();
     }
 
-    void assign(detail::refc_t* rp, objT* p)
-    {
-        if(rp!=_rp){
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
-
-            _rp=rp;
-            _p=p;
-
-            if(rp_old){
-                long r=rp_old->release();
-                if(!r){
-                    p_old->~objT(); // may throw
-                    alloc_t::confiscate(rp_old);
-                }
-            }
-        }
-    }
-
     void release()
     {
         if(_rp){
@@ -278,6 +259,7 @@ public:
     }
 
     /** copy ctor.
+     * gcc bug? without this, there will be compile errors.
      */
     ref_(ref_& r):_p(r._p)
     {
@@ -286,9 +268,8 @@ public:
 
     /** move ctor.
      */
-    ref_(ref_&& r):_p(r._p)
+    ref_(ref_&& r):_rp(r._rp),_p(r._p)
     {
-        _rp=r._rp;
         r._rp=NULL;
         r._p=NULL;
     }
@@ -297,9 +278,23 @@ public:
      */
     ref_& operator=(ref_ r)
     {
-        assign(r._rp,r._p);
-        r._rp=NULL;
-        r._p=NULL;
+        if(r._rp!=_rp){
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            _rp=r._rp;
+            _p=r._p;
+            r._rp=NULL;
+            r._p=NULL;
+
+            if(rp_old){
+                long r=rp_old->release();
+                if(!r){
+                    p_old->~objT(); // may throw
+                    alloc_t::confiscate(rp_old);
+                }
+            }
+        }
         return *this;
     }
 
