@@ -262,7 +262,7 @@ public:
         }
     }
 
-    /** const copy ctor.
+    /** copy ctor.
      */
     ref_(const ref_& r):_p(r._p)
     {
@@ -270,11 +270,15 @@ public:
         enter(r._rp);
     }
 
-    /** copy ctor.
-     */
     ref_(ref_& r):_p(r._p)
     {
         PROTON_REF_LOG(9,"copy ctor");
+        enter(r._rp);
+    }
+
+    ref_(const ref_&& r):_p(r._p)
+    {
+        PROTON_REF_LOG(9,"copy rvalue ctor");
         enter(r._rp);
     }
 
