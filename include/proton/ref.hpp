@@ -161,8 +161,6 @@ template<typename T, typename refT> T cast(const refT& x)
     if(is_null(x))
         return T();
     typedef typename T::obj_t target_t;
-    if(std::is_base_of<target_t, typename refT::obj_t>())
-        return T(alloc_inner, x._rp, static_cast<target_t*>(x._p));
     target_t* p=dynamic_cast<target_t*>(x._p);
     if(p)
         return T(alloc_inner, x._rp, p);

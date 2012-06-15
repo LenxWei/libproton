@@ -176,6 +176,7 @@ int reset_ut()
     PROTON_THROW_IF(ref_count(t)!=0, "err");
     PROTON_THROW_IF(&t.__o()!=NULL, "err");
 
+    PROTON_THROW_IF(is_valid(cast<de>(t)),"err");
     return 0;
 }
 
