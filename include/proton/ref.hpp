@@ -271,7 +271,6 @@ public:
     }
 
     /** copy ctor.
-     * gcc bug? without this, there will be compile errors.
      */
     ref_(ref_& r):_p(r._p)
     {
