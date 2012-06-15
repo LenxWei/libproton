@@ -203,7 +203,10 @@ int cast_ut()
     PROTON_THROW_IF(c(3)!="abc", "err");
     PROTON_THROW_IF(c[3]!="abc", "err");
 
+    debug_level=9;
     const test f=d;
+    debug_level=1;
+
     PROTON_THROW_IF(f(3)!="abc", "err");
     PROTON_THROW_IF(f[3]!="abc", "err");
 

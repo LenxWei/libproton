@@ -11,6 +11,12 @@
 #include <type_traits>
 #include <proton/pool.hpp>
 
+#ifndef PROTON_REF_DEBUG
+#define PROTON_REF_LOG(lvl, out)
+#else
+#define PROTON_REF_LOG PROTON_LOG
+#endif
+
 namespace proton{
 
 namespace detail{
@@ -210,17 +216,21 @@ public:
      * Doesn't refer to any object.
      */
     ref_():_rp(NULL), _p(NULL)
-    {}
+    {
+        PROTON_REF_LOG(9,"default ctor");
+    }
 
     // inner use
     ref_(init_alloc_inner, detail::refc_t* rp, objT* p):_rp(rp), _p(p)
     {
+        PROTON_REF_LOG(9,"alloc_inner ctor");
         if(_rp)
             _rp->enter();
     }
 
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
+        PROTON_REF_LOG(9,"alloc fwd ctor");
         struct ref_obj_t{
             detail::refc_t r;
             obj_t o;
@@ -237,6 +247,7 @@ public:
 
     template<typename ...argT> explicit ref_(argT&& ...a)
     {
+        PROTON_REF_LOG(9,"fwd ctor");
         struct ref_obj_t{
             detail::refc_t r;
             obj_t o;
@@ -255,6 +266,7 @@ public:
      */
     ref_(const ref_& r):_p(r._p)
     {
+        PROTON_REF_LOG(9,"const copy ctor");
         enter(r._rp);
     }
 
@@ -263,6 +275,7 @@ public:
      */
     ref_(ref_& r):_p(r._p)
     {
+        PROTON_REF_LOG(9,"copy ctor");
         enter(r._rp);
     }
 
@@ -270,6 +283,7 @@ public:
      */
     ref_(ref_&& r):_rp(r._rp),_p(r._p)
     {
+        PROTON_REF_LOG(9,"move ctor");
         r._rp=NULL;
         r._p=NULL;
     }
@@ -278,6 +292,7 @@ public:
      */
     ref_& operator=(ref_ r)
     {
+        PROTON_REF_LOG(9,"assign");
         if(r._rp!=_rp){
             detail::refc_t* rp_old=_rp;
             objT* p_old=_p;
@@ -306,21 +321,27 @@ public:
     }
 
 public:
-    /** conversion to const baseT&.
+#if 0
+    /* conversion to const baseT&.
      * Notice! NEVER convert to a non-const ref from here!
+     * Due to the optimizing ability of c++11, in most situations this method is not needed.
+     * Use the next method for casting.
      */
     template<typename baseT> operator const baseT& () const
 	{
+        PROTON_REF_LOG(9,"const baseT&()");
 		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
 		static_assert(static_cast<typename baseT::obj_t*>((obj_t*)4096)==(typename baseT::obj_t*)4096, "can not convert to a non-first-base ref_");
 		return reinterpret_cast<const baseT&>(*this);
 	}
+#endif
 
     /** conversion to baseT.
      */
 	template<typename baseT> operator baseT () const
 	{
+        PROTON_REF_LOG(9,"baseT()");
 		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
 		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
 		return baseT(alloc_inner, _rp, static_cast<typename baseT::obj_t*>(_p));

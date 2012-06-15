@@ -67,6 +67,7 @@
 		<Unit filename="test\Makefile.am" />
 		<Unit filename="test\base_test.cpp" />
 		<Unit filename="test\pool_ut.cpp" />
+		<Unit filename="test\ref_ut.cpp" />
 		<Unit filename="test\test.cpp" />
 		<Extensions>
 			<code_completion />
