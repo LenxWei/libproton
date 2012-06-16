@@ -19,4 +19,6 @@ Makefile
 test/.libs/*
 *.scan
 src/.deps/*
+examples/.deps/*
+examples/.libs/*
 configure
