@@ -25,8 +25,26 @@ namespace proton{
  */
 template<typename retT, typename ...argT>
 struct func_{
-    virtual retT operator()(argT&& ...x)=0;
+    typedef retT (*fp_t)(argT...);
+    virtual retT operator()(argT ...x)=0;
 };
+
+template<typename retT, typename ...argT>
+struct fp_:func_<retT,argT...>{
+    typedef retT (*fp_t)(argT...);
+    fp_t fp;
+
+    fp_()=delete;
+
+    fp_(fp_t f):fp(f)
+    {}
+
+    retT operator()(argT ...x)
+    {
+        return fp(x...);
+    }
+};
+
 
 /** @example func.cpp
  */
