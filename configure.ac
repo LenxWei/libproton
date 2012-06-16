@@ -36,5 +36,6 @@ AC_CHECK_HEADERS([ctime cstring cstdio cstdlib])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 examples/Makefile
                  test/Makefile])
 AC_OUTPUT

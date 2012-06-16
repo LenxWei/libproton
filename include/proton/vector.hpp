@@ -4,7 +4,7 @@
 
 /** @file vector.hpp
  *  @brief vector support.
- *  Please include this header instead of <vector>.
+ *  Please include this header instead of \<vector\>.
  */
 
 #include <vector>
@@ -13,13 +13,7 @@
 
 namespace proton{
 
-/** @addtogroup stl Containers
- * Pack stl containers in new templates following python's habits.
- *
- * @{
- */
-
-/** @defgroup vector Vector
+/** @addtogroup vector_
  * @{
  */
 
@@ -190,7 +184,6 @@ public:
 };
 
 /**
- * @}
  * @}
  */
 }

@@ -47,7 +47,7 @@ inline void output_ts(std::ostream& o, const char* type, const char* fn, long ln
 }
 
 /**
- * @defgroup debug Debug utilities
+ * @addtogroup debug Debug utilities
  * Macros, global variables, classes for debug.
  * @{
  */

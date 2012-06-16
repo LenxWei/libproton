@@ -25,4 +25,33 @@
 * @todo add threading support at 1.4
 * @todo add gc support at 1.6
 *
+* @defgroup ref Smart reference
+* Provide basic reference support for proton.
+* @{
+*  @defgroup ref_ ref_
+*  Core reference template.
+*
+*  @defgroup functor func_
+*  General functor interface template.
+* @}
+*
+* @defgroup stl Containers
+* Repack stl containers in new templates following python's habits.
+* @{
+*  @defgroup vector_ vector_
+*  like list in python.
+*
+* @}
+*
+* @defgroup util Utilities
+* @{
+*
+*  @defgroup debug Debug utilities
+*  Macros, global variables, classes for debug.
+*
+*  @defgroup pool Smart allocator
+*  A high-performance and smart allocator.
+*
+* @}
+*
 */

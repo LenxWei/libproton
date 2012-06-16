@@ -240,7 +240,7 @@ public:
 
 } // namespace detail
 
-/** @defgroup pool Smart allocator
+/** @addtogroup pool Smart allocator
  * A high-performance and smart allocator.
  * @{
  */

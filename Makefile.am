@@ -1,4 +1,4 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src test
-DIST_SUBDIRS = src test
+SUBDIRS = src test examples
+DIST_SUBDIRS = src test examples
