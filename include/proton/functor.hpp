@@ -43,16 +43,16 @@ template<typename> struct _fp_;
 template<typename retT, typename ...argT>
 struct _fp_<retT(argT...) >: fo_<retT(argT...)>{
     typedef retT (*fp_t)(argT...);
-    fp_t fp;
+    fp_t _f;
 
     _fp_()=delete;
 
-    _fp_(fp_t f):fp(f)
+    _fp_(fp_t f):_f(f)
     {}
 
     retT operator()(argT ...x)
     {
-        return fp(x...);
+        return _f(x...);
     }
 };
 
@@ -60,6 +60,33 @@ struct _fp_<retT(argT...) >: fo_<retT(argT...)>{
  */
 template<typename fpT>
     using fp_=ref_<_fp_<fpT> >;
+
+
+template<typename, typename> struct _fm_;
+
+template<typename refT, typename retT, typename ...argT>
+struct _fm_<refT, retT(argT...) >: fo_<retT(argT...)>{
+    typedef typename refT::obj_t obj_t;
+    typedef retT (obj_t::*fp_t)(argT...);
+
+    refT _x;
+    fp_t _f;
+
+    _fm_()=delete;
+
+    _fm_(refT x, fp_t f):_x(x), _f(f)
+    {}
+
+    retT operator()(argT ...a)
+    {
+        return ((*_x).*(_f))(a...);
+    }
+};
+
+/** functor for member functions.
+ */
+template<typename refT, typename fpT>
+    using fm_=ref_<_fm_<refT, fpT> >;
 
 /**
  * @}

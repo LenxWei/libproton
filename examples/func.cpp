@@ -38,6 +38,9 @@ struct _t1{
         return strlen(s);
     }
 };
+typedef ref_<_t1> t1;
+
+typedef fm_<t1, _str2int> str2int_fm;
 
 int main()
 {
@@ -62,6 +65,13 @@ int main()
     str2int_fp d([](const char* s){return strlen(s);});
     a=d;
     cout << "lambda through fp is " << a("abc") << endl;
+    PROTON_THROW_IF(a("abc")!=3, "err");
+
+    /// generate a functor using a ref_ class member function.
+    t1 x;
+    str2int_fm e(x, &_t1::f);
+    a=e;
+    cout << "member function through fm is " << a("abc") << endl;
     PROTON_THROW_IF(a("abc")!=3, "err");
 
     return 0;
