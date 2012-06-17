@@ -18,6 +18,15 @@ namespace proton{
  * @{
  * @addtogroup functor
  * @{
+ * Due to bugs of Doxygen, template aliases can't be shown here, including:
+ *  - template<typename fpT> func_ : the functor template.
+ *  - template<typename fpT> fp_ : functor for normal functions.
+ *  - template<typename refT, typename fpT> fm_ : functor for ref_ member functions.
+ *
+ * @see functor.cpp in examples.
+ */
+
+/**  @example functor.cpp
  */
 
 template<typename> struct fo_;
@@ -29,14 +38,10 @@ struct fo_<retT(argT...)>{
     virtual retT operator()(argT ...x)=0;
 };
 
-
 /** functor template.
  */
 template<typename fpT>
     using func_=ref_<fo_<fpT> >;
-
-/** @example func.cpp
- */
 
 template<typename> struct _fp_;
 
@@ -84,6 +89,9 @@ struct _fm_<refT, retT(argT...) >: fo_<retT(argT...)>{
 };
 
 /** functor for member functions.
+ *
+ * If possible, please use interface mechanism of ref_ directly or std::mem_fn,
+ * instead of functors for member functions.
  */
 template<typename refT, typename fpT>
     using fm_=ref_<_fm_<refT, fpT> >;

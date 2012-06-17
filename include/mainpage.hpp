@@ -33,6 +33,7 @@
 *
 *  @defgroup functor func_
 *  General functor interface template.
+*
 * @}
 *
 * @defgroup stl Containers
