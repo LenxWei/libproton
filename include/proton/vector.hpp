@@ -12,6 +12,7 @@
 #include <iostream>
 #include <initializer_list>
 #include <algorithm>
+#include <proton/pool.hpp>
 
 namespace proton{
 
@@ -172,7 +173,7 @@ std::vector<T,A> sub(const std::vector<T,A>& x, long first, long last)
 
 /** a vector extension implementing python's list-like interfaces.
  */
-template <typename T, typename A>
+template <typename T, typename A=smart_allocator<T> >
 struct vector_ : public std::vector<T,A>{
 public:
     typedef std::vector<T,A> baseT;
@@ -184,33 +185,33 @@ public:
 
     /** initializer_list forwarding ctor.
      */
-    template<typename T> vector_(std::initializer_list<T> a):baseT(a)
+    vector_(std::initializer_list<T> a):baseT(a)
     {}
 
     /** append an item at the end.
      */
     void append(const T& x)
     {
-        push_back(x);
+        this->push_back(x);
     }
 
     void append(T&& x)
     {
-        push_back(x);
+        this->push_back(x);
     }
 
     /** total number of occurences of x.
      */
     size_t count(const T& x)const
     {
-        return std::count(begin(), end(), x);
+        return std::count(this->begin(), this->end(), x);
     }
 
     /** append items from a sequence.
      */
     template<typename seqT>void extend(const seqT& x)
     {
-        reserve(size()+x.size()); // [TODO] use len() to replace size()?
+        this->reserve(this->size()+x.size()); // [TODO] use len() to replace size()?
         std::copy(x.begin(), x.end(), std::back_inserter(*this));
     }
 };
