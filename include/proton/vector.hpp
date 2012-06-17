@@ -208,6 +208,7 @@ public:
     }
 
     /** append items from a sequence.
+     * [TODO] support general range concept.
      */
     template<typename seqT>void extend(const seqT& x)
     {
