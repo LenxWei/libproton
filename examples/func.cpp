@@ -6,22 +6,33 @@
 using namespace std;
 using namespace proton;
 
-typedef func_<unsigned int(const char*)> _str2int;
-typedef ref_<_str2int> str2int;
+/** define a function interface type.
+ */
+typedef unsigned int (_str2int)(const char*);
 
-typedef ref_<fp_<_str2int> > str2int_f1;
+/** define a functor type.
+ */
+typedef func_<_str2int> str2int;
 
-typedef ref_<fp_<unsigned int(const char*)> > str2int_f2;
+/** You can use function interface types to define fp_ types.
+ */
+typedef fp_<_str2int> str2int_fp;
 
-struct _f1: _str2int{
+/** an function object type inheriting the interface.
+ */
+struct _f1: fo_<_str2int>{
     unsigned int operator()(const char* s)
     {
         return string(s).size();
     }
 };
-typedef ref_<_f1> str2int_fn;
+typedef ref_<_f1> str2int_fo;
 
-struct _type{
+/** an object type with a candidate member function.
+ */
+struct _t1{
+    /** the candidate member function.
+     */
     unsigned int f(const char* s)
     {
         return strlen(s);
@@ -31,20 +42,26 @@ struct _type{
 int main()
 {
     cout << ">>> functor examples :" << endl;
+
+    /// the interface variable.
     str2int a;
-    str2int_fn b(alloc);
+
+    /// generate a functor using the function object type.
+    str2int_fo b(alloc);
     a=b;
-    cout << "functor is " << a("abc") << endl;
+    cout << "fo is " << a("abc") << endl;
     PROTON_THROW_IF(a("abc")!=3, "err");
 
-    str2int_f1 c(strlen);
+    /// generate a functor using a library function.
+    str2int_fp c(strlen);
     a=c;
-    cout << "strlen fp_<func_ > is " << a("abc") << endl;
+    cout << "strlen through fp is " << a("abc") << endl;
     PROTON_THROW_IF(a("abc")!=3, "err");
 
-    str2int_f2 d(strlen);
-    a=c;
-    cout << "strlen fp_ directly is " << a("abc") << endl;
+    /// generate a functor using a lambda function.
+    str2int_fp d([](const char* s){return strlen(s);});
+    a=d;
+    cout << "lambda through fp is " << a("abc") << endl;
     PROTON_THROW_IF(a("abc")!=3, "err");
 
     return 0;
