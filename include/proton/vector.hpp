@@ -218,6 +218,10 @@ public:
 };
 
 /**
+ * @example vector.cpp
+ */
+
+/**
  * @}
  */
 }
