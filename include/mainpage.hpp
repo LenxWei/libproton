@@ -11,7 +11,7 @@
 * - http://code.google.com/p/libproton/downloads/list
 * - https://github.com/LenxWei/libproton/downloads
 *
-* Need a compiler supporting c++11, such as gcc 4.6 or higher.<br>
+* Need a compiler supporting c++11, such as gcc 4.7.0 or higher.<br>
 * Install <a href="http://www.boost.org/">Boost C++ Library</a> 1.48 or higher first.
 *
 * After that, just standard "./configure; make; make check; make install"
