@@ -22,11 +22,19 @@
 * @section modules Modules
 * You can find documents about modules <a href="modules.html">here</a>.
 * <hr>
-* @todo add proton containers for stl containers
+* @todo 1.1.1 goal: vector_, map_, str
+* @todo 1.1.2 goal: deque_, list_, set_, unordered_, getopt
 * @todo add examples
 * @todo add tutorial
-* @todo add threading support at 1.4
-* @todo add gc support at 1.6
+* @todo 1.2 milestone
+* @todo add os module
+* @todo add socket module(?)
+* @todo add server/client module
+* @todo add regex module
+* @todo add threading
+* @todo 1.4 milestone
+* @todo add gc support
+* @todo 1.6 milestone
 *
 * @defgroup ref Smart reference
 * Provide basic reference support for proton.
