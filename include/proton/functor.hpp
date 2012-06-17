@@ -21,16 +21,19 @@ namespace proton{
  * @{
  */
 
+template<typename> struct func_;
+
 /** the common functor interface template for object classes.
  */
 template<typename retT, typename ...argT>
-struct func_{
-    typedef retT (*fp_t)(argT...);
+struct func_<retT(argT...)>{
     virtual retT operator()(argT ...x)=0;
 };
 
+template<typename> struct fp_;
+
 template<typename retT, typename ...argT>
-struct fp_:func_<retT,argT...>{
+struct fp_<func_<retT(argT...)> >: func_<retT(argT...)>{
     typedef retT (*fp_t)(argT...);
     fp_t fp;
 
@@ -45,6 +48,21 @@ struct fp_:func_<retT,argT...>{
     }
 };
 
+template<typename retT, typename ...argT>
+struct fp_<retT(argT...) >: func_<retT(argT...)>{
+    typedef retT (*fp_t)(argT...);
+    fp_t fp;
+
+    fp_()=delete;
+
+    fp_(fp_t f):fp(f)
+    {}
+
+    retT operator()(argT ...x)
+    {
+        return fp(x...);
+    }
+};
 
 /** @example func.cpp
  */

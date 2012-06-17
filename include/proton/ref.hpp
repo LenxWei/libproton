@@ -10,6 +10,7 @@
 #include <tuple>
 #include <type_traits>
 #include <proton/pool.hpp>
+#include <initializer_list>
 
 #ifndef PROTON_REF_DEBUG
 #define PROTON_REF_LOG(lvl, out)
@@ -252,9 +253,15 @@ public:
      * Construct an obj_t using give args.
      * Note: don't conflict with copy ctors. Use the explicit fwd ctor in that case.
      */
-    template<typename ...argT> explicit ref_(argT&& ...a)
+    template<typename ...argT> explicit ref_(argT&& ...a):ref_(alloc, a...)
+    {}
+
+    /** explicit initializer_list forwarding ctor.
+     * Construct an obj_t using give args.
+     */
+    template<typename T> explicit ref_(init_alloc, std::initializer_list<T> a)
     {
-        PROTON_REF_LOG(9,"fwd ctor");
+        PROTON_REF_LOG(9,"alloc initializer_list fwd ctor");
         struct ref_obj_t{
             detail::refc_t r;
             obj_t o;
@@ -263,11 +270,17 @@ public:
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
             new (&(p->r)) detail::refc_t();
-            new (&(p->o)) obj_t(a...);
+            new (&p->o) obj_t(a);
             _p=&(p->o);
             enter(&(p->r));
         }
     }
+
+    /** implicit initializer_list forwarding ctor.
+     * Construct an obj_t using give args.
+     */
+    template<typename T> explicit ref_(std::initializer_list<T> a):ref_(alloc,a)
+    {}
 
     /** copy ctor.
      */
