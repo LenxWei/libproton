@@ -203,10 +203,16 @@ public:
      */
     size_t count(const T& x)const
     {
-        return size();
+        return std::count(begin(), end(), x);
     }
 
-
+    /** append items from a sequence.
+     */
+    template<typename seqT>void extend(const seqT& x)
+    {
+        reserve(size()+x.size()); // [TODO] use len() to replace size()?
+        std::copy(x.begin(), x.end(), std::back_inserter(*this));
+    }
 };
 
 /**

@@ -1,4 +1,6 @@
-a library to make C++ as convenient as Python :)
+Proton is a library to provide Python-like interfaces for C++11,
+which try to make porting from Python to C++11 easier,
+and make programming in C++11 more convenient :)
 
 download:   http://code.google.com/p/libproton/downloads/list
   github:   https://github.com/LenxWei/libproton
