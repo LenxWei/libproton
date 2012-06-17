@@ -3,7 +3,10 @@
 * @authors <a href="http://lenx.100871.net">Lenx Tao Wei</a> (lenx.wei at gmail.com)
 *
 * @section intro Introduction
-* Proton is a library to make C++11 as convenient as Python :) <br>
+* Proton is a library to provide Python-like interfaces for C++11,
+* which try to make porting from Python to C++11 easier,
+* and make programming in C++11 more convenient :)
+*
 * The main git repository is at https://github.com/LenxWei/libproton.
 *
 * @section install Install

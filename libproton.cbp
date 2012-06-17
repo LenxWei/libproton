@@ -47,10 +47,14 @@
 		<Unit filename="bootstrap.sh" />
 		<Unit filename="configure.ac" />
 		<Unit filename="dox\Doxyfile" />
+		<Unit filename="examples\Makefile.am" />
+		<Unit filename="examples\functor.cpp" />
+		<Unit filename="include\mainpage.hpp" />
 		<Unit filename="include\proton\_mapped_type.hpp" />
 		<Unit filename="include\proton\base.hpp" />
 		<Unit filename="include\proton\detail\atomic.hpp" />
 		<Unit filename="include\proton\detail\unit_test.hpp" />
+		<Unit filename="include\proton\functor.hpp" />
 		<Unit filename="include\proton\getopt.hpp" />
 		<Unit filename="include\proton\list.hpp" />
 		<Unit filename="include\proton\map.hpp" />

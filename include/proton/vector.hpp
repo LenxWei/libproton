@@ -10,6 +10,8 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <initializer_list>
+#include <algorithm>
 
 namespace proton{
 
@@ -168,18 +170,42 @@ std::vector<T,A> sub(const std::vector<T,A>& x, long first, long last)
     return r;
 }
 
+/** a vector extension implementing python's list-like interfaces.
+ */
 template <typename T, typename A>
 struct vector_ : public std::vector<T,A>{
 public:
     typedef std::vector<T,A> baseT;
 
+    /** forwarding ctor.
+     */
     template<typename ...argT> vector_(argT&& ...a):baseT(a...)
     {}
+
+    /** initializer_list forwarding ctor.
+     */
+    template<typename T> vector_(std::initializer_list<T> a):baseT(a)
+    {}
+
+    /** append an item at the end.
+     */
+    void append(const T& x)
+    {
+        push_back(x);
+    }
 
     void append(T&& x)
     {
         push_back(x);
     }
+
+    /** total number of occurences of x.
+     */
+    size_t count(const T& x)const
+    {
+        return size();
+    }
+
 
 };
 
