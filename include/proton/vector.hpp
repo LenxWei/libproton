@@ -459,7 +459,6 @@ public:
  */
 
 /** vector + vector
- * [TODO] use perfect forwarding
  */
 template<typename T, typename A, typename X>
 vector_<T,A> operator+(const std::vector<T,A>& s, X&& t)

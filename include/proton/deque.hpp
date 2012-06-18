@@ -458,7 +458,6 @@ public:
  */
 
 /** deque + deque
- * [TODO] use perfect forwarding
  */
 template<typename T, typename A, typename X>
 deque_<T,A> operator+(const std::deque<T,A>& s, X&& t)
