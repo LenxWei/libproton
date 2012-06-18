@@ -224,6 +224,48 @@ public:
     vector_(std::initializer_list<T> a):baseT(a)
     {}
 
+    /** copy ctor.
+     */
+    vector_(const vector_& x):baseT(x)
+    {}
+
+    /** move ctor.
+     */
+    vector_(vector_&& x):baseT(x)
+    {}
+
+    explicit vector_(const baseT& x):baseT(x)
+    {}
+
+    vector_(baseT&& x):baseT(x)
+    {}
+
+    /** assign.
+     */
+    vector_& operator=(const vector_& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    vector_& operator=(vector_&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    vector_& operator=(const baseT& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    vector_& operator=(baseT&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
     /** cast to std::vector<>&.
      */
     operator baseT&()
@@ -481,6 +523,38 @@ template<typename T, typename A>
 size_t len(const std::vector<T,A>& v)
 {
     return v.size();
+}
+
+/** smallest item.
+ */
+template<typename T, typename A>
+const T& min(const std::vector<T,A>& v)
+{
+    return *std::min_element(v.begin(), v.end());
+}
+
+/** smallest item.
+ */
+template<typename T, typename A>
+T min(const std::vector<T,A>&& v)
+{
+    return *std::min_element(v.begin(), v.end());
+}
+
+/** largest item.
+ */
+template<typename T, typename A>
+const T& max(const std::vector<T,A>& v)
+{
+    return *std::max_element(v.begin(), v.end());
+}
+
+/** largest item.
+ */
+template<typename T, typename A>
+T max(const std::vector<T,A>&& v)
+{
+    return *std::max_element(v.begin(), v.end());
 }
 
 /**

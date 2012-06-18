@@ -1,5 +1,6 @@
-#ifndef PROTON_DEQUE_HEADER
-#define PROTON_DEQUE_HEADER
+#ifndef PROTON_VECTOR_HEADER
+#define PROTON_VECTOR_HEADER
+
 
 /** @file deque.hpp
  *  @brief deque support.
@@ -222,6 +223,48 @@ public:
      */
     deque_(std::initializer_list<T> a):baseT(a)
     {}
+
+    /** copy ctor.
+     */
+    deque_(const deque_& x):baseT(x)
+    {}
+
+    /** move ctor.
+     */
+    deque_(deque_&& x):baseT(x)
+    {}
+
+    explicit deque_(const baseT& x):baseT(x)
+    {}
+
+    deque_(baseT&& x):baseT(x)
+    {}
+
+    /** assign.
+     */
+    deque_& operator=(const deque_& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    deque_& operator=(deque_&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    deque_& operator=(const baseT& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    deque_& operator=(baseT&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
 
     /** cast to std::deque<>&.
      */
@@ -479,9 +522,41 @@ size_t len(const std::deque<T,A>& v)
     return v.size();
 }
 
+/** smallest item.
+ */
+template<typename T, typename A>
+const T& min(const std::deque<T,A>& v)
+{
+    return *std::min_element(v.begin(), v.end());
+}
+
+/** smallest item.
+ */
+template<typename T, typename A>
+T min(const std::deque<T,A>&& v)
+{
+    return *std::min_element(v.begin(), v.end());
+}
+
+/** largest item.
+ */
+template<typename T, typename A>
+const T& max(const std::deque<T,A>& v)
+{
+    return *std::max_element(v.begin(), v.end());
+}
+
+/** largest item.
+ */
+template<typename T, typename A>
+T max(const std::deque<T,A>&& v)
+{
+    return *std::max_element(v.begin(), v.end());
+}
+
 /**
  * @}
  */
 }
 
-#endif // PROTON_DEQUE_HEADER
+#endif // PROTON_VECTOR_HEADER

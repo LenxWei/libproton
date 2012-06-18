@@ -64,6 +64,22 @@ int main()
     s.sort();
     cout << "sorted vector is :" << s << endl;
     PROTON_THROW_IF(s[0]!="a", "remove err");
+
+    cout << "min is :" << min(s) << endl;
+    PROTON_THROW_IF(min(s)!="a", "remove err");
+
+    cout << "max is :" << max(s) << endl;
+    PROTON_THROW_IF(max(s)!="c", "remove err");
+
+    s.del(-1);
+    PROTON_THROW_IF(max(s)!="b", "remove err");
+
+    s.del(1,-1);
+    PROTON_THROW_IF(min(s)!="a", "remove err");
+
+    s.del_to_end(1);
+    PROTON_THROW_IF(min(s)!="a", "remove err");
+
     return 0;
 }
 
