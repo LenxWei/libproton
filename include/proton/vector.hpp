@@ -458,15 +458,24 @@ public:
  * @example vector.cpp
  */
 
-/** vector_ + vector_
+/** vector + vector
  * [TODO] use perfect forwarding
  */
-template<typename T, typename A>
-vector_<T,A> operator+(const std::vector<T,A>& s, const std::vector<T,A>& t)
+template<typename T, typename A, typename X>
+vector_<T,A> operator+(const std::vector<T,A>& s, X&& t)
 {
     vector_<T,A> r(s);
     r.reserve(s.size()+t.size());
-    r.extend(t);
+    r.extend(std::forward<X>(t));
+    return r;
+}
+
+template<typename T, typename A, typename X>
+vector_<T,A> operator+(std::vector<T,A>&& s, X&& t)
+{
+    vector_<T,A> r(s);
+    r.reserve(s.size()+t.size());
+    r.extend(std::forward<X>(t));
     return r;
 }
 
