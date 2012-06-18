@@ -51,7 +51,10 @@
 * Repack stl containers in new templates following python's habits.
 * @{
 *  @defgroup vector_ vector_
-*  like list in python.
+*  like list in python, better for small sequences
+*
+*  @defgroup deque_ deque_
+*  like list in python, better for long sequences.
 *
 * @}
 *
