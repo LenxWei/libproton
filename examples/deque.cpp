@@ -31,6 +31,9 @@ int main()
     slice=2*slice;
     PROTON_THROW_IF(len(slice)!=8, "slice with step err");
 
+    slice=slice+s;
+    PROTON_THROW_IF(len(slice)!=11, "slice with step err");
+
     s.append("b");
 
     cout << "There is " << s.count("b") << " of b in s." << endl;

@@ -414,6 +414,17 @@ public:
  * @example deque.cpp
  */
 
+/** deque_ + deque_
+ * [TODO] use perfect forwarding
+ */
+template<typename T, typename A>
+deque_<T,A> operator+(const std::deque<T,A>& s, const std::deque<T,A>& t)
+{
+    deque_<T,A> r(s);
+    r.extend(t);
+    return r;
+}
+
 /** deque_ * n
  */
 template<typename T, typename A>

@@ -416,6 +416,17 @@ public:
  * @example vector.cpp
  */
 
+/** vector_ + vector_
+ */
+template<typename T, typename A>
+vector_<T,A> operator+(const std::vector<T,A>& s, const std::vector<T,A>& t)
+{
+    vector_<T,A> r(s);
+    r.reserve(s.size()+t.size());
+    r.extend(t);
+    return r;
+}
+
 /** vector_ * n
  */
 template<typename T, typename A>
