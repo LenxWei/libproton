@@ -231,13 +231,13 @@ public:
 
     /** move ctor.
      */
-    deque_(deque_&& x):baseT(x)
+    deque_(deque_&& x)noexcept:baseT(x)
     {}
 
     explicit deque_(const baseT& x):baseT(x)
     {}
 
-    deque_(baseT&& x):baseT(x)
+    deque_(baseT&& x)noexcept:baseT(x)
     {}
 
     /** assign.
@@ -537,26 +537,10 @@ const T& min(const std::deque<T,A>& v)
     return *std::min_element(v.begin(), v.end());
 }
 
-/** smallest item.
- */
-template<typename T, typename A>
-T min(const std::deque<T,A>&& v)
-{
-    return *std::min_element(v.begin(), v.end());
-}
-
 /** largest item.
  */
 template<typename T, typename A>
 const T& max(const std::deque<T,A>& v)
-{
-    return *std::max_element(v.begin(), v.end());
-}
-
-/** largest item.
- */
-template<typename T, typename A>
-T max(const std::deque<T,A>&& v)
 {
     return *std::max_element(v.begin(), v.end());
 }

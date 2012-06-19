@@ -302,7 +302,7 @@ public:
 
     /** move ctor.
      */
-    ref_(ref_&& r):_rp(r._rp),_p(r._p)
+    ref_(ref_&& r)noexcept:_rp(r._rp),_p(r._p)
     {
         PROTON_REF_LOG(9,"move ctor");
         r._rp=NULL;

@@ -231,13 +231,13 @@ public:
 
     /** move ctor.
      */
-    vector_(vector_&& x):baseT(x)
+    vector_(vector_&& x)noexcept:baseT(x)
     {}
 
     explicit vector_(const baseT& x):baseT(x)
     {}
 
-    vector_(baseT&& x):baseT(x)
+    vector_(baseT&& x)noexcept:baseT(x)
     {}
 
     /** assign.
@@ -541,26 +541,10 @@ const T& min(const std::vector<T,A>& v)
     return *std::min_element(v.begin(), v.end());
 }
 
-/** smallest item.
- */
-template<typename T, typename A>
-T min(const std::vector<T,A>&& v)
-{
-    return *std::min_element(v.begin(), v.end());
-}
-
 /** largest item.
  */
 template<typename T, typename A>
 const T& max(const std::vector<T,A>& v)
-{
-    return *std::max_element(v.begin(), v.end());
-}
-
-/** largest item.
- */
-template<typename T, typename A>
-T max(const std::vector<T,A>&& v)
 {
     return *std::max_element(v.begin(), v.end());
 }

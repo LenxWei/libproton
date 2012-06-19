@@ -59,6 +59,7 @@ struct _fp_<retT(argT...) >: fo_<retT(argT...)>{
     {
         return _f(x...);
     }
+
 };
 
 /** functor for normal functions.
