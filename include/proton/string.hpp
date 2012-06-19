@@ -484,6 +484,56 @@ public:
 
 };
 
+/**
+ * @example string.cpp
+ */
+
+/** string * n
+ */
+template<typename T, typename C, typename A>
+basic_string_<T,C,A> operator*(const std::basic_string<T,C,A>& s, size_t n)
+{
+    basic_string_<T,C,A> r;
+    r.reserve(s.size()*n);
+    for(size_t i=0; i<n; i++)
+        r.append(s);
+    return r;
+}
+
+/** n * string
+ */
+template<typename T, typename C, typename A>
+basic_string_<T,C,A> operator*(size_t n, const std::basic_string<T,C,A>& s)
+{
+    return s*n;
+}
+
+/** cast to proton::basic_string_<>& from std::basic_string<>&.
+ */
+template<typename T, typename C, typename A>
+basic_string_<T,C,A>& cast_(std::basic_string<T,C,A>& x)
+{
+    return reinterpret_cast<basic_string_<T,C,A>&>(x);
+}
+
+template<typename T, typename C, typename A>
+const basic_string_<T,C,A>& cast_(const std::basic_string<T,C,A>& x)
+{
+    return reinterpret_cast<const basic_string_<T,C,A>&>(x);
+}
+
+template<typename T, typename C, typename A>
+basic_string_<T,C,A>&& cast_(std::basic_string<T,C,A>&& x)
+{
+    return reinterpret_cast<basic_string_<T,C,A>&&>(x);
+}
+
+template<typename T, typename C, typename A>
+const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&& x)
+{
+    return reinterpret_cast<const basic_string_<T,C,A>&&>(x);
+}
+
 /** the main string type in proton.
  */
 typedef basic_string_<char> str;
