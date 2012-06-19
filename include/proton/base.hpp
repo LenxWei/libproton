@@ -162,6 +162,10 @@ inline std::ostream& operator<<(std::ostream& o, const err& e)
     return o;
 }
 
+/**
+ * @}
+ */
+
 namespace detail{
 
 template<typename T>struct min_t{
@@ -187,7 +191,6 @@ template<typename T>struct has_t{
         return std::find(x.begin(), x.end(), v)!=x.end();
     }
 };
-
 
 }
 
@@ -231,7 +234,6 @@ size_t len(const T& v)
 }
 
 /**
- * @}
  * @}
  */
 }; // namespace proton
