@@ -50,8 +50,8 @@
 * @defgroup stl Containers
 * Repack stl containers in new templates following python's habits.
 * @{
-*  @defgroup seq sequence
-*  common sequence operations
+*  @defgroup seq common
+*  common container operations
 *
 *  @defgroup str str
 *  like string in python
