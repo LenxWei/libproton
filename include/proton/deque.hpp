@@ -248,7 +248,7 @@ public:
         return *this;
     }
 
-    deque_& operator=(deque_&& x)
+    deque_& operator=(deque_&& x)noexcept
     {
         baseT::operator=(x);
         return *this;
@@ -260,9 +260,23 @@ public:
         return *this;
     }
 
-    deque_& operator=(baseT&& x)
+    deque_& operator=(baseT&& x)noexcept
     {
         baseT::operator=(x);
+        return *this;
+    }
+
+    template<typename ...argT> deque_& operator=(argT&& ...a)
+    {
+        baseT::operator=(a...);
+        return *this;
+    }
+
+    /** initializer_list forwarding ctor.
+     */
+    deque_& operator=(std::initializer_list<T> a)
+    {
+        baseT::operator=(a);
         return *this;
     }
 

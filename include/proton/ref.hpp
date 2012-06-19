@@ -334,7 +334,7 @@ public:
 
     /** assign move operator.
      */
-    ref_& operator=(ref_&& r)
+    ref_& operator=(ref_&& r)noexcept(noexcept(_p->~objT()))
     {
         PROTON_REF_LOG(9,"assign rvalue");
         if(r._rp!=_rp){
@@ -359,7 +359,7 @@ public:
 
     /** dtor.
      */
-    ~ref_()
+    ~ref_()noexcept(noexcept(_p->~objT()))
     {
         release();
     }

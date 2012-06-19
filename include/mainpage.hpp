@@ -50,6 +50,9 @@
 * @defgroup stl Containers
 * Repack stl containers in new templates following python's habits.
 * @{
+*  @defgroup str str
+*  like string in python
+*
 *  @defgroup vector_ vector_
 *  like list in python, better for small sequences
 *

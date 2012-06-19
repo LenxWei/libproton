@@ -7,8 +7,14 @@
 #include <string>
 #include <string.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <stdexcept>
+#include <proton/pool.hpp>
 
 namespace proton{
+
+/** @addtogroup str
+ * @{
+ */
 
 template<typename string>string strip(const string& x)
 {
@@ -298,6 +304,135 @@ std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first, long
         last=s;
     return x.substr(first,last-first);
 }
+
+#if 0
+template<
+    class CharT,
+    class Traits = std::char_traits<CharT>,
+    class Allocator = smart_allocator<CharT>
+> class basic_string_ : public std::basic_string<CharT,Traits,Allocator> {
+public:
+    typedef std::vector<T,A> baseT;
+    typedef typename baseT::difference_type offset_t;
+
+    /** forwarding ctor.
+     */
+    template<typename ...argT> basic_string_(argT&& ...a):baseT(a...)
+    {}
+
+    /** initializer_list forwarding ctor.
+     */
+    basic_string_(std::initializer_list<T> a):baseT(a)
+    {}
+
+    /** copy ctor.
+     */
+    basic_string_(const basic_string_& x):baseT(x)
+    {}
+
+    /** move ctor.
+     */
+    basic_string_(basic_string_&& x)noexcept:baseT(x)
+    {}
+
+    explicit basic_string_(const baseT& x):baseT(x)
+    {}
+
+    basic_string_(baseT&& x)noexcept:baseT(x)
+    {}
+
+    /** assign.
+     */
+    basic_string_& operator=(const basic_string_& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    basic_string_& operator=(basic_string_&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    basic_string_& operator=(const baseT& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    basic_string_& operator=(baseT&& x)
+    {
+        baseT::operator=(x);
+        return *this;
+    }
+
+    /** cast to std::vector<>&.
+     */
+    operator baseT&()
+    {
+        return reinterpret_cast<baseT&>(*this);
+    }
+
+    /** [i] in python
+     */
+    T& operator[](offset_t i)
+    {
+        return *(this->begin()+offset(i));
+    }
+
+    /** [i] in python
+     */
+    const T& operator[](offset_t i)const
+    {
+        return *(this->begin()+offset(i));
+    }
+
+    /** slice of [i:]
+     */
+    vector_ operator()(offset_t i)const
+    {
+        auto begin=this->begin();
+        return vector_(begin+offset(i),this->end());
+    }
+
+    /** slice of [i:j]
+     */
+    vector_ operator()(offset_t i, offset_t j)const
+    {
+        auto begin=this->begin();
+        fix_range(i,j);
+        return vector_(begin+i,begin+j);
+    }
+
+    /** slice of [i:j:k]
+     */
+    vector_ operator()(offset_t i, offset_t j, size_t k)const
+    {
+        fix_range(i,j);
+        vector_ r;
+        r.reserve((j-i)/k+1);
+        auto it=this->begin()+i;
+        for(offset_t n=i; n<j; n+=k,it+=k)
+            r.push_back(*it);
+        return r;
+    }
+
+};
+
+/** the main string type in proton.
+ */
+typedef basic_string_<char> str;
+
+/** the main wstring type in proton.
+ */
+typedef basic_string_<wchar_t> wstr;
+
+#endif
+
+/**
+ * @}
+ */
 
 }
 

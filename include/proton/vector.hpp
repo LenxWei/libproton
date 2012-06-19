@@ -248,7 +248,7 @@ public:
         return *this;
     }
 
-    vector_& operator=(vector_&& x)
+    vector_& operator=(vector_&& x)noexcept
     {
         baseT::operator=(x);
         return *this;
@@ -260,9 +260,23 @@ public:
         return *this;
     }
 
-    vector_& operator=(baseT&& x)
+    vector_& operator=(baseT&& x)noexcept
     {
         baseT::operator=(x);
+        return *this;
+    }
+
+    template<typename ...argT> vector_& operator=(argT&& ...a)
+    {
+        baseT::operator=(a...);
+        return *this;
+    }
+
+    /** initializer_list forwarding ctor.
+     */
+    vector_& operator=(std::initializer_list<T> a)
+    {
+        baseT::operator=(a);
         return *this;
     }
 
@@ -464,7 +478,6 @@ template<typename T, typename A, typename X>
 vector_<T,A> operator+(const std::vector<T,A>& s, X&& t)
 {
     vector_<T,A> r(s);
-    r.reserve(s.size()+t.size());
     r.extend(std::forward<X>(t));
     return r;
 }
@@ -473,7 +486,6 @@ template<typename T, typename A, typename X>
 vector_<T,A> operator+(std::vector<T,A>&& s, X&& t)
 {
     vector_<T,A> r(s);
-    r.reserve(s.size()+t.size());
     r.extend(std::forward<X>(t));
     return r;
 }
