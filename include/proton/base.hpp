@@ -10,6 +10,8 @@
 #include <cstring>
 #include <iomanip>
 #include <cstdio>
+#include <algorithm>
+#include <type_traits>
 
 /** The main proton namespace.
  */
@@ -158,6 +160,70 @@ inline std::ostream& operator<<(std::ostream& o, const err& e)
 {
     o << e.what();
     return o;
+}
+
+namespace detail{
+
+template<typename T>struct min_t{
+    typedef typename std::remove_reference<decltype(*(((T*)1)->begin()))>::type item_t;
+    static const item_t& result(const T& v)
+    {
+        return *std::min_element(v.begin(), v.end());
+    }
+};
+
+template<typename T>struct max_t{
+    typedef typename std::remove_reference<decltype(*(((T*)1)->begin()))>::type item_t;
+    static const item_t& result(const T& v)
+    {
+        return *std::max_element(v.begin(), v.end());
+    }
+};
+
+template<typename T>struct has_t{
+//    typedef decltype(*(((T*)1)->begin())) item_t;
+    template<typename V>static bool result(const T& x, V&& v)
+    {
+        return std::find(x.begin(), x.end(), v)!=x.end();
+    }
+};
+
+
+}
+
+/** smallest item.
+ */
+template<typename T>
+const typename detail::min_t<T>::item_t& min(const T& v)
+{
+    return detail::min_t<T>::result(v);
+}
+
+/** largest item.
+ */
+template<typename T>
+const typename detail::max_t<T>::item_t& max(const T& v)
+{
+    return detail::max_t<T>::result(v);
+}
+
+/** check if x has val.
+ * @param x the container
+ * @param v the value
+ * @return true: has, false: not
+ */
+template <typename T, typename V>
+bool has(const T& x, const V& v)
+{
+    return detail::has_t<T>::result(x, v);
+}
+
+/** get length.
+ */
+template<typename T>
+size_t len(const T& v)
+{
+    return v.size();
 }
 
 /**

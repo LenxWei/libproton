@@ -7,11 +7,25 @@
 
 namespace proton{
 
+namespace detail{
+
+template<typename T, typename H, typename C, typename A>
+struct has_t<std::unordered_set<T,H,C,A> >{
+    template<typename V> static bool result(const std::unordered_set<T,H,C,A>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+} // ns detail
+
+/*
 template <typename T, typename H, typename C, typename A, typename V >
-bool has(const std::unordered_set<T,H,C,A>& x, V&& val)
+bool has<std::unordered_set<T,H,C,A>, V>(const std::unordered_set<T,H,C,A>& x, V&& val)
 {
     return x.find(val)!=x.end();
 }
+*/
 
 template <typename T, typename H, typename C, typename A, typename V >
 std::unordered_set<T,H,C,A>& operator<<(std::unordered_set<T,H,C,A>& x, V&& val)

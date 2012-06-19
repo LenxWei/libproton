@@ -8,11 +8,26 @@
 
 namespace proton{
 
+namespace detail{
+
+template<typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
+struct has_t<std::map<_Key, _Tp, _Cmp, _Alloc> >{
+    template<typename V> static bool result(const std::map<_Key, _Tp, _Cmp, _Alloc>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+} // ns detail
+
+/*
 template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc, typename T>
-bool has(const std::map<_Key, _Tp, _Cmp, _Alloc>& x, T&& key)
+bool has<std::map<_Key, _Tp, _Cmp, _Alloc>, T>
+    (const std::map<_Key, _Tp, _Cmp, _Alloc>& x, T&& key)
 {
     return x.find(key)!=x.end();
 }
+*/
 
 /*
 template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>

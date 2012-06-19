@@ -272,8 +272,6 @@ public:
         return *this;
     }
 
-    /** initializer_list forwarding ctor.
-     */
     vector_& operator=(std::initializer_list<T> a)
     {
         baseT::operator=(a);
@@ -518,47 +516,22 @@ vector_<T,A>& cast_(std::vector<T,A>& x)
     return reinterpret_cast<vector_<T,A>&>(x);
 }
 
-/** cast to proton::vector_<>& from std::vector<>&.
- */
 template<typename T, typename A>
 const vector_<T,A>& cast_(const std::vector<T,A>& x)
 {
     return reinterpret_cast<const vector_<T,A>&>(x);
 }
 
-/** check if x has val.
- * @param x the container
- * @param val the value
- * @return true: has, false: not
- */
-template <typename T, typename allocT, typename V >
-bool has(const std::vector<T,allocT>& x, const V& val)
+template<typename T, typename A>
+vector_<T,A>&& cast_(std::vector<T,A>&& x)
 {
-    return std::find(x.begin(), x.end(), val)!=x.end();
+    return reinterpret_cast<vector_<T,A>&&>(x);
 }
 
-/** get length of vector.
- */
 template<typename T, typename A>
-size_t len(const std::vector<T,A>& v)
+const vector_<T,A>&& cast_(const std::vector<T,A>&& x)
 {
-    return v.size();
-}
-
-/** smallest item.
- */
-template<typename T, typename A>
-const T& min(const std::vector<T,A>& v)
-{
-    return *std::min_element(v.begin(), v.end());
-}
-
-/** largest item.
- */
-template<typename T, typename A>
-const T& max(const std::vector<T,A>& v)
-{
-    return *std::max_element(v.begin(), v.end());
+    return reinterpret_cast<const vector_<T,A>&&>(x);
 }
 
 /**

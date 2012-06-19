@@ -305,16 +305,48 @@ std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first, long
     return x.substr(first,last-first);
 }
 
-#if 0
 template<
     class CharT,
     class Traits = std::char_traits<CharT>,
     class Allocator = smart_allocator<CharT>
-> class basic_string_ : public std::basic_string<CharT,Traits,Allocator> {
+>
+class basic_string_ : public std::basic_string<CharT,Traits,Allocator> {
 public:
-    typedef std::vector<T,A> baseT;
+    typedef std::basic_string<CharT,Traits,Allocator> baseT;
     typedef typename baseT::difference_type offset_t;
+protected:
+    offset_t __offset(offset_t i)const
+    {
+        if(i<0)
+            i+=this->size();
+        return i;
+    }
 
+    offset_t offset(offset_t i)const
+    {
+        i=__offset(i);
+        PROTON_THROW_IF(i<0 || (size_t)i>=this->size(), "out of range, offset is " << i
+                         << " while size is " << this->size() );
+        return i;
+    }
+
+    void fix_range(offset_t& begin, offset_t& end)const
+    {
+        offset_t size=(offset_t)this->size(); //[FIXME] size>2G in 32bit?
+        begin=__offset(begin);
+        end=__offset(end);
+        if(begin>=size || end<=0 || end<=begin){
+            begin=0;
+            end=0;
+            return;
+        }
+        if(begin<0)
+            begin=0;
+        if(end>=size)
+            end=size;
+    }
+
+public:
     /** forwarding ctor.
      */
     template<typename ...argT> basic_string_(argT&& ...a):baseT(a...)
@@ -322,7 +354,7 @@ public:
 
     /** initializer_list forwarding ctor.
      */
-    basic_string_(std::initializer_list<T> a):baseT(a)
+    basic_string_(std::initializer_list<CharT> a):baseT(a)
     {}
 
     /** copy ctor.
@@ -349,7 +381,7 @@ public:
         return *this;
     }
 
-    basic_string_& operator=(basic_string_&& x)
+    basic_string_& operator=(basic_string_&& x)noexcept
     {
         baseT::operator=(x);
         return *this;
@@ -361,9 +393,21 @@ public:
         return *this;
     }
 
-    basic_string_& operator=(baseT&& x)
+    basic_string_& operator=(baseT&& x)noexcept
     {
         baseT::operator=(x);
+        return *this;
+    }
+
+    template<typename ...argT> basic_string_& operator=(argT&& ...a)
+    {
+        baseT::operator=(a...);
+        return *this;
+    }
+
+    basic_string_& operator=(std::initializer_list<CharT> a)
+    {
+        baseT::operator=(a);
         return *this;
     }
 
@@ -376,46 +420,66 @@ public:
 
     /** [i] in python
      */
-    T& operator[](offset_t i)
+    CharT& operator[](offset_t i)
     {
         return *(this->begin()+offset(i));
     }
 
     /** [i] in python
      */
-    const T& operator[](offset_t i)const
+    const CharT& operator[](offset_t i)const
     {
         return *(this->begin()+offset(i));
     }
 
     /** slice of [i:]
      */
-    vector_ operator()(offset_t i)const
+    basic_string_ operator()(offset_t i)const
     {
         auto begin=this->begin();
-        return vector_(begin+offset(i),this->end());
+        return basic_string_(begin+offset(i),this->end());
     }
 
     /** slice of [i:j]
      */
-    vector_ operator()(offset_t i, offset_t j)const
+    basic_string_ operator()(offset_t i, offset_t j)const
     {
         auto begin=this->begin();
         fix_range(i,j);
-        return vector_(begin+i,begin+j);
+        return basic_string_(begin+i,begin+j);
     }
 
     /** slice of [i:j:k]
      */
-    vector_ operator()(offset_t i, offset_t j, size_t k)const
+    basic_string_ operator()(offset_t i, offset_t j, size_t k)const
     {
         fix_range(i,j);
-        vector_ r;
+        basic_string_ r;
         r.reserve((j-i)/k+1);
         auto it=this->begin()+i;
         for(offset_t n=i; n<j; n+=k,it+=k)
             r.push_back(*it);
         return r;
+    }
+
+    /** total number of occurences of a char.
+     */
+    size_t count(const CharT& x)const
+    {
+        return std::count(this->begin(), this->end(), x);
+    }
+
+    /** index of the first occurence of a char.
+     * @param val the char.
+     * @throw std::invalid_argument if there is no such a char.
+     */
+    offset_t index(const CharT& val)const
+    {
+        auto begin=this->begin(), end=this->end();
+        auto it=std::find(begin, end, val);
+        if(it==end)
+            throw std::invalid_argument("The given char doesn't exist in this sequence.");
+        return it-begin;
     }
 
 };
@@ -427,8 +491,6 @@ typedef basic_string_<char> str;
 /** the main wstring type in proton.
  */
 typedef basic_string_<wchar_t> wstr;
-
-#endif
 
 /**
  * @}

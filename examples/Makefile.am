@@ -1,9 +1,13 @@
-TESTS = func vector deque
-check_PROGRAMS = func vector deque
+TESTS = func vector deque string
+check_PROGRAMS = func vector deque string
 
 func_SOURCES = functor.cpp
 func_CXXFLAGS = $(BOOST_CPPFLAGS)
 func_LDADD = $(top_srcdir)/src/libproton.la
+
+string_SOURCES = string.cpp
+string_CXXFLAGS = $(BOOST_CPPFLAGS)
+string_LDADD = $(top_srcdir)/src/libproton.la
 
 vector_SOURCES = vector.cpp
 vector_CXXFLAGS = $(BOOST_CPPFLAGS)

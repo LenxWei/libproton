@@ -7,11 +7,25 @@
 
 namespace proton{
 
+namespace detail{
+
+template<typename T, typename C, typename allocT>
+struct has_t<std::set<T,C,allocT> >{
+    template<typename V> static bool result(const std::set<T,C,allocT>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+} // ns detail
+
+/*
 template <typename T, typename C, typename allocT, typename V >
-bool has(const std::set<T,C,allocT>& x, V&& val)
+bool has<std::set<T,C,allocT>, V>(const std::set<T,C,allocT>& x, V&& val)
 {
     return x.find(val)!=x.end();
 }
+*/
 
 template <typename T, typename C, typename A, typename V >
 std::set<T,C,A>& operator<<(std::set<T,C,A>& x, V&& val)
