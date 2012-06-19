@@ -40,7 +40,7 @@
 * Provide basic reference support for proton.
 * @{
 *  @defgroup ref_ ref_
-*  Core reference template.
+*  Core reference template supporting interface through inheritance/multiple inheritance.
 *
 *  @defgroup functor func_
 *  General functor interface template.
