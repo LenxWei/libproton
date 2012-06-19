@@ -19,14 +19,6 @@ struct has_t<std::set<T,C,allocT> >{
 
 } // ns detail
 
-/*
-template <typename T, typename C, typename allocT, typename V >
-bool has<std::set<T,C,allocT>, V>(const std::set<T,C,allocT>& x, V&& val)
-{
-    return x.find(val)!=x.end();
-}
-*/
-
 template <typename T, typename C, typename A, typename V >
 std::set<T,C,A>& operator<<(std::set<T,C,A>& x, V&& val)
 {

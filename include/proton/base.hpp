@@ -191,6 +191,10 @@ template<typename T>struct has_t{
 
 }
 
+/** @addtogroup seq
+ * @{
+ */
+
 /** smallest item.
  */
 template<typename T>
@@ -213,7 +217,7 @@ const typename detail::max_t<T>::item_t& max(const T& v)
  * @return true: has, false: not
  */
 template <typename T, typename V>
-bool has(const T& x, const V& v)
+bool has(const T& x, V&& v)
 {
     return detail::has_t<T>::result(x, v);
 }
@@ -227,6 +231,7 @@ size_t len(const T& v)
 }
 
 /**
+ * @}
  * @}
  */
 }; // namespace proton

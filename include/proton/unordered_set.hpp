@@ -19,14 +19,6 @@ struct has_t<std::unordered_set<T,H,C,A> >{
 
 } // ns detail
 
-/*
-template <typename T, typename H, typename C, typename A, typename V >
-bool has<std::unordered_set<T,H,C,A>, V>(const std::unordered_set<T,H,C,A>& x, V&& val)
-{
-    return x.find(val)!=x.end();
-}
-*/
-
 template <typename T, typename H, typename C, typename A, typename V >
 std::unordered_set<T,H,C,A>& operator<<(std::unordered_set<T,H,C,A>& x, V&& val)
 {

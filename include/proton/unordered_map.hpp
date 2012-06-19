@@ -22,23 +22,6 @@ struct has_t<std::unordered_map<K,V,H,E,A> >{
 
 /*
 template <typename K, typename V, typename H, typename E, typename A, typename T>
-bool has<std::unordered_map<K,V,H,E,A>, T>
-    (const std::unordered_map<K,V,H,E,A>& x, T&& key)
-{
-    return x.find(key)!=x.end();
-}
-*/
-
-/*
-template <typename K, typename V, typename H, typename E, typename A, typename T>
-bool has(const std::unordered_map<K,V,H,E,A>& x, T&& key)
-{
-    return x.find(key)!=x.end();
-}
-*/
-
-/*
-template <typename K, typename V, typename H, typename E, typename A, typename T>
 std::unordered_map<K,V,H,E,A>& operator<<(std::unordered_map<K,V,H,E,A>& x,
                                               const std::pair<const K, V>& item)
 {

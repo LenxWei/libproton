@@ -305,6 +305,8 @@ std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first, long
     return x.substr(first,last-first);
 }
 
+/** main string template
+ */
 template<
     class CharT,
     class Traits = std::char_traits<CharT>,
@@ -455,7 +457,7 @@ public:
     {
         fix_range(i,j);
         basic_string_ r;
-        r.reserve((j-i)/k+1);
+        r.reserve((j-i)/k+2);
         auto it=this->begin()+i;
         for(offset_t n=i; n<j; n+=k,it+=k)
             r.push_back(*it);
@@ -494,7 +496,7 @@ template<typename T, typename C, typename A>
 basic_string_<T,C,A> operator*(const std::basic_string<T,C,A>& s, size_t n)
 {
     basic_string_<T,C,A> r;
-    r.reserve(s.size()*n);
+    r.reserve(s.size()*n+1);
     for(size_t i=0; i<n; i++)
         r.append(s);
     return r;

@@ -21,15 +21,6 @@ struct has_t<std::map<_Key, _Tp, _Cmp, _Alloc> >{
 } // ns detail
 
 /*
-template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc, typename T>
-bool has<std::map<_Key, _Tp, _Cmp, _Alloc>, T>
-    (const std::map<_Key, _Tp, _Cmp, _Alloc>& x, T&& key)
-{
-    return x.find(key)!=x.end();
-}
-*/
-
-/*
 template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
 std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>& x,
                                               const std::pair<const _Key, _Tp>& item)
