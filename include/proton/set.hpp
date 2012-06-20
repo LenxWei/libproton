@@ -91,7 +91,7 @@ void sort(std::set<T,C,A>& x)
 {
 }
 
-/** a set extension implementing python's list-like interfaces.
+/** a set extension implementing python's set-like interfaces.
  */
 template<typename T, typename C=std::less<T>, typename A=smart_allocator<T> >
 class set_ : public std::set<T,C,A>{
@@ -170,6 +170,8 @@ public:
         return reinterpret_cast<baseT&>(*this);
     }
 
+    PROTON_COPY_DECL(set_)
+
     /** add an item.
      */
     void add(const T& x)
@@ -189,12 +191,13 @@ public:
     T pop()
     {
         auto it=this->begin();
+        PROTON_THROW_IF(it==this->end(), "try to pop an empty set.");
         T r=*it;
         this->erase(it);
         return r;
     }
 
-    /** remove the first occurence of a value.
+    /** remove a value.
      * @param val the value.
      * @throw std::invalid_argument if there is no such a value.
      */
@@ -205,6 +208,17 @@ public:
         if(it==end)
             throw std::invalid_argument("The given value doesn't exist in this sequence.");
         this->erase(it);
+    }
+
+    /** remove a value if it is present.
+     * @param val the value.
+     */
+    void discard(const T& val)
+    {
+        auto end=this->end();
+        auto it=this->find(val);
+        if(it!=end)
+            this->erase(it);
     }
 
 };
