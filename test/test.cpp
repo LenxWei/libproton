@@ -296,7 +296,7 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(get(dict,"4",0)!=s0,"adf");
     }
     {
-        set<int> a={1,2,3,4}, a1={1,2}, a2={3,4}, a3;
+        set_<int> a={1,2,3,4}, a1={1,2}, a2={3,4}, a3;
         set<string> s={"1","2","3","4"};
         PROTON_THROW_IF(has(a,5),"");
         PROTON_THROW_IF(!has(a,1),"");

@@ -54,13 +54,16 @@
 *  common container operations
 *
 *  @defgroup str str
-*  like string in python
+*  like string in python.
 *
 *  @defgroup vector_ vector_
 *  like list in python, better for small sequences
 *
 *  @defgroup deque_ deque_
 *  like list in python, better for long sequences.
+*
+*  @defgroup set_ set_
+*  like set in python.
 *
 * @}
 *

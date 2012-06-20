@@ -419,9 +419,9 @@ public:
         return *this;
     }
 
-    template<typename ...argT> basic_string_& operator=(argT&& ...a)
+    template<typename argT> basic_string_& operator=(argT&& a)
     {
-        baseT::operator=(a...);
+        baseT::operator=(a);
         return *this;
     }
 
