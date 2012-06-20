@@ -163,33 +163,6 @@ public:
         return *this;
     }
 
-    /** &=
-     */
-    set_& operator&=(const baseT& y)
-    {
-        auto it=this->begin(), end=this->end();
-        while(it!=end){
-            if(!has(y,*it)){
-                auto it1=it;
-                ++it;
-                this->erase(it1);
-            }
-            else
-                ++it;
-        }
-        return *this;
-    }
-
-    /** |=
-     */
-    set_& operator|=(const baseT& y)
-    {
-        for(auto& t: y){
-            add(t);
-        }
-        return *this;
-    }
-
     /** cast to std::set<>&.
      */
     operator baseT&()
@@ -239,6 +212,35 @@ public:
 /**
  * @example set.cpp
  */
+
+/** &=
+ */
+template <typename T, typename C, typename A>
+std::set<T,C,A>& operator&=(std::set<T,C,A>& x, const std::set<T,C,A>& y)
+{
+    auto it=x.begin(), end=x.end();
+    while(it!=end){
+        if(!has(y,*it)){
+            auto it1=it;
+            ++it;
+            x.erase(it1);
+        }
+        else
+            ++it;
+    }
+    return x;
+}
+
+/** |=
+ */
+template <typename T, typename C, typename A>
+std::set<T,C,A>& operator|=(std::set<T,C,A>& x, const std::set<T,C,A>& y)
+{
+    for(auto& t: y){
+        x.insert(t);
+    }
+    return x;
+}
 
 /** set & set
  */
