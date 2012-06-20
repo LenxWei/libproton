@@ -7,8 +7,10 @@
 #include <string>
 #include <string.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <stdexcept>
 #include <proton/pool.hpp>
+#include <proton/deque.hpp>
 
 namespace proton{
 
@@ -413,6 +415,25 @@ public:
         return *this;
     }
 
+    /** +=
+     */
+    template<typename argT>
+    basic_string_& operator+=(argT&& a)
+    {
+        this->append(a);
+        return *this;
+    }
+
+    /** string + string
+     */
+    template<typename argT>
+    basic_string_ operator+(argT&& a)
+    {
+        basic_string_ r(*this);
+        r.append(a);
+        return r;
+    }
+
     /** cast to std::vector<>&.
      */
     operator baseT&()
@@ -482,6 +503,139 @@ public:
         if(it==end)
             throw std::invalid_argument("The given char doesn't exist in this sequence.");
         return it-begin;
+    }
+
+    /** Return a copy of the string with leading and trailing characters removed.
+     * @param spc white space chars
+     * @return the stripped string
+     */
+    basic_string_ strip(const baseT& spc=" \t\n\r")const
+    {
+        offset_t i=this->find_first_not_of(spc);
+        offset_t j=this->find_last_not_of(spc);
+
+        if(i<0 || j<0 || j < i )
+            return "";
+
+        return basic_string_(this->begin()+i,this->begin()+j+1);
+    }
+
+    /** split a string.
+     * @param delim        the delimiters
+     * @param null_unite -1: a.c.t. python depent on token, 0: false, 1: true
+     * @return the output string list, in deque_<basic_string_>
+     */
+    deque_<basic_string_ >
+        split(const baseT& delim=baseT(), int null_unite=-1)const
+    {
+        long pos = 0, begin, end;
+
+        deque_<basic_string_> r;
+
+        basic_string_ spc(delim);
+        if(spc.size()==0){
+            if(null_unite<0)
+                null_unite=1;
+            spc=" \t\n\r";
+        }
+        else{
+            if(null_unite<0)
+                null_unite=0;
+        }
+
+        if(null_unite){
+            do{
+                begin = this->find_first_not_of(spc,pos);
+                if(begin<0)
+                    break;
+                end = this->find_first_of(spc,begin);
+                if(end<0)
+                    end=this->length();
+                r.push_back(this->substr(begin, end-begin));
+                pos = end;
+            }
+            while(pos < (long)this->length());
+        }
+        else{
+            while(1){
+                begin = this->find_first_of(spc,pos);
+                if(begin<0){
+                    r.push_back(this->substr(pos));
+                    break;
+                }
+                r.push_back(this->substr(pos, begin-pos));
+                pos = begin + 1;
+                if(pos>=(long)this->length()){
+                    r.push_back("");
+                    break;
+                }
+            }//while
+        }//else
+        return r;
+    }
+
+    /** join a list of strings to one string.
+     * @param r     the input string list
+     * @return the output string
+     */
+    template<typename string_list>
+        basic_string_ join(const string_list& r)const
+    {
+        if(r.empty()){
+            return basic_string_();
+        }
+        else{
+            typename string_list::const_iterator it=r.begin();
+            basic_string_ res=*it;
+            ++it;
+            for(;it!=r.end();++it){
+                res+=*this;
+                res+=*it;
+            }
+            return res;
+        }
+    }
+
+    /** startswith.
+     */
+    template<typename str2> bool startswith(str2&& sub)const
+    {
+        return boost::algorithm::starts_with(*this, sub);
+    }
+
+    /** case-insensitive startswith.
+     */
+    template<typename str2> bool istartswith(str2&& sub)const
+    {
+        return boost::algorithm::istarts_with(*this, sub);
+    }
+
+    /** endswith.
+     */
+    template<typename str2> bool endswith(str2&& sub)const
+    {
+        return boost::algorithm::ends_with(*this, sub);
+    }
+
+    /** case-insensitive endswith.
+     */
+    template<typename str2> bool iendswith(str2&& sub)const
+    {
+        return boost::algorithm::iends_with(*this, sub);
+    }
+
+    /** return a copy with upper case letters converted to lower case.
+     */
+    basic_string_ lower()const
+    {
+        return boost::algorithm::to_lower_copy(*this);
+    }
+
+    /** return a copy with lower case letters converted to upper case.
+     */
+    basic_string_ upper()const
+    {
+        return boost::algorithm::to_upper_copy(*this);
     }
 
 };

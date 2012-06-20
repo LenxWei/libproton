@@ -1,5 +1,5 @@
-#ifndef PROTON_VECTOR_HEADER
-#define PROTON_VECTOR_HEADER
+#ifndef PROTON_DEQUE_HEADER
+#define PROTON_DEQUE_HEADER
 
 
 /** @file deque.hpp
@@ -537,4 +537,4 @@ const deque_<T,A>&& cast_(const std::deque<T,A>&& x)
  */
 }
 
-#endif // PROTON_VECTOR_HEADER
+#endif // PROTON_DEQUE_HEADER
