@@ -80,6 +80,22 @@ std::ostream& operator<<(std::ostream& s, std::deque<T,A>& x)
     return s;
 }
 
+template <typename T, typename A>
+std::wostream& operator<<(std::wostream& s, std::deque<T,A>& x)
+{
+    s << L"[";
+    bool first=true;
+    for(auto& t: x){
+        if(first)
+            first=false;
+        else
+            s <<L", ";
+        s << t;
+    }
+    s << L"]";
+    return s;
+}
+
 /* sort a deque
  * @param x the deque to be sorted
  */
