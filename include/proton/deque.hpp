@@ -33,18 +33,6 @@ std::deque<T,A>& operator<<(std::deque<T,A>& x, V&& val)
     return x;
 }
 
-/** add an item in streaming style.
- * @param x the deque to be added
- * @param val the new item
- * @return the new x
- */
-template <typename T, typename A, typename V>
-std::deque<T,A>& operator<<(std::deque<T,A>& x, const V& val)
-{
-    x.push_back(val);
-    return x;
-}
-
 /** pop an item in streaming style.
  * @param x the deque to be popped from
  * @param val the popped item
@@ -282,9 +270,9 @@ public:
         return *this;
     }
 
-    template<typename ...argT> deque_& operator=(argT&& ...a)
+    template<typename argT> deque_& operator=(argT&& a)
     {
-        baseT::operator=(a...);
+        baseT::operator=(a);
         return *this;
     }
 
