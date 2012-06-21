@@ -365,6 +365,7 @@ public:
     }
 
 public:
+
 #if 0
     /* conversion to const baseT&.
      * Notice! NEVER convert to a non-const ref from here!
@@ -381,14 +382,48 @@ public:
 	}
 #endif
 
+#if 0
+	template<typename derivedT,
+        typename=typename std::enable_if<
+            std::is_base_of<obj_t, derivedT>::value
+        >::type
+        >
+        ref_(const ref_<derivedT>& x)noexcept:_rp(x._rp), _p(static_cast<obj_t*>(x._p))
+    {
+        if(_rp)
+            _rp->enter();
+    }
+#endif
+
+#if 0
+	template<typename baseT,
+        typename=typename std::enable_if<
+            std::is_base_of<baseT, obj_t>::value
+            && static_cast<baseT*>((obj_t*)4096)==(baseT*)4096
+        >::type
+        >
+        operator const ref_<baseT>& ()const noexcept
+    {
+        PROTON_REF_LOG(9,"const baseT&()");
+		return reinterpret_cast<const ref_<baseT>&>(*this);
+	}
+#endif
+
+#if 1
     /** conversion to baseT.
      */
-	template<typename baseT> operator ref_<baseT> () const
-	{
+	template<typename baseT,
+        typename=typename std::enable_if<
+            std::is_base_of<baseT, obj_t>::value
+//          && static_cast<baseT*>((obj_t*)4096)!=(baseT*)4096
+        >::type
+        >
+        operator ref_<baseT> ()const noexcept
+    {
         PROTON_REF_LOG(9,"baseT()");
-		static_assert(std::is_base_of<baseT, obj_t>(), "The target type is not a base type of obj_t");
 		return ref_<baseT>(alloc_inner, _rp, static_cast<baseT*>(_p));
 	}
+#endif
 
 public:
     const objT& __o()const
