@@ -129,7 +129,6 @@ public:
 
 typedef ref_<_tt2> tt2;
 
-
 int main(int argc, char** argv)
 {
     wait_on_err=0;
@@ -139,21 +138,21 @@ int main(int argc, char** argv)
         cout << a << endl;
     }
     {
-        vector<string> a={"1","2","3","4"};
+        vector_<str> a={"1","2","3","4"};
 
         PROTON_THROW_IF(has(a,"5"), "");
         PROTON_THROW_IF(!has(a,"1"),"");
         a << "5";
         PROTON_THROW_IF(!has(a,"5"), "");
 
-        vector<string> b;
+        vector_<str> b;
         for(auto& t: a){
             b << t;
         }
         PROTON_THROW_IF(a!=b, "");
     }
     {
-        vector<int> a={1,2,3,4};
+        vector_<int> a={1,2,3,4};
         PROTON_THROW_IF(has(a,5), "");
         PROTON_THROW_IF(!has(a,1),"");
         a << 5;
@@ -185,7 +184,7 @@ int main(int argc, char** argv)
     }
     {
         tt1 t1(34), t2(345), t0;
-        set<tt1> s={t1,t2,t0};
+        set_<tt1> s={t1,t2,t0};
         PROTON_THROW_IF(s.size()!=3,"");
     }
     {
@@ -194,13 +193,13 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(s.size()!=3,"");
     }
     {
-        map<int,int> dict={{1,1},{2,2}};
+        map_<int,int> dict={{1,1},{2,2}};
         dict.insert({3,3});
         PROTON_THROW_IF(dict.size()!=3, "");
     }
     {
-        map<int, string> dict={{1,"a"},{2,"b"}};
-        string x;
+        map_<int, str> dict={{1,"a"},{2,"b"}};
+        str x;
         PROTON_THROW_IF(test_get(x, dict, 3),"");
         PROTON_THROW_IF(!test_get(x, dict, 2),"");
         PROTON_THROW_IF(x!="b","");
@@ -211,9 +210,9 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!test_insert_or_get(dict,8,x),"");
         PROTON_THROW_IF(dict[8]!="c","");
         bool hit;
-        string& t=get_or_create(hit, dict, 8, "d");
+        str& t=get_or_create(hit, dict, 8, "d");
         PROTON_THROW_IF(!hit,"");
-        string& t1=get_or_create(hit, dict, 7, "d");
+        str& t1=get_or_create(hit, dict, 7, "d");
         PROTON_THROW_IF(hit,"");
         PROTON_THROW_IF(t1!="d","");
         t1="e";
@@ -221,11 +220,11 @@ int main(int argc, char** argv)
 
         PROTON_THROW_IF(has(dict,0),"0 is in dict!");
         PROTON_THROW_IF(!has(dict,2),"2 is not in dict!");
-        string s=get(dict,1);
+        str s=get(dict,1);
         PROTON_THROW_IF(s!="a","");
         int a=1;
         PROTON_THROW_IF(!has(dict,a),"");
-        string dft="x";
+        str dft="x";
         //get_ref(dict,3,"x"); ///< this line should not pass by compilation
         auto s0=get(dict,3,dft);
         auto s1=get(dict,3,"x");
@@ -233,8 +232,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(get(dict,4,"x")!=s0,"adf");
     }
     {
-        unordered_map<int, string> dict={{1,"a"},{2,"b"}};
-        string x;
+        unordered_map<int, str> dict={{1,"a"},{2,"b"}};
+        str x;
         PROTON_THROW_IF(test_get(x, dict, 3),"");
         PROTON_THROW_IF(!test_get(x, dict, 2),"");
         PROTON_THROW_IF(x!="b","");
@@ -245,9 +244,9 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!test_insert_or_get(dict,8,x),"");
         PROTON_THROW_IF(dict[8]!="c","");
         bool hit;
-        string& t=get_or_create(hit, dict, 8, "d");
+        str& t=get_or_create(hit, dict, 8, "d");
         PROTON_THROW_IF(!hit,"");
-        string& t1=get_or_create(hit, dict, 7, "d");
+        str& t1=get_or_create(hit, dict, 7, "d");
         PROTON_THROW_IF(hit,"");
         PROTON_THROW_IF(t1!="d","");
         t1="e";
@@ -256,11 +255,11 @@ int main(int argc, char** argv)
         cout << "unordered_map:" << dict << endl;
         PROTON_THROW_IF(has(dict,0),"0 is in dict!");
         PROTON_THROW_IF(!has(dict,2),"2 is not in dict!");
-        string s=get(dict,1);
+        str s=get(dict,1);
         PROTON_THROW_IF(s!="a","");
         int a=1;
         PROTON_THROW_IF(!has(dict,a),"");
-        string dft="x";
+        str dft="x";
         //get_ref(dict,3,"x"); ///< this line should not pass by compilation
         auto s0=get(dict,3,dft);
         auto s1=get(dict,3,"x");
@@ -268,8 +267,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(get(dict,4,"x")!=s0,"adf");
     }
     {
-        map<string, int> dict={{"1",3},{"2",4}};
-        cout << "map:" << dict << endl;
+        map_<str, int> dict={{"1",3},{"2",4}};
+        cout << "map_:" << dict << endl;
         PROTON_THROW_IF(has(dict,"0"),"0 is in dict!");
         PROTON_THROW_IF(!has(dict,"2"),"2 is not in dict!");
         int s=get(dict,"1");
@@ -282,8 +281,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(get(dict,"4",0)!=s0,"adf");
     }
     {
-        unordered_map<string, int> dict={{"1",3},{"2",4}};
-        cout << "map:" << dict << endl;
+        unordered_map<str, int> dict={{"1",3},{"2",4}};
+        cout << "map_:" << dict << endl;
         PROTON_THROW_IF(has(dict,"0"),"0 is in dict!");
         PROTON_THROW_IF(!has(dict,"2"),"2 is not in dict!");
         int s=get(dict,"1");
@@ -296,8 +295,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(get(dict,"4",0)!=s0,"adf");
     }
     {
-        set<int> a={1,2,3,4}, a1={1,2}, a2={3,4}, a3;
-        set<string> s={"1","2","3","4"};
+        set_<int> a={1,2,3,4}, a1={1,2}, a2={3,4}, a3;
+        set_<str> s={"1","2","3","4"};
         PROTON_THROW_IF(has(a,5),"");
         PROTON_THROW_IF(!has(a,1),"");
         PROTON_THROW_IF(has(s,"5"),"");
@@ -312,14 +311,14 @@ int main(int argc, char** argv)
         auto a4=a3|a;
         a|=a3;
         PROTON_THROW_IF(a!=a4,"");
-        cout << "set:" << a << endl;
+        cout << "set_:" << a << endl;
         PROTON_THROW_IF(a.size()!=4,"");
         PROTON_THROW_IF(a2==a3,"");
     }
     {
         unordered_set<int> a={1,2,3,4}, a1={1,2}, a2={3,4}, a3;
         cout << "unordered_set:" << a << endl;
-        unordered_set<string> s={"1","2","3","4"};
+        unordered_set<str> s={"1","2","3","4"};
         PROTON_THROW_IF(has(a,5),"");
         PROTON_THROW_IF(!has(a,1),"");
         PROTON_THROW_IF(has(s,"5"),"");
@@ -334,12 +333,12 @@ int main(int argc, char** argv)
         auto a4=a3|a;
         a|=a3;
         PROTON_THROW_IF(a!=a4,"");
-        cout << "set:" << a << endl;
+        cout << "set_:" << a << endl;
         PROTON_THROW_IF(a.size()!=4,"");
         PROTON_THROW_IF(a2==a3,"");
     }
     {
-        vector<int> a;
+        vector_<int> a;
         a << 1 << 2<< 3;
         int x,y,z,d;
         a >> x >> y >> z;
@@ -354,7 +353,7 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!got, "");
     }
     {
-        set<int> a;
+        set_<int> a;
         a << 1 << 2<< 3;
         int x,y,z,d;
         a >> x >> y >> z;
@@ -369,8 +368,8 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!got, "");
     }
     {
-        vector<int> a={1,2,3,4,5};
-        cout <<"vector:" << a << endl;
+        vector_<int> a={1,2,3,4,5};
+        cout <<"vector_:" << a << endl;
         PROTON_THROW_IF(get(a,-1)!=a[4], "");
 
     }
@@ -418,7 +417,7 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(!got,"");
     }
     {
-        string a="012345";
+        str a="012345";
         PROTON_THROW_IF(sub(a,0,2)!="01","");
         PROTON_THROW_IF(sub(a,-3,-1)!="34","");
         PROTON_THROW_IF(get(a,-1)!='5',"");
@@ -462,7 +461,7 @@ int main(int argc, char** argv)
 
     }
     {
-        const vector<int> a={1,2,3,4,5};
+        const vector_<int> a={1,2,3,4,5};
         PROTON_THROW_IF(get(a,0)!=a[0], "");
         bool got=false;
         try{
@@ -478,7 +477,7 @@ int main(int argc, char** argv)
         PROTON_THROW_IF(a2!=a3,"");
     }
     {
-        string a="12345";
+        str a="12345";
         PROTON_THROW_IF(get(a,0)!=a[0], "");
         bool got=false;
         try{

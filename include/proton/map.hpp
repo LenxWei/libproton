@@ -9,18 +9,15 @@
 
 namespace proton{
 
-namespace detail{
+/** @addtogroup map_
+ * @{
+ */
 
-template<typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
-struct has_t<std::map<_Key, _Tp, _Cmp, _Alloc> >{
-    template<typename V> static bool result(const std::map<_Key, _Tp, _Cmp, _Alloc>& x, V&& v)
-    {
-        return x.find(v)!=x.end();
-    }
-};
-
-} // ns detail
-
+/** add an item in streaming style.
+ * @param x the map to be added
+ * @param item the new item
+ * @return the new x
+ */
 template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
 std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>& x,
                                               const std::pair<const _Key, _Tp>& item)
@@ -29,14 +26,19 @@ std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>&
     return x;
 }
 
-template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc, typename T>
+template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
 std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>& x,
-                                              std::initializer_list<T> item)
+                                              std::initializer_list<std::pair<const _Key, _Tp> > item)
 {
     x.insert(item);
     return x;
 }
 
+/** general output for map.
+ * @param s the output stream
+ * @param x the map to be outputed
+ * @return s
+ */
 template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
 std::ostream& operator<<(std::ostream& s, const std::map<_Key, _Tp, _Cmp, _Alloc>& x)
 {
@@ -71,11 +73,11 @@ std::wostream& operator<<(std::wostream& s, const std::map<_Key, _Tp, _Cmp, _All
 
 /** a map extension implementing python's dict-like interfaces.
  */
-template <typename K, typename T, typename C=std::less<K>, typename A=smart_allocator<std::pair<K,T> > >
+template <typename K, typename T, typename C=std::less<K>, typename A=smart_allocator<std::pair<const K,T> > >
 class map_ : public std::map<K,T,C,A>{
 public:
     typedef std::map<K,T,C,A> baseT;
-    typedef std::pair<K,T> itemT;
+    typedef std::pair<const K,T> itemT;
 
 public:
     /** forwarding ctor.
@@ -85,7 +87,7 @@ public:
 
     /** initializer_list forwarding ctor.
      */
-    map_(std::initializer_list<T> a):baseT(a)
+    map_(std::initializer_list<itemT> a):baseT(a)
     {}
 
     /** copy ctor.
@@ -250,6 +252,8 @@ public:
         return this->insert(std::make_pair(key, T(dft...))).first->second;
     }
 
+    /** Update the map with the key/value pairs from other, overwriting existing keys.
+     */
     template<typename oT>
     void update(oT&& o)
     {
@@ -260,7 +264,8 @@ public:
 };
 
 /**
- * @example set.cpp
+ * @example map.cpp
+ * [TODO]
  */
 
 /** cast to proton::map_<>& from std::map<>&.
@@ -293,6 +298,26 @@ const map_<K,T,C,A>&& cast_(const std::map<K,T,C,A>&& x)
  * @}
  */
 
-}
+namespace detail{
+
+template<typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
+struct has_t<std::map<_Key, _Tp, _Cmp, _Alloc> >{
+    template<typename V> static bool result(const std::map<_Key, _Tp, _Cmp, _Alloc>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+template<typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
+struct has_t<map_<_Key, _Tp, _Cmp, _Alloc> >{
+    template<typename V> static bool result(const map_<_Key, _Tp, _Cmp, _Alloc>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+} // ns detail
+
+} // ns proton
 
 #endif // PROTON_MAP_HEADER

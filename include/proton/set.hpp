@@ -7,18 +7,6 @@
 
 namespace proton{
 
-namespace detail{
-
-template<typename T, typename C, typename allocT>
-struct has_t<std::set<T,C,allocT> >{
-    template<typename V> static bool result(const std::set<T,C,allocT>& x, V&& v)
-    {
-        return x.find(v)!=x.end();
-    }
-};
-
-} // ns detail
-
 /** @addtogroup set_
  * @{
  */
@@ -106,7 +94,7 @@ public:
 
     /** initializer_list forwarding ctor.
      */
-    set_(std::initializer_list<T> a):baseT(a)
+    set_(std::initializer_list<T> a):baseT(a.begin(),a.end())
     {}
 
     /** copy ctor.
@@ -225,6 +213,7 @@ public:
 
 /**
  * @example set.cpp
+ * [TODO]
  */
 
 /** &=
@@ -306,6 +295,26 @@ const set_<T,C,A>&& cast_(const std::set<T,C,A>&& x)
 /**
  * @}
  */
+
+namespace detail{
+
+template<typename T, typename C, typename allocT>
+struct has_t<std::set<T,C,allocT> >{
+    template<typename V> static bool result(const std::set<T,C,allocT>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+template<typename T, typename C, typename allocT>
+struct has_t<set_<T,C,allocT> >{
+    template<typename V> static bool result(const set_<T,C,allocT>& x, V&& v)
+    {
+        return x.find(v)!=x.end();
+    }
+};
+
+} // ns detail
 
 } // ns proton
 #endif // PROTON_SET_HEADER

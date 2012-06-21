@@ -62,6 +62,9 @@
 *  @defgroup deque_ deque_
 *  like list in python, better for long sequences.
 *
+*  @defgroup map_ map_
+*  like dict in python.
+*
 *  @defgroup set_ set_
 *  like set in python.
 *

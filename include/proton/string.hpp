@@ -720,4 +720,18 @@ typedef basic_string_<wchar_t> wstr;
 
 }
 
+namespace std{
+
+template<typename T, typename C, typename A>
+struct hash<proton::basic_string_<T,C,A> >{
+public:
+    typedef size_t     result_type;
+    typedef proton::basic_string_<T,C,A>      argument_type;
+    size_t operator()(const proton::basic_string_<T,C,A> &s) const noexcept
+    {
+        return std::hash<std::basic_string<T> >()(reinterpret_cast<const std::basic_string<T>&>(s));
+    }
+};
+
+} // ns std
 #endif // PROTON_STRING_HEADER

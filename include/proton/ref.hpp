@@ -383,12 +383,11 @@ public:
 
     /** conversion to baseT.
      */
-	template<typename baseT> operator baseT () const
+	template<typename baseT> operator ref_<baseT> () const
 	{
         PROTON_REF_LOG(9,"baseT()");
-		static_assert(std::is_class<typename baseT::proton_ref_self_t>(), "The target type is not a ref_ type");
-		static_assert(std::is_base_of<typename baseT::obj_t, obj_t>(), "The target type is not a base type of obj_t");
-		return baseT(alloc_inner, _rp, static_cast<typename baseT::obj_t*>(_p));
+		static_assert(std::is_base_of<baseT, obj_t>(), "The target type is not a base type of obj_t");
+		return ref_<baseT>(alloc_inner, _rp, static_cast<baseT*>(_p));
 	}
 
 public:
