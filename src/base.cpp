@@ -1,8 +1,7 @@
-#include "proton/base.hpp"
-#include "proton/detail/unit_test.hpp"
-#include <map>
-#include <list>
-#include <string>
+#include <proton/base.hpp>
+#include <proton/ref.hpp>
+#include <proton/detail/unit_test.hpp>
+#include <proton/getopt.hpp>
 
 using namespace std;
 
@@ -12,8 +11,8 @@ int debug_level = 0;
 bool log_console=true;
 int wait_on_err = 2;
 
-class init_alloc{} alloc;
-class init_alloc_inner{} alloc_inner;
+init_alloc alloc;
+init_alloc_inner alloc_inner;
 
 int detail::unittest_run(vector<unittest_t>& ut)
 {
@@ -54,23 +53,18 @@ int detail::unittest_run(vector<unittest_t>& ut)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// misc
-
-/**
- * return:
- *   int, 0-success, !0-error
- *
- */
-int getopt(map<char, string>& optlist, list<string>& arglist,
+// getopt
+#if 0
+int getopt(map_<str, str>& opts, vector_<str>& args,
            int argc, char* const argv[],
-           const string& optstr)
+           const str& optstr, const vector_<str>& longopt/*={}*/)
 {
     // parsing optstr to opt_dict
-    map<char, int> opt_dict;
-    char key;
+    map<str, int> opt_dict;
+    str key;
     long i, j, len=optstr.size();
     for(i=0; i < len; ++i){
-        key=optstr[i];
+        key="-"+str(optstr[i]);
         if(i<len-1 && optstr[i+1]==':'){
             opt_dict[key]=1;
             ++i;
@@ -78,15 +72,22 @@ int getopt(map<char, string>& optlist, list<string>& arglist,
         else
             opt_dict[key]=0;
     }
+    for(auto s : longopt){
+        if(s[-1]=='='){
+            opt_dict["--"+s(0,-1)]=1;
+        }
+        else
+            opt_dict["--"+s]=0;
+    }
 
-    optlist.clear();
-    arglist.clear();
+    opts.clear();
+    args.clear();
     for(i=1; i < argc; ++i){
         len=strlen(argv[i]);
         if(len==0)
             continue;
         else if(len==1 || argv[i][0]!='-'){
-            arglist.push_back(argv[i]);
+            args.push_back(argv[i]);
             continue;
         }
         else if(argv[i][1]=='-'){
@@ -100,11 +101,11 @@ int getopt(map<char, string>& optlist, list<string>& arglist,
                     return -1;
                 if(opt_dict[key]){// have parameter
                     if(j<len-1){
-                        optlist[key]=string(argv[i]+j+1);
+                        opts[key]=str(argv[i]+j+1);
                         break;
                     }
                     else if(i<argc-1){
-                        optlist[key]=string(argv[i+1]);
+                        opts[key]=str(argv[i+1]);
                         ++i;
                         break;
                     }
@@ -112,12 +113,12 @@ int getopt(map<char, string>& optlist, list<string>& arglist,
                         return -2;
                 }
                 else
-                    optlist.insert(make_pair(key, ""));
+                    opts.insert(make_pair(key, ""));
             }
         }
     }
     return 0;
 }
-
+#endif
 }; //namespace proton
 

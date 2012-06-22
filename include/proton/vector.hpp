@@ -12,8 +12,11 @@
 #include <iostream>
 #include <initializer_list>
 #include <algorithm>
-#include <proton/pool.hpp>
 #include <stdexcept>
+
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
+#include <proton/ref.hpp>
 
 namespace proton{
 

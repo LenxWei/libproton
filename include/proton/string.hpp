@@ -9,6 +9,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <stdexcept>
+#include <proton/base.hpp>
 #include <proton/pool.hpp>
 #include <proton/deque.hpp>
 
@@ -659,6 +660,17 @@ public:
 /**
  * @example string.cpp
  */
+
+/** const char* + str
+ */
+template<typename T, typename C, typename A>
+basic_string_<T,C,A> operator+(const T* s, const basic_string_<T,C,A>& t)
+{
+    basic_string_<T,C,A> r(s);
+    r.append(t);
+    return r;
+}
+
 
 /** string * n
  */

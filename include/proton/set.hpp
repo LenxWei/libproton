@@ -5,6 +5,10 @@
 #include <iterator>
 #include <iostream>
 
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
+#include <proton/ref.hpp>
+
 namespace proton{
 
 /** @addtogroup set_

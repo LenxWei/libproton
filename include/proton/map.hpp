@@ -4,6 +4,9 @@
 #include <map>
 #include <iostream>
 #include <stdexcept>
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
+#include <proton/ref.hpp>
 
 #include "_mapped_type.hpp"
 
