@@ -53,7 +53,7 @@ std::deque<T,A>& operator>>(std::deque<T,A>& x, V& val)
  * @return s
  */
 template <typename T, typename A>
-std::ostream& operator<<(std::ostream& s, std::deque<T,A>& x)
+std::ostream& operator<<(std::ostream& s, const std::deque<T,A>& x)
 {
     s << "[";
     bool first=true;
@@ -69,7 +69,7 @@ std::ostream& operator<<(std::ostream& s, std::deque<T,A>& x)
 }
 
 template <typename T, typename A>
-std::wostream& operator<<(std::wostream& s, std::deque<T,A>& x)
+std::wostream& operator<<(std::wostream& s, const std::deque<T,A>& x)
 {
     s << L"[";
     bool first=true;

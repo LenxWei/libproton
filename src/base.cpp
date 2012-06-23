@@ -54,17 +54,20 @@ int detail::unittest_run(vector<unittest_t>& ut)
 
 ////////////////////////////////////////////////////////////////////////////
 // getopt
-#if 0
-int getopt(map_<str, str>& opts, vector_<str>& args,
+
+std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
            int argc, char* const argv[],
            const str& optstr, const vector_<str>& longopt/*={}*/)
 {
     // parsing optstr to opt_dict
+    vector_<tuple<str,str> > opts;
+    vector_<str> args;
+
     map<str, int> opt_dict;
     str key;
     long i, j, len=optstr.size();
     for(i=0; i < len; ++i){
-        key="-"+str(optstr[i]);
+        key=str(1,optstr[i]);
         if(i<len-1 && optstr[i+1]==':'){
             opt_dict[key]=1;
             ++i;
@@ -74,51 +77,55 @@ int getopt(map_<str, str>& opts, vector_<str>& args,
     }
     for(auto s : longopt){
         if(s[-1]=='='){
-            opt_dict["--"+s(0,-1)]=1;
+            opt_dict["--"+s]=1;
         }
         else
             opt_dict["--"+s]=0;
     }
 
-    opts.clear();
-    args.clear();
+    bool hit_arg=false;
     for(i=1; i < argc; ++i){
         len=strlen(argv[i]);
         if(len==0)
             continue;
-        else if(len==1 || argv[i][0]!='-'){
-            args.push_back(argv[i]);
+        if(hit_arg){
+            args << argv[i];
             continue;
         }
-        else if(argv[i][1]=='-'){
+        if(len==1 || argv[i][0]!='-'){
+            args.push_back(argv[i]);
+            hit_arg=true;
+            continue;
+        }
+        if(argv[i][1]=='-'){
             //PROTON_LOG(0, "Long options are not supported yet!");
-            return -3;
+            continue;
         }
         else{
             for(j=1;j<len;++j){
                 key=argv[i][j];
                 if(opt_dict.find(key)==opt_dict.end())
-                    return -1;
+                    throw std::invalid_argument("unknown option");
                 if(opt_dict[key]){// have parameter
                     if(j<len-1){
-                        opts[key]=str(argv[i]+j+1);
+                        opts << _t(key,str(argv[i]+j+1));
                         break;
                     }
                     else if(i<argc-1){
-                        opts[key]=str(argv[i+1]);
+                        opts << _t(key,str(argv[i+1]));
                         ++i;
                         break;
                     }
                     else
-                        return -2;
+                        throw std::invalid_argument("unfinished option");
                 }
                 else
-                    opts.insert(make_pair(key, ""));
+                    opts << _t(key,"");
             }
         }
     }
-    return 0;
+    return _t(opts, args);
 }
-#endif
+
 }; //namespace proton
 

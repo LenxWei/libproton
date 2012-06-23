@@ -661,17 +661,6 @@ public:
  * @example string.cpp
  */
 
-/** const char* + str
- */
-template<typename T, typename C, typename A>
-basic_string_<T,C,A> operator+(const T* s, const basic_string_<T,C,A>& t)
-{
-    basic_string_<T,C,A> r(s);
-    r.append(t);
-    return r;
-}
-
-
 /** string * n
  */
 template<typename T, typename C, typename A>
