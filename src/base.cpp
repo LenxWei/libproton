@@ -99,7 +99,35 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
         }
         if(argv[i][1]=='-'){
             //PROTON_LOG(0, "Long options are not supported yet!");
-            continue;
+            str a(argv[i]);
+            int pos=a.find('=');
+            str k;
+            if(pos>0){
+                k=a(0,pos);
+            }
+            else
+                k=a;
+            if(!has(opt_dict,k)){
+                // try to determine the option
+            }
+            if(opt_dict[k]){
+                if(pos>0)
+                    opts << _t(k,a(pos+1));
+                else{
+                    if(i<argc-1){
+                        opts << _t(k,str(argv[i+1]));
+                        i++;
+                    }
+                    else{
+                        throw std::invalid_argument("incomplete option");
+                    }
+                }
+            }
+            else{
+                if(pos>0)
+                    throw std::invalid_argument("bad option");
+                opts << _t(k,str());
+            }
         }
         else{
             for(j=1;j<len;++j){
@@ -117,10 +145,10 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
                         break;
                     }
                     else
-                        throw std::invalid_argument("unfinished option");
+                        throw std::invalid_argument("incomplete option");
                 }
                 else
-                    opts << _t(key,"");
+                    opts << _t(key,str());
             }
         }
     }
