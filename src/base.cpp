@@ -118,6 +118,8 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
                         f=s.first;
                     }
                 }
+                if(!found)
+                    throw std::invalid_argument("unknown option");
                 k=f;
             }
             if(opt_dict[k]){
