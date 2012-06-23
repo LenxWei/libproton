@@ -108,7 +108,17 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
             else
                 k=a;
             if(!has(opt_dict,k)){
-                // try to determine the option
+                bool found=false;
+                str f;
+                for(auto s : opt_dict){
+                    if(s.first.startswith(k)){
+                        if(found)
+                            throw std::invalid_argument("ambiguous option");
+                        found=true;
+                        f=s.first;
+                    }
+                }
+                k=f;
             }
             if(opt_dict[k]){
                 if(pos>0)
