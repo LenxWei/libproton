@@ -68,10 +68,16 @@
 *  @defgroup set_ set_
 *  like set in python.
 *
+*  @defgroup tuple tuple
+*  like tuple in python.
+*
 * @}
 *
 * @defgroup util Utilities
 * @{
+*
+*  @defgroup getopt getopt
+*  get options
 *
 *  @defgroup debug Debug utilities
 *  Macros, global variables, classes for debug.

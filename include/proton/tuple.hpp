@@ -2,9 +2,9 @@
 #define PROTON_TUPLE_HEADER
 
 
-/** @file vector.hpp
- *  @brief vector support.
- *  Please include this header instead of \<vector\>.
+/** @file tuple.hpp
+ *  @brief tuple support.
+ *  Please include this header instead of \<tuple\>.
  */
 
 #include <tuple>
@@ -18,10 +18,6 @@
 #include <proton/base.hpp>
 
 namespace proton{
-
-/** @addtogroup tuple_
- * @{
- */
 
 namespace detail{
 // helper function to print a tuple of any size
@@ -142,6 +138,10 @@ struct sub<T,begin,1>{
 };
 
 } // ns detail
+
+/** @addtogroup tuple
+ * @{
+ */
 
 /** like x[index] in python
  */

@@ -9,7 +9,13 @@
 
 namespace proton{
 
-/** like getopt in python
+/** @addtogroup getopt
+ * @{
+ */
+
+/** like getopt in python.
+ * Note: the prototype above is wrong due to some bugs of doxygen,
+ * use the prototype in the function list (above the "detailed description" line).
  * @param argc    argc in main()
  * @param argv    argv in main()
  * @param optstr  the option string
@@ -20,6 +26,10 @@ namespace proton{
 std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
            int argc, char* const argv[],
            const str& optstr, const vector_<str>& longopt={});
+
+/**
+ * @}
+ */
 
 } // ns proton
 
