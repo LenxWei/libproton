@@ -13,6 +13,7 @@
 #include <initializer_list>
 #include <algorithm>
 #include <stdexcept>
+#include <limits>
 
 #include <proton/base.hpp>
 
@@ -48,14 +49,80 @@ struct output_tuple<T, 0> {
     }
 };
 
+constexpr long fix_index(long i, long size)
+{
+    return (i>size)?
+				size
+			:(
+				(i<0)?
+					(i+size < 0 ?
+						0
+					:
+						i+size
+					)
+				:
+					i
+			);
+}
+
+constexpr long sub_index(long i, long size)
+{
+    return (i>=size)?
+				size-1
+			:(
+				(i<0)?
+					(i+size < 0 ?
+						0
+					:
+						i+size
+					)
+				:
+					i
+			);
+}
+
+constexpr long get_index(long i, long size)
+{
+    return (i>=size)?
+				-1
+			:(
+				(i<0)?
+					(i+size < 0 ?
+						-1
+					:
+						i+size
+					)
+				:
+					i
+			);
+}
+
+template<long i, typename ...T>
+struct at_index{
+	static_assert(i>=0, "out of range");
+	const std::tuple<T...>* p;
+	typedef decltype(std::get<i>(*p)) type;
+};
+
+constexpr long fix_size(long begin, long end, long size)
+{
+	return fix_index(begin,size)>fix_index(end,size)?
+				0
+			:
+				fix_index(end,size)-fix_index(begin,size);
+}
+
 template<typename T, size_t begin, size_t size>
 struct sub{
 private:
 	static_assert(begin < std::tuple_size<T>::value, "out of range");
-	static_assert(begin+size <= std::tuple_size<T>::value, "out of range");
 
 	std::tuple<typename std::tuple_element<begin, T>::type> *p;
-	typedef typename sub<T, begin+1, size-1>::type next_types;
+	typedef typename sub<T, begin+1,
+						(begin+size > std::tuple_size<T>::value ?
+							(std::tuple_size<T>::value-begin-1)
+							: (size-1))
+						>::type next_types;
 	next_types* q;
 
 public:
@@ -76,27 +143,27 @@ struct sub<T,begin,1>{
 
 } // ns detail
 
-/** get a slice of tuple x[begin:end] in python.
- * @param begin must be constexpr determined during compile time
- * @param end  must be constexpr determined during compile time
+/** like x[index] in python
  */
-template<size_t begin, size_t end, typename ...T>
-typename detail::sub<std::tuple<T...>, begin, end-begin>::type
-	sub(const std::tuple<T...>& x)
+
+template<long index, typename ...T>
+typename detail::at_index<detail::get_index(index,sizeof...(T)),T...>::type
+	at(const std::tuple<T...>& x)
 {
-	typedef typename detail::sub<std::tuple<T...>, begin, end-begin>::type ret_t;
-	return ret_t(*(ret_t*)(&std::get<end-1>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
+	static_assert(detail::get_index(index,sizeof...(T))<sizeof...(T), "out of range");
+	return std::get<detail::get_index(index,sizeof...(T))>(x);
 }
 
-/** get a slice of tuple x[begin:] in python.
- * @param begin must be constexpr determined during compile time
+/** get a slice of tuple x[begin:end] in python
  */
-template<size_t begin, typename ...T>
-typename detail::sub<std::tuple<T...>, begin, sizeof...(T)-begin>::type
-	sub_to_end(const std::tuple<T...>& x)
+template<long begin, long end=std::numeric_limits<long>::max(), typename ...T>
+typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
+									   detail::fix_size(begin,end, sizeof...(T))>::type
+	sub(const std::tuple<T...>& x)
 {
-	typedef typename detail::sub<std::tuple<T...>, begin, sizeof...(T)-begin>::type ret_t;
-	return ret_t(*(ret_t*)(&std::get<sizeof...(T)-1>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
+	typedef typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
+									   detail::fix_size(begin,end, sizeof...(T))>::type ret_t;
+	return ret_t(*(ret_t*)(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
 }
 
 /** general output for tuple.
