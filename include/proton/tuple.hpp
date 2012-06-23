@@ -150,7 +150,6 @@ template<long index, typename ...T>
 typename detail::at_index<detail::get_index(index,sizeof...(T)),T...>::type
 	at(const std::tuple<T...>& x)
 {
-	static_assert(detail::get_index(index,sizeof...(T))<sizeof...(T), "out of range");
 	return std::get<detail::get_index(index,sizeof...(T))>(x);
 }
 
