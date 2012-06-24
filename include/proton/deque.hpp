@@ -12,8 +12,11 @@
 #include <iostream>
 #include <initializer_list>
 #include <algorithm>
-#include <proton/pool.hpp>
 #include <stdexcept>
+
+#include <proton/base.hpp>
+#include <proton/pool.hpp>
+#include <proton/ref.hpp>
 
 namespace proton{
 
@@ -199,6 +202,18 @@ protected:
         PROTON_THROW_IF(i<0 || (size_t)i>=this->size(), "out of range, offset is " << i
                          << " while size is " << this->size() );
         return i;
+    }
+
+    int fix_offset(offset_t begin)const
+    {
+        offset_t size=(offset_t)this->size();
+        begin=__offset(begin);
+        if(begin>=size){
+            return size;
+        }
+        if(begin<0)
+            return 0;
+        return begin;
     }
 
     void fix_range(offset_t& begin, offset_t& end)const

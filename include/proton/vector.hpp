@@ -204,6 +204,18 @@ protected:
         return i;
     }
 
+    int fix_offset(offset_t begin)const
+    {
+        offset_t size=(offset_t)this->size();
+        begin=__offset(begin);
+        if(begin>=size){
+            return size;
+        }
+        if(begin<0)
+            return 0;
+        return begin;
+    }
+
     void fix_range(offset_t& begin, offset_t& end)const
     {
         offset_t size=(offset_t)this->size();

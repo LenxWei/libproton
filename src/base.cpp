@@ -2,6 +2,7 @@
 #include <proton/ref.hpp>
 #include <proton/detail/unit_test.hpp>
 #include <proton/getopt.hpp>
+#include <proton/map.hpp>
 
 using namespace std;
 
@@ -76,8 +77,10 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
             opt_dict[key]=0;
     }
     for(auto s : longopt){
+        if(s.size()==0)
+            throw std::invalid_argument("meet an empty longopt string");
         if(s[-1]=='='){
-            opt_dict["--"+s]=1;
+            opt_dict["--"+s(0,-1)]=1;
         }
         else
             opt_dict["--"+s]=0;
@@ -85,6 +88,7 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
 
     bool hit_arg=false;
     for(i=1; i < argc; ++i){
+//        cout << "opt:" << argv[i] << endl;
         len=strlen(argv[i]);
         if(len==0)
             continue;
@@ -93,17 +97,18 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
             continue;
         }
         if(len==1 || argv[i][0]!='-'){
-            args.push_back(argv[i]);
+            args << argv[i];
             hit_arg=true;
             continue;
         }
         if(argv[i][1]=='-'){
-            //PROTON_LOG(0, "Long options are not supported yet!");
             str a(argv[i]);
             int pos=a.find('=');
             str k;
             if(pos>0){
                 k=a(0,pos);
+                if((size_t)pos+1==a.size())
+                    throw std::invalid_argument("incomplete long option:"+k);
             }
             else
                 k=a;
@@ -113,13 +118,13 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
                 for(auto s : opt_dict){
                     if(s.first.startswith(k)){
                         if(found)
-                            throw std::invalid_argument("ambiguous option");
+                            throw std::invalid_argument("ambiguous option:"+k);
                         found=true;
                         f=s.first;
                     }
                 }
                 if(!found)
-                    throw std::invalid_argument("unknown option");
+                    throw std::invalid_argument("unknown long option:"+k);
                 k=f;
             }
             if(opt_dict[k]){
@@ -131,13 +136,13 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
                         i++;
                     }
                     else{
-                        throw std::invalid_argument("incomplete option");
+                        throw std::invalid_argument("incomplete long option:"+k);
                     }
                 }
             }
             else{
                 if(pos>0)
-                    throw std::invalid_argument("bad option");
+                    throw std::invalid_argument("bad option with parameter:"+k);
                 opts << _t(k,str());
             }
         }
@@ -145,22 +150,22 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
             for(j=1;j<len;++j){
                 key=argv[i][j];
                 if(opt_dict.find(key)==opt_dict.end())
-                    throw std::invalid_argument("unknown option");
+                    throw std::invalid_argument("unknown short option: -"+key);
                 if(opt_dict[key]){// have parameter
                     if(j<len-1){
-                        opts << _t(key,str(argv[i]+j+1));
+                        opts << _t("-"+key,str(argv[i]+j+1));
                         break;
                     }
                     else if(i<argc-1){
-                        opts << _t(key,str(argv[i+1]));
+                        opts << _t("-"+key,str(argv[i+1]));
                         ++i;
                         break;
                     }
                     else
-                        throw std::invalid_argument("incomplete option");
+                        throw std::invalid_argument("incomplete short option: -"+key);
                 }
                 else
-                    opts << _t(key,str());
+                    opts << _t("-"+key,str());
             }
         }
     }

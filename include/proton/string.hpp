@@ -351,6 +351,18 @@ protected:
         return i;
     }
 
+    int fix_offset(offset_t begin)const
+    {
+        offset_t size=(offset_t)this->size();
+        begin=__offset(begin);
+        if(begin>=size){
+            return size;
+        }
+        if(begin<0)
+            return 0;
+        return begin;
+    }
+
     void fix_range(offset_t& begin, offset_t& end)const
     {
         offset_t size=(offset_t)this->size(); //[FIXME] size>2G in 32bit?
@@ -451,11 +463,19 @@ public:
         return r;
     }
 
-    /** cast to std::vector<>&.
+    /** cast to std::basic_string<>&.
      */
     operator baseT&()
     {
         return reinterpret_cast<baseT&>(*this);
+    }
+
+    /** cast to std::basic_string<>&.
+     */
+    template<typename A1>
+    operator std::basic_string<CharT,Traits,A1> ()const
+    {
+        return this->c_str();
     }
 
     /** [i] in python
@@ -477,7 +497,7 @@ public:
     basic_string_ operator()(offset_t i)const
     {
         auto begin=this->begin();
-        return basic_string_(begin+offset(i),this->end());
+        return basic_string_(begin+fix_offset(i),this->end());
     }
 
     /** slice of [i:j]
@@ -661,10 +681,21 @@ public:
  * @example string.cpp
  */
 
+/** const CharT* + str
+ */
+template<typename T, typename C, typename A>
+basic_string_<T,C,A> operator+(const T* s, basic_string_<T,C,A>& t)
+{
+    basic_string_<T,C,A> r(s);
+    r.append(t);
+    return r;
+}
+
+
 /** string * n
  */
 template<typename T, typename C, typename A>
-basic_string_<T,C,A> operator*(const std::basic_string<T,C,A>& s, size_t n)
+basic_string_<T,C,A> operator*(const basic_string_<T,C,A>& s, size_t n)
 {
     basic_string_<T,C,A> r;
     r.reserve(s.size()*n+1);
@@ -676,7 +707,7 @@ basic_string_<T,C,A> operator*(const std::basic_string<T,C,A>& s, size_t n)
 /** n * string
  */
 template<typename T, typename C, typename A>
-basic_string_<T,C,A> operator*(size_t n, const std::basic_string<T,C,A>& s)
+basic_string_<T,C,A> operator*(size_t n, const basic_string_<T,C,A>& s)
 {
     return s*n;
 }

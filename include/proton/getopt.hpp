@@ -1,7 +1,6 @@
 #ifndef PROTON_GETOPT_H
 #define PROTON_GETOPT_H
 
-#include <proton/map.hpp>
 #include <proton/vector.hpp>
 #include <proton/string.hpp>
 #include <proton/tuple.hpp>
@@ -28,6 +27,7 @@ std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
            const str& optstr, const vector_<str>& longopt={});
 
 /**
+ * @example getopt.cpp
  * @}
  */
 
