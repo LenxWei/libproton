@@ -1,24 +1,24 @@
-TESTS = func vector deque string getopt
-check_PROGRAMS = func vector deque string getopt
+TESTS = eg_func eg_vector eg_deque eg_string eg_getopt
+check_PROGRAMS = eg_func eg_vector eg_deque eg_string eg_getopt
 
-func_SOURCES = functor.cpp
-func_CXXFLAGS = $(BOOST_CPPFLAGS)
-func_LDADD = $(top_srcdir)/src/libproton.la
+eg_func_SOURCES = functor.cpp
+eg_func_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_func_LDADD = $(top_srcdir)/src/libproton.la
 
-string_SOURCES = string.cpp
-string_CXXFLAGS = $(BOOST_CPPFLAGS)
-string_LDADD = $(top_srcdir)/src/libproton.la
+eg_string_SOURCES = string.cpp
+eg_string_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_string_LDADD = $(top_srcdir)/src/libproton.la
 
-vector_SOURCES = vector.cpp
-vector_CXXFLAGS = $(BOOST_CPPFLAGS)
-vector_LDADD = $(top_srcdir)/src/libproton.la
+eg_vector_SOURCES = vector.cpp
+eg_vector_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_vector_LDADD = $(top_srcdir)/src/libproton.la
 
-deque_SOURCES = deque.cpp
-deque_CXXFLAGS = $(BOOST_CPPFLAGS)
-deque_LDADD = $(top_srcdir)/src/libproton.la
+eg_deque_SOURCES = deque.cpp
+eg_deque_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_deque_LDADD = $(top_srcdir)/src/libproton.la
 
-getopt_SOURCES = getopt.cpp
-getopt_CXXFLAGS = $(BOOST_CPPFLAGS)
-getopt_LDADD = $(top_srcdir)/src/libproton.la
+eg_getopt_SOURCES = getopt.cpp
+eg_getopt_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_getopt_LDADD = $(top_srcdir)/src/libproton.la
 
 INCLUDES = -I$(top_srcdir)/include
