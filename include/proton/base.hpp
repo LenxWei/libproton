@@ -192,6 +192,14 @@ template<typename T>struct has_t{
     }
 };
 
+template<typename T>struct len_t{
+//    typedef decltype(*(((T*)1)->begin())) item_t;
+    static size_t result(const T& x)
+    {
+        return x.size();
+    }
+};
+
 }
 
 /** @addtogroup seq
@@ -230,7 +238,7 @@ bool has(const T& x, V&& v)
 template<typename T>
 size_t len(const T& v)
 {
-    return v.size();
+    return detail::len_t<T>::result(v);
 }
 
 /**

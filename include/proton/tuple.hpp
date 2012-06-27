@@ -137,6 +137,15 @@ struct sub<T,begin,1>{
 	typedef std::tuple<typename std::tuple_element<begin,T>::type > type;
 };
 
+
+template<typename ...T>
+struct len_t<std::tuple<T...> >{
+    static size_t result(const std::tuple<T...>& x)
+    {
+        return sizeof...(T);
+    }
+};
+
 } // ns detail
 
 /** @addtogroup tuple
@@ -162,7 +171,7 @@ typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 {
 	typedef typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 									   detail::fix_size(begin,end, sizeof...(T))>::type ret_t;
-	return ret_t(*(ret_t*)(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
+	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
 }
 
 /** general output for tuple.
@@ -233,6 +242,7 @@ vector_<T,A> operator*(size_t n, const std::vector<T,A>& s)
 #endif
 
 /**
+ * @example tuple.cpp
  * @}
  */
 }

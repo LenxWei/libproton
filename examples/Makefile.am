@@ -1,5 +1,5 @@
-TESTS = eg_func eg_vector eg_deque eg_string eg_getopt
-check_PROGRAMS = eg_func eg_vector eg_deque eg_string eg_getopt
+TESTS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple
+check_PROGRAMS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple
 
 eg_func_SOURCES = functor.cpp
 eg_func_CXXFLAGS = $(BOOST_CPPFLAGS)
@@ -20,5 +20,9 @@ eg_deque_LDADD = $(top_srcdir)/src/libproton.la
 eg_getopt_SOURCES = getopt.cpp
 eg_getopt_CXXFLAGS = $(BOOST_CPPFLAGS)
 eg_getopt_LDADD = $(top_srcdir)/src/libproton.la
+
+eg_tuple_SOURCES = tuple.cpp
+eg_tuple_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_tuple_LDADD = $(top_srcdir)/src/libproton.la
 
 INCLUDES = -I$(top_srcdir)/include

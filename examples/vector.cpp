@@ -26,13 +26,13 @@ int main()
     PROTON_THROW_IF(len(slice)!=2, "slice with step err");
 
     slice=slice*2;
-    PROTON_THROW_IF(len(slice)!=4, "slice with step err");
+    PROTON_THROW_IF(len(slice)!=4, "slice*2 err");
 
     slice=2*slice;
-    PROTON_THROW_IF(len(slice)!=8, "slice with step err");
+    PROTON_THROW_IF(len(slice)!=8, "2*slice err");
 
     slice=slice+s;
-    PROTON_THROW_IF(len(slice)!=11, "slice with step err");
+    PROTON_THROW_IF(len(slice)!=11, "slice + s err");
 
     s.append("b");
 
@@ -46,7 +46,7 @@ int main()
     PROTON_THROW_IF(i!=2, "index err");
 
     s.insert(-1,"x");
-    PROTON_THROW_IF(s.index("x")!=long(s.size()-2), "index err");
+    PROTON_THROW_IF(s.index("x")!=long(s.size()-2), "insert err");
 
     string k=s.pop();
     k=s.pop();
@@ -59,26 +59,26 @@ int main()
     string r=s[-2];
     s.reverse();
     cout << "reversed vector is :" << s << endl;
-    PROTON_THROW_IF(s[1]!=r, "remove err");
+    PROTON_THROW_IF(s[1]!=r, "reverse err");
 
     s.sort();
     cout << "sorted vector is :" << s << endl;
-    PROTON_THROW_IF(s[0]!="a", "remove err");
+    PROTON_THROW_IF(s[0]!="a", "sort err");
 
     cout << "min is :" << min(s) << endl;
-    PROTON_THROW_IF(min(s)!="a", "remove err");
+    PROTON_THROW_IF(min(s)!="a", "min err");
 
     cout << "max is :" << max(s) << endl;
-    PROTON_THROW_IF(max(s)!="c", "remove err");
+    PROTON_THROW_IF(max(s)!="c", "max err");
 
     s.del(-1);
-    PROTON_THROW_IF(max(s)!="b", "remove err");
+    PROTON_THROW_IF(max(s)!="b", "del err");
 
     s.del(1,-1);
-    PROTON_THROW_IF(min(s)!="a", "remove err");
+    PROTON_THROW_IF(min(s)!="a", "del range err");
 
     s.del_to_end(1);
-    PROTON_THROW_IF(min(s)!="a", "remove err");
+    PROTON_THROW_IF(min(s)!="a", "del_to_end err");
 
     return 0;
 }
