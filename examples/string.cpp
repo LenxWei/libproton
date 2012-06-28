@@ -84,6 +84,15 @@ void wstr_eg()
     wcout << L"strip of '" << c << L"' is " ;
     wcout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!=L"abc", "strip error");
+
+    output(wcout, L"%d %s %o %% %x %X\n", 1,L"abc",10, 15,15);
+    try{
+        output(wcout, L"%d %d %o %% %x %X\n", 1,L"abc",10, 15,15);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cout << e.what() << endl;
+    }
 }
 
 int main()

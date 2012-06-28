@@ -5,12 +5,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <string.h>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <stdexcept>
 #include <cstring>
 #include <cwchar>
+#include <type_traits>
 #include <proton/base.hpp>
 #include <proton/pool.hpp>
 #include <proton/deque.hpp>
@@ -363,7 +363,7 @@ template<typename C, typename T, typename ...V>
 struct format_t;
 
 template<typename C, typename T>
-struct format_t<C,T>{
+struct format_t<C,T,void>{
     static void output(std::basic_ostream<C,T>& o, const C* & f)
     {
         while(1){
@@ -390,7 +390,7 @@ struct format_t<C,T>{
 };
 
 template<typename C, typename T, typename V, typename ...W>
-struct format_t<C,T,V,W...>{
+struct format_t<C,T,typename std::enable_if<std::is_integral<V>::value, void>::type, V,W...>{
     static void output(const V& a, const W& ...w, std::basic_ostream<C,T>& o, const C* & f)
     {
         while(1){
@@ -406,38 +406,54 @@ struct format_t<C,T,V,W...>{
                     o << vals<C>::per;
                     f=p+2;
                     continue;
+                case *vals<C>::s:
                 case *vals<C>::d:
-                    o << std::dec << long(a);
-                    f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
-                    return;
                 case *vals<C>::u:
-                    o << std::dec << (unsigned long)(a);
-                    f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
-                    return;
+                    o << std::dec << a;
+                    break;
                 case *vals<C>::o:
-                    o << std::oct << (unsigned long)(a);
-                    f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
-                    return;
+                    o << std::oct << a;
+                    break;
                 case *vals<C>::x:
-                    o << std::hex << std::nouppercase << (unsigned long)(a);
-                    f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
-                    return;
+                    o << std::hex << std::nouppercase << a;
+                    break;
                 case *vals<C>::X:
-                    o << std::hex << std::uppercase << (unsigned long)(a);
+                    o << std::hex << std::uppercase << a;
+                    break;
+                default:
+                    throw std::invalid_argument("unsupported format character");
+            }//switch
+            f=p+2;
+            format_t<C,T,void,W...>::output(w...,o,f);
+            return;
+        }//while
+    }
+};
+
+template<typename C, typename T, typename V, typename ...W>
+struct format_t<C,T,typename std::enable_if<!std::is_integral<V>::value, void>::type,V,W...>{
+    static void output(const V& a, const W& ...w, std::basic_ostream<C,T>& o, const C* & f)
+    {
+        while(1){
+            const C* p=vals<C>::find(f, *vals<C>::per);
+            if(!p)
+                throw std::invalid_argument("not all arguments converted during formatting"
+                                            );
+            o.write(f, p-f);
+            switch(*(p+1)){
+                case 0:
+                    throw std::invalid_argument("incomplete format");
+                case *vals<C>::per:
+                    o << vals<C>::per;
                     f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
-                    return;
+                    continue;
                 case *vals<C>::s:
                     o << a;
                     f=p+2;
-                    format_t<C,T,W...>::output(w...,o,f);
+                    format_t<C,T,void,W...>::output(w...,o,f);
                     return;
                 default:
-                    throw std::invalid_argument("unsupported format character");
+                    throw std::invalid_argument("bad format character");
             }//switch
         }//while
     }
@@ -454,7 +470,7 @@ basic_string_<C,T,A> str_format(const C* f, const V& a);
 template<typename C, typename T=std::char_traits<C>, typename ...V>
     void output(std::basic_ostream<C,T>& s, const C* f, const V&... v)
 {
-    detail::format_t<C,T,V...>::output(v...,s, f);
+    detail::format_t<C,T,void,V...>::output(v...,s, f);
 }
 
 
