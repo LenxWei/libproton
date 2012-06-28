@@ -214,9 +214,9 @@ auto operator+(std::tuple<T1...>&& x, T2&& y) -> decltype(std::tuple_cat(x,y))
 /** eq to make_tuple
  */
 template<typename ...T>
-auto _t(T&& ...x) -> decltype(make_tuple(x...))
+auto _t(T&& ...x) -> decltype(std::make_tuple(x...))
 {
-	return make_tuple(x...);
+	return std::make_tuple(x...);
 }
 
 #if 0

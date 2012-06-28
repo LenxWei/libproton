@@ -9,6 +9,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <stdexcept>
+#include <cstring>
+#include <cwchar>
 #include <proton/base.hpp>
 #include <proton/pool.hpp>
 #include <proton/deque.hpp>
@@ -256,7 +258,8 @@ template<typename string>string readline(std::istream& f, char delim='\n')
     end=f.tellg();
     if(end-start>(long)r.length()){
         char a[2]={delim,0};
-        return r+a;
+        r.append(a);
+        return r;
     }
     else
         return r;
@@ -315,21 +318,152 @@ namespace detail{
         static constexpr const char* nil="";
         static constexpr const char* spc=" ";
         static constexpr const char* ws=" \t\r\n";
+        static constexpr const char* per="%";
+        static constexpr const char* d="d";
+        static constexpr const char* u="u";
+        static constexpr const char* o="o";
+        static constexpr const char* x="x";
+        static constexpr const char* X="X";
+        static constexpr const char* s="s";
+
+        static const char* find(const char* s, char x)
+        {
+            return std::strchr(s, x);
+        }
     };
 
     template<> struct vals<wchar_t>{
         static constexpr const wchar_t* nil=L"";
         static constexpr const wchar_t* spc=L" ";
         static constexpr const wchar_t* ws=L" \t\r\n";
+        static constexpr const wchar_t* per=L"%";
+        static constexpr const wchar_t* d=L"d";
+        static constexpr const wchar_t* u=L"u";
+        static constexpr const wchar_t* o=L"o";
+        static constexpr const wchar_t* x=L"x";
+        static constexpr const wchar_t* X=L"X";
+        static constexpr const wchar_t* s=L"s";
+
+        static const wchar_t* find(const wchar_t* s, wchar_t x)
+        {
+            return std::wcschr(s,x);
+        }
     };
 }
+
+template<
+    class CharT,
+    class Traits = std::char_traits<CharT>,
+    class Allocator = smart_allocator<CharT>
+> class basic_string_;
+
+namespace detail{
+
+template<typename C, typename T, typename ...V>
+struct format_t;
+
+template<typename C, typename T>
+struct format_t<C,T>{
+    static void output(std::basic_ostream<C,T>& o, const C* & f)
+    {
+        while(1){
+            const C* p=vals<C>::find(f, *vals<C>::per);
+            if(p){
+                switch(*(p+1)){
+                case 0:
+                    throw std::invalid_argument("incomplete format");
+                case *vals<C>::per:
+                    o.write(f, p-f+1);
+                    f=p+2;
+                    continue;
+                default:
+                    throw std::invalid_argument("not enough arguments for format");
+                }//switch
+            }
+            else{
+                o << f;
+                f=NULL;
+                return;
+            }
+        }
+    }
+};
+
+template<typename C, typename T, typename V, typename ...W>
+struct format_t<C,T,V,W...>{
+    static void output(const V& a, const W& ...w, std::basic_ostream<C,T>& o, const C* & f)
+    {
+        while(1){
+            const C* p=vals<C>::find(f, *vals<C>::per);
+            if(!p)
+                throw std::invalid_argument("not all arguments converted during formatting"
+                                            );
+            o.write(f, p-f);
+            switch(*(p+1)){
+                case 0:
+                    throw std::invalid_argument("incomplete format");
+                case *vals<C>::per:
+                    o << vals<C>::per;
+                    f=p+2;
+                    continue;
+                case *vals<C>::d:
+                    o << std::dec << long(a);
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                case *vals<C>::u:
+                    o << std::dec << (unsigned long)(a);
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                case *vals<C>::o:
+                    o << std::oct << (unsigned long)(a);
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                case *vals<C>::x:
+                    o << std::hex << std::nouppercase << (unsigned long)(a);
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                case *vals<C>::X:
+                    o << std::hex << std::uppercase << (unsigned long)(a);
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                case *vals<C>::s:
+                    o << a;
+                    f=p+2;
+                    format_t<C,T,W...>::output(w...,o,f);
+                    return;
+                default:
+                    throw std::invalid_argument("unsupported format character");
+            }//switch
+        }//while
+    }
+};
+
+template<typename C, typename T=std::char_traits<C>, typename A=smart_allocator<C>,
+        typename V>
+basic_string_<C,T,A> str_format(const C* f, const V& a);
+
+} // ns detail
+
+/** format output.
+ */
+template<typename C, typename T=std::char_traits<C>, typename ...V>
+    void output(std::basic_ostream<C,T>& s, const C* f, const V&... v)
+{
+    detail::format_t<C,T,V...>::output(v...,s, f);
+}
+
 
 /** main string template
  */
 template<
     class CharT,
-    class Traits = std::char_traits<CharT>,
-    class Allocator = smart_allocator<CharT>
+    class Traits,
+    class Allocator
 >
 class basic_string_ : public std::basic_string<CharT,Traits,Allocator> {
 public:
@@ -461,6 +595,14 @@ public:
         basic_string_ r(*this);
         r.append(a);
         return r;
+    }
+
+    /** string % V
+     */
+    template<typename V>
+    basic_string_ operator%(const V& a)
+    {
+        return detail::str_format<CharT, Traits, Allocator>(this->c_str(), a);
     }
 
     /** cast to std::basic_string<>&.
@@ -690,7 +832,6 @@ basic_string_<T,C,A> operator+(const T* s, basic_string_<T,C,A>& t)
     r.append(t);
     return r;
 }
-
 
 /** string * n
  */

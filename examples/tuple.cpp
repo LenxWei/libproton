@@ -11,7 +11,6 @@ int main()
     cout << ">>> tuple examples :" << endl;
 
     tuple<str,str,str> s("a","b","c");
-    tuple<str,str> t("b","a");
 
     cout << "s is " << s << endl;
     cout << "last item is :" << at<-1>(s) << endl;
@@ -28,6 +27,9 @@ int main()
     auto slice2=slice1+s;
     cout << "s[1:-1]+s is " << slice2 << endl;
     PROTON_THROW_IF(len(slice2)!=4, "slice with step err");
+
+    tuple<int,int,int,int,int> t(0,1,2,3,4);
+    PROTON_THROW_IF((sub<1,3>(t)!=_t(1,2)),"bad sub");
 
 /*
     cout << "min is :" << min(s) << endl;

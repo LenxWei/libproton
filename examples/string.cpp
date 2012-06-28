@@ -43,6 +43,8 @@ void str_eg()
     cout << "strip of '" << c << "' is " ;
     cout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!="abc", "strip error");
+
+    output(cout, "%d %s %o %% %x %X\n", 1,"abc",10, 15,15);
 }
 
 void wstr_eg()
