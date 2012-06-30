@@ -45,15 +45,23 @@ void str_eg()
     cout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!="abc", "strip error");
 
-    cout << str("%d %%\n") % 15;
-    cout << str("%f %%\n") % 15.1;
-    cout << "%%%s" % str("abc") << endl;
-    cout << "%d %d" % _t(1,2) << endl;
+    cout << str("%% to show a number: %d\n") % 15;
+    cout << str("%% to show a float: %f\n") % 15.1;
+    cout << "%% to show a str: %s\n" % str("abc");
+    cout << "%% to show a tuple: (%d,%d)\n" % _t(1,2);
 
     int k=10;
-    cout << "%s %f %X" % _f(c,1.1,k) << endl;
+    cout << "%% to show a forwarded tuple: (%s,%f,%X)" % _f(c,1.1,k) << endl;
+
     try{
         cout << str("%d %d %o %% %x %X\n") % 1;
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cout << e.what() << endl;
+    }
+    try{
+        cout << str("%d %d %o %% %x %X\n") % _t(1,2,3);
     }
     catch(const std::invalid_argument& e)
     {
@@ -116,5 +124,6 @@ int main()
 {
     str_eg();
     wstr_eg();
+    return 0;
 }
 
