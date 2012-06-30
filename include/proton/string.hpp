@@ -14,6 +14,7 @@
 #include <proton/base.hpp>
 #include <proton/pool.hpp>
 #include <proton/deque.hpp>
+#include <proton/tuple.hpp>
 
 namespace proton{
 
@@ -320,6 +321,7 @@ namespace detail{
         static constexpr const char* ws=" \t\r\n";
         static constexpr const char* per="%";
         static constexpr const char* d="d";
+        static constexpr const char* f="f";
         static constexpr const char* u="u";
         static constexpr const char* o="o";
         static constexpr const char* x="x";
@@ -338,6 +340,7 @@ namespace detail{
         static constexpr const wchar_t* ws=L" \t\r\n";
         static constexpr const wchar_t* per=L"%";
         static constexpr const wchar_t* d=L"d";
+        static constexpr const wchar_t* f=L"f";
         static constexpr const wchar_t* u=L"u";
         static constexpr const wchar_t* o=L"o";
         static constexpr const wchar_t* x=L"x";
@@ -359,120 +362,191 @@ template<
 
 namespace detail{
 
-template<typename C, typename T, typename ...V>
-struct format_t;
-
 template<typename C, typename T>
-struct format_t<C,T,void>{
-    static void output(std::basic_ostream<C,T>& o, const C* & f)
-    {
-        while(1){
-            const C* p=vals<C>::find(f, *vals<C>::per);
-            if(p){
-                switch(*(p+1)){
-                case 0:
-                    throw std::invalid_argument("incomplete format");
-                case *vals<C>::per:
-                    o.write(f, p-f+1);
-                    f=p+2;
-                    continue;
-                default:
-                    throw std::invalid_argument("not enough arguments for format");
-                }//switch
-            }
-            else{
-                o << f;
-                f=NULL;
+void output_prefix(std::basic_ostream<C,T>& o, const C*& f)
+{
+    if(f==NULL)
+        return;
+    while(1){
+        const C* p=vals<C>::find(f, *vals<C>::per);
+        if(p){
+            switch(*(p+1)){
+            case 0:
+                throw std::invalid_argument("incomplete format");
+            case *vals<C>::per:
+                o.write(f, p-f+1);
+                f=p+2;
+                continue;
+            default:
+                o.write(f,p-f);
+                f=p+1;
                 return;
-            }
+            }//switch
+        }
+        else{
+            o << f;
+            f=NULL;
+            return;
         }
     }
-};
-
-template<typename C, typename T, typename V, typename ...W>
-struct format_t<C,T,typename std::enable_if<std::is_integral<V>::value, void>::type, V,W...>{
-    static void output(const V& a, const W& ...w, std::basic_ostream<C,T>& o, const C* & f)
-    {
-        while(1){
-            const C* p=vals<C>::find(f, *vals<C>::per);
-            if(!p)
-                throw std::invalid_argument("not all arguments converted during formatting"
-                                            );
-            o.write(f, p-f);
-            switch(*(p+1)){
-                case 0:
-                    throw std::invalid_argument("incomplete format");
-                case *vals<C>::per:
-                    o << vals<C>::per;
-                    f=p+2;
-                    continue;
-                case *vals<C>::s:
-                case *vals<C>::d:
-                case *vals<C>::u:
-                    o << std::dec << a;
-                    break;
-                case *vals<C>::o:
-                    o << std::oct << a;
-                    break;
-                case *vals<C>::x:
-                    o << std::hex << std::nouppercase << a;
-                    break;
-                case *vals<C>::X:
-                    o << std::hex << std::uppercase << a;
-                    break;
-                default:
-                    throw std::invalid_argument("unsupported format character");
-            }//switch
-            f=p+2;
-            format_t<C,T,void,W...>::output(w...,o,f);
-            return;
-        }//while
-    }
-};
-
-template<typename C, typename T, typename V, typename ...W>
-struct format_t<C,T,typename std::enable_if<!std::is_integral<V>::value, void>::type,V,W...>{
-    static void output(const V& a, const W& ...w, std::basic_ostream<C,T>& o, const C* & f)
-    {
-        while(1){
-            const C* p=vals<C>::find(f, *vals<C>::per);
-            if(!p)
-                throw std::invalid_argument("not all arguments converted during formatting"
-                                            );
-            o.write(f, p-f);
-            switch(*(p+1)){
-                case 0:
-                    throw std::invalid_argument("incomplete format");
-                case *vals<C>::per:
-                    o << vals<C>::per;
-                    f=p+2;
-                    continue;
-                case *vals<C>::s:
-                    o << a;
-                    f=p+2;
-                    format_t<C,T,void,W...>::output(w...,o,f);
-                    return;
-                default:
-                    throw std::invalid_argument("bad format character");
-            }//switch
-        }//while
-    }
-};
-
-template<typename C, typename T=std::char_traits<C>, typename A=smart_allocator<C>,
-        typename V>
-basic_string_<C,T,A> str_format(const C* f, const V& a);
-
-} // ns detail
-
-/** format output.
- */
-template<typename C, typename T=std::char_traits<C>, typename ...V>
-    void output(std::basic_ostream<C,T>& s, const C* f, const V&... v)
-{
-    detail::format_t<C,T,void,V...>::output(v...,s, f);
 }
 
+template<typename C, typename T, typename V, typename X>
+struct format_t;
+
+template<typename C, typename T, typename V>
+struct format_t<C,T,V,typename std::enable_if<std::is_integral<V>::value, void>::type>
+{
+    static void output(std::basic_ostream<C,T>& o, const C* & f, V a)
+    {
+        bool printed=false;
+        output_prefix(o,f);
+        if(f==NULL)
+            throw std::invalid_argument("not all arguments converted during formatting");
+        switch(*(f)){
+            case *vals<C>::s:
+            case *vals<C>::f:
+            case *vals<C>::d:
+            case *vals<C>::u:
+                o << std::dec << a;
+                break;
+            case *vals<C>::o:
+                o << std::oct << a;
+                break;
+            case *vals<C>::x:
+                o << std::hex << std::nouppercase << a;
+                break;
+            case *vals<C>::X:
+                o << std::hex << std::uppercase << a;
+                break;
+            default:
+                throw std::invalid_argument("unsupported format character");
+        }//inner switch
+        f++;
+    }
+};
+
+template<typename C, typename T, typename V>
+struct format_t<C,T,V,typename std::enable_if<std::is_floating_point<V>::value, void>::type>
+{
+    static void output(std::basic_ostream<C,T>& o, const C* & f, V a)
+    {
+        bool printed=false;
+        output_prefix(o,f);
+        if(f==NULL)
+            throw std::invalid_argument("not all arguments converted during formatting");
+        switch(*(f)){
+            case *vals<C>::s:
+            case *vals<C>::f:
+                o << std::dec << a;
+                break;
+            case *vals<C>::d:
+            case *vals<C>::u:
+                o << std::dec << (long long)(a);
+                break;
+            case *vals<C>::o:
+                o << std::oct << (long long)(a);
+                break;
+            case *vals<C>::x:
+                o << std::hex << std::nouppercase << (long long)(a);
+                break;
+            case *vals<C>::X:
+                o << std::hex << std::uppercase << (long long)(a);
+                break;
+            default:
+                throw std::invalid_argument("unsupported format character");
+        }//inner switch
+        f++;
+    }
+};
+
+
+template<typename C, typename T, typename V>
+struct format_t<C,T,V,typename std::enable_if<!(std::is_floating_point<V>::value ||
+                                                std::is_integral<V>::value), void>::type>{
+    static void output(std::basic_ostream<C,T>& o, const C* & f, const V& a)
+    {
+        bool printed=false;
+        output_prefix(o,f);
+        if(f==NULL)
+            throw std::invalid_argument("not all arguments converted during formatting");
+        switch(*(f)){
+            case *vals<C>::s:
+                o << a;
+                break;
+            case *vals<C>::d:
+            case *vals<C>::u:
+            case *vals<C>::o:
+            case *vals<C>::x:
+            case *vals<C>::X:
+                throw std::invalid_argument("a number is required");
+            default:
+                throw std::invalid_argument("unsupported format character");
+        }//inner switch
+        f++;
+    }
+};
+
+template<typename C, typename T, typename V>
+struct format_output_t{
+    static void output(std::basic_ostream<C,T>& s, const C* f, const V& v)
+    {
+        format_t<C,T,V,void>::output(s, f, v);
+        output_prefix(s, f);
+        if(f)
+            throw std::invalid_argument("not enough arguments for format");
+    }
+};
+
+template<typename C, typename T, typename A, typename V>
+    basic_string_<C,T,A> str_format(const C* f, const V& v)
+{
+    std::basic_ostringstream<C,T,A> o;
+    format_output_t<C,T,V>::output(o, f, v);
+    return o.str();
+}
+
+// helper function to format a tuple of any size
+template<typename C, typename T, typename V, std::size_t I>
+struct format_tuple {
+    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    {
+        format_tuple<C, T, V, I-1>::output(s, f, t);
+        typedef decltype(std::get<I-1>(t)) N;
+        typedef typename std::remove_reference<N>::type N1;
+        format_t<C,T,N1,void>::output(s, f, std::get<I-1>(t));
+    }
+};
+
+template<typename C, typename T, typename V>
+struct format_tuple<C, T, V, 1> {
+    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    {
+        typedef decltype(std::get<0>(t)) N;
+        typedef typename std::remove_reference<N>::type N1;
+        format_t<C,T,N1,void>::output(s, f, std::get<0>(t));
+    }
+};
+
+template<typename C, typename T, typename V>
+struct format_tuple<C, T, V, 0> {
+    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    {
+    }
+};
+
+template<typename C, typename T, typename ...V>
+struct format_output_t<C,T,std::tuple<V...> >{
+    static void output(std::basic_ostream<C,T>& s, const C* f, const std::tuple<V...> & t)
+    {
+        format_tuple<C, T, const std::tuple<V...> &, sizeof...(V) >::output(s,f,t);
+        detail::output_prefix(s, f);
+        if(f)
+            throw std::invalid_argument("not enough arguments for format");
+    }
+};
+
+} //ns detail
 
 /** main string template
  */
@@ -839,6 +913,15 @@ public:
  * @example string.cpp
  */
 
+/** the main string type in proton.
+ */
+typedef basic_string_<char> str;
+
+/** the main wstring type in proton.
+ */
+typedef basic_string_<wchar_t> wstr;
+
+
 /** const CharT* + str
  */
 template<typename T, typename C, typename A>
@@ -847,6 +930,14 @@ basic_string_<T,C,A> operator+(const T* s, basic_string_<T,C,A>& t)
     basic_string_<T,C,A> r(s);
     r.append(t);
     return r;
+}
+
+/** const CharT* % V
+ */
+template<typename C, typename V>
+basic_string_<C,std::char_traits<C>,smart_allocator<C> > operator%(const C* f, const V& a)
+{
+    return detail::str_format<C, std::char_traits<C>, smart_allocator<C> >(f, a);
 }
 
 /** string * n
@@ -894,14 +985,6 @@ const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&& x)
 {
     return reinterpret_cast<const basic_string_<T,C,A>&&>(x);
 }
-
-/** the main string type in proton.
- */
-typedef basic_string_<char> str;
-
-/** the main wstring type in proton.
- */
-typedef basic_string_<wchar_t> wstr;
 
 /**
  * @}

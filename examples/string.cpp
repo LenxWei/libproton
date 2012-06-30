@@ -2,6 +2,7 @@
 #include <proton/ref.hpp>
 #include <proton/deque.hpp>
 #include <proton/string.hpp>
+#include <proton/tuple.hpp>
 
 using namespace std;
 using namespace proton;
@@ -44,7 +45,18 @@ void str_eg()
     cout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!="abc", "strip error");
 
-    output(cout, "%d %s %o %% %x %X\n", 1,"abc",10, 15,15);
+    cout << str("%d %%\n") % 15;
+    cout << str("%f %%\n") % 15.1;
+    cout << "%%%s" % str("abc") << endl;
+    cout << "%d %d" % _t(1,2) << endl;
+    cout << "%s %f %X" % _t("abc",1.1, 12) << endl;
+    try{
+        cout << str("%d %d %o %% %x %X\n") % 1;
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cout << e.what() << endl;
+    }
 }
 
 void wstr_eg()
@@ -85,9 +97,12 @@ void wstr_eg()
     wcout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!=L"abc", "strip error");
 
-    output(wcout, L"%d %s %o %% %x %X\n", 1,L"abc",10, 15,15);
+    wcout << wstr(L"%d %%\n") % 15;
+    wcout << wstr(L"%f %%\n") % 15.1;
+    wcout << L"%%%s" % wstr(L"abc") << endl;
+    wcout << L"%s %f %X" % _t(L"abc",1.1, 12) << endl;
     try{
-        output(wcout, L"%d %d %o %% %x %X\n", 1,L"abc",10, 15,15);
+        wcout << wstr(L"%d %d %o %% %x %X\n") % 1;
     }
     catch(const std::invalid_argument& e)
     {

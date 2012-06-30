@@ -20,6 +20,7 @@
 namespace proton{
 
 namespace detail{
+
 // helper function to print a tuple of any size
 template<typename T, std::size_t I>
 struct output_tuple {
