@@ -220,6 +220,14 @@ auto _t(T&& ...x) -> decltype(std::make_tuple(x...))
 	return std::make_tuple(x...);
 }
 
+/** eq to forward_as_tuple
+ */
+template<typename ...T>
+auto _f(T&& ...x) -> decltype(std::forward_as_tuple(x...))
+{
+	return std::forward_as_tuple(x...);
+}
+
 #if 0
 /* vector_ * n
  */

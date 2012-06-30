@@ -49,7 +49,9 @@ void str_eg()
     cout << str("%f %%\n") % 15.1;
     cout << "%%%s" % str("abc") << endl;
     cout << "%d %d" % _t(1,2) << endl;
-    cout << "%s %f %X" % _t("abc",1.1, 12) << endl;
+
+    int k=10;
+    cout << "%s %f %X" % _f(c,1.1,k) << endl;
     try{
         cout << str("%d %d %o %% %x %X\n") % 1;
     }
