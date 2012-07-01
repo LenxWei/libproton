@@ -58,13 +58,39 @@ void str_eg()
     }
     catch(const std::invalid_argument& e)
     {
+        // catch more formats
         cout << e.what() << endl;
     }
     try{
-        cout << str("%d %d %o %% %x %X\n") % _t(1,2,3);
+        cout << "%d %d %o %% %x %X\n" % _f(1,2,3);
     }
     catch(const std::invalid_argument& e)
     {
+        // catch more formats for tuple
+        cout << e.what() << endl;
+    }
+    try{
+        cout << "%d %d" % _f(1,2,3);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch extra parameters
+        cout << e.what() << endl;
+    }
+    try{
+        cout << "%d %d" % _f("abc",2);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch bad type
+        cout << e.what() << endl;
+    }
+    try{
+        cout << "%t %d" % _f("abc",2);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch bad type
         cout << e.what() << endl;
     }
 }
@@ -107,15 +133,53 @@ void wstr_eg()
     wcout << c.strip() << endl;
     PROTON_THROW_IF(c.strip()!=L"abc", "strip error");
 
-    wcout << wstr(L"%d %%\n") % 15;
-    wcout << wstr(L"%f %%\n") % 15.1;
-    wcout << L"%%%s" % wstr(L"abc") << endl;
-    wcout << L"%s %f %X" % _t(L"abc",1.1, 12) << endl;
+    cout << str("%% to show a number: %d\n") % 15;
+    cout << str("%% to show a float: %f\n") % 15.1;
+    cout << "%% to show a str: %s\n" % str("abc");
+    cout << "%% to show a tuple: (%d,%d)\n" % _t(1,2);
+
+    int k=10;
+    wcout << L"%% to show a forwarded tuple: (%s,%f,%X)" % _f(c,1.1,k) << endl;
+
+
     try{
         wcout << wstr(L"%d %d %o %% %x %X\n") % 1;
     }
     catch(const std::invalid_argument& e)
     {
+        // catch more formats
+        cout << e.what() << endl;
+    }
+    try{
+        wcout << L"%d %d %o %% %x %X\n" % _f(1,2,3);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch more formats for tuple
+        cout << e.what() << endl;
+    }
+    try{
+        wcout << L"%d %d" % _f(1,2,3);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch extra parameters
+        cout << e.what() << endl;
+    }
+    try{
+        wcout << L"%d %d" % _f(L"abc",2);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch bad type
+        cout << e.what() << endl;
+    }
+    try{
+        wcout << L"%t %d" % _f(L"abc",2);
+    }
+    catch(const std::invalid_argument& e)
+    {
+        // catch bad type
         cout << e.what() << endl;
     }
 }
