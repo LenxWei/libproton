@@ -22,9 +22,7 @@
 * @section modules Modules
 * You can find documents about modules <a href="modules.html">here</a>.
 * <hr>
-* @todo 1.1.1 goal: vector_, deque_, map_, set_, str
-* @todo 1.1.2 goal: list_, unordered_, getopt
-* @todo add examples
+* @todo 1.1.2 goal: list_, unordered_
 * @todo add tutorial
 * @todo 1.2 milestone
 * @todo add os module
