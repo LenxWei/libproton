@@ -9,8 +9,9 @@
 #include <utility>
 #include <tuple>
 #include <type_traits>
-#include <proton/pool.hpp>
+#include <stdexcept>
 #include <initializer_list>
+#include <proton/pool.hpp>
 
 #ifndef PROTON_REF_DEBUG
 #define PROTON_REF_LOG(lvl, out)
@@ -126,6 +127,8 @@ template<typename refT> refT copy(const refT& x)
         return refT();
     typedef typename refT::alloc_t alloc_t;
     detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(x._rp);
+    if(!p)
+        throw std::bad_alloc();
     new (p) detail::refc_t();
     typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
@@ -182,6 +185,7 @@ template<typename T, typename ref_>friend  T cast(const ref_& x);
 public:
     typedef ref_ proton_ref_self_t;
     typedef std::ostream proton_ostream_t;
+    typedef std::wostream proton_wostream_t;
     typedef objT obj_t;
     typedef allocator alloc_t;
 
@@ -345,6 +349,41 @@ public:
             _p=r._p;
             r._rp=NULL;
             r._p=NULL;
+
+            if(rp_old){
+                long r=rp_old->release();
+                if(!r){
+                    p_old->~objT(); // may throw
+                    alloc_t::confiscate(rp_old);
+                }
+            }
+        }
+        return *this;
+    }
+
+    template<typename T,
+        typename=typename std::enable_if<std::is_pod<T>::value>::type
+    >
+    ref_& operator=(const T& a)
+    {
+        PROTON_REF_LOG(9,"assign argument");
+        struct ref_obj_t{
+            detail::refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
+        if(!p)
+            throw std::bad_alloc();
+        {
+            new (&(p->r)) detail::refc_t();
+            new (&p->o) obj_t(a);
+
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(&(p->r));
+            _p=&(p->o);
 
             if(rp_old){
                 long r=rp_old->release();
@@ -546,6 +585,96 @@ public:
         PROTON_THROW_IF(is_null(*this), "nullptr for []");
         return __o()[x];
     }
+
+    /** +
+     */
+    template<typename T,
+        typename=typename std::enable_if<std::is_same<T, ref_>::value>::type
+        >
+    ref_ operator+(const T& x)const
+    {
+        if(is_null(x) || is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        if(!p)
+            throw std::bad_alloc();
+        new (p) detail::refc_t();
+        obj_t* q=(obj_t *)(p+1);
+        new (q) obj_t(__o()+x.__o());
+        return ref_(alloc_inner,p,q);
+    }
+
+    template<typename T,
+        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        >
+    ref_ operator+(T x)const
+    {
+        if(is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        if(!p)
+            throw std::bad_alloc();
+        new (p) detail::refc_t();
+        obj_t* q=(obj_t *)(p+1);
+        new (q) obj_t(__o()+x);
+        return ref_(alloc_inner,p,q);
+    }
+
+    /** *
+     */
+    template<typename T,
+        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        >
+    ref_ operator*(T x)const
+    {
+        if(is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        if(!p)
+            throw std::bad_alloc();
+        new (p) detail::refc_t();
+        obj_t* q=(obj_t *)(p+1);
+        new (q) obj_t(__o()*x);
+        return ref_(alloc_inner,p,q);
+    }
+
+    /** +=
+     */
+    template<typename T,
+        typename=typename std::enable_if<std::is_convertible<T, ref_>::value>::type
+        >
+    ref_& operator+=(const T& x)
+    {
+        if(is_null(x) || is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        __o()+=x.__o();
+        return *this;
+    }
+
+    template<typename T,
+        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        >
+    ref_& operator+=(T x)
+    {
+        if(is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        __o()+=x;
+        return *this;
+    }
+
+    /** *=
+     */
+    template<typename T,
+        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        >
+    ref_& operator*=(T x)
+    {
+        if(is_null(*this))
+            throw std::invalid_argument("want to add null values");
+        __o()*=x;
+        return *this;
+    }
+
 };
 
 /** general output for refs.
@@ -557,6 +686,21 @@ template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
 {
     if(is_null(y)){
         s << "<>" ;
+        return s;
+    }
+    y->output(s);
+    return s;
+}
+
+/** general wchar output for refs.
+ * Need T::obj_t to implenment the method: void output(std::wostream& s)const.
+ * Don't forget virtual when needed.
+ */
+template<typename T>std::wostream& operator<<(typename T::proton_wostream_t& s,
+                                   const T& y)
+{
+    if(is_null(y)){
+        s << L"<>" ;
         return s;
     }
     y->output(s);
