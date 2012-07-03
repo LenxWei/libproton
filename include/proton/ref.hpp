@@ -663,7 +663,7 @@ public:
         return ref_(alloc_inner,p,q);
     }
 
-    /** ref_ * pod
+    /** ref_ % other
      */
     template<typename T>
     ref_ operator%(const T& x)const
@@ -677,6 +677,28 @@ public:
         obj_t* q=(obj_t *)(p+1);
         new (q) obj_t(__o() % x);
         return ref_(alloc_inner,p,q);
+    }
+
+    /** ref_ << other
+     */
+    template<typename T>
+    ref_ operator<<(const T& x)
+    {
+        if(*this==none)
+            throw std::invalid_argument("want to << null values");
+        __o() << x;
+        return *this;
+    }
+
+    /** ref_ >> other
+     */
+    template<typename T>
+    ref_ operator<<(const T& x)
+    {
+        if(*this==none)
+            throw std::invalid_argument("want to << null values");
+        __o() >> x;
+        return *this;
     }
 
     /** +=
