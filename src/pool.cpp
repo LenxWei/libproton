@@ -206,9 +206,10 @@ void* mem_pool::malloc(size_t size, size_t n/*=1*/)
 void mem_pool::print_info()
 {
     static bool print_null=true;
-    printf("=mem pool== %d ( %d )==========================\n", get_seg_total(),get_seg_free());
+    std::cout << "=mem pool== " << get_seg_total() << " ( "
+        << get_seg_free() <<" )==========================\n";
     if(print_null)
-        printf("_seg_cnt: %d\n", _seg_cnt);
+        std::cout << "_seg_cnt: " << _seg_cnt << "\n";
     for(size_t i=0; i<=_seg_cnt; i++){
         _segs[i].print_info(print_null);
     }
@@ -445,12 +446,13 @@ void seg_pool::get_info(size_t&free_cnt, size_t& free_cap, size_t& empty_cap, si
 void seg_pool::print_info(bool print_null)
 {
     if(_total_block_size || print_null)
-        printf("--seg: %d - %d - ( %d | %d )\n", _chunk_min_size, _chunk_size,
-                _min_block_size, _total_block_size);
+        std::cout << "--seg: " << _chunk_min_size << " - " << _chunk_size <<
+            " - ( " << _min_block_size << " | " << _total_block_size << " )\n";
     if(_total_block_size){
         size_t free_cnt, free_cap, empty_cap, full_cnt;
         get_info(free_cnt, free_cap, empty_cap, full_cnt);
-        printf("free: %d/%d, empty: %d, full: %d\n", free_cnt, free_cap, empty_cap, full_cnt);
+        std::cout << "free: " << free_cnt << "/" << free_cap << ", empty: "
+            << empty_cap << ", full: " << full_cnt << "\n";
     }
 }
 

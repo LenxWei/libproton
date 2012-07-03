@@ -78,23 +78,21 @@ extern init_alloc alloc; ///< explicitly demand to initialize an object.
 class init_alloc_inner{};
 extern init_alloc_inner alloc_inner; //< for inner use of ref_.
 
-/** test a ref null or not.
- * @param x the ref to be checked
- * @return true: x doesn't refer to any object, false: x refers to an object.
- */
-template<typename refT> bool is_null(const refT& x)
-{
-    return &x.__o()==NULL;
-}
+class init_alloc_none{};
+extern init_alloc_none none; ///< explicitly demand to construct an empty object.
 
-/** test a ref valid or not.
- * @param x the ref to be checked
- * @return true: x refers to an object, false: x doesn't refer to any object.
- */
-template<typename refT> bool is_valid(const refT& x)
-{
-    return &x.__o()!=NULL;
-}
+enum ref_flags{
+    ref_not_use_output=0x1,
+    ref_immutable=0x2
+};
+
+template<typename T>
+struct ref_traits{
+    static constexpr unsigned long long flag=0;
+};
+
+template<typename objT, typename allocator=smart_allocator<objT>, typename traits=ref_traits<objT> >
+struct ref_;
 
 /** declare copy_to().
  * For object classes which need to support copy().
@@ -121,8 +119,10 @@ template<typename refT> bool is_valid(const refT& x)
  *          in the obj class.
  * @return a cloned obj of x
  */
-template<typename refT> refT copy(const refT& x)
+template<typename O, typename A, typename T> ref_<O,A,T> copy(const ref_<O,A,T>& x)
 {
+    typedef ref_<O,A,T> refT;
+
     if(is_null(x))
         return refT();
     typedef typename refT::alloc_t alloc_t;
@@ -135,19 +135,12 @@ template<typename refT> refT copy(const refT& x)
     return refT(alloc_inner,p,q);
 }
 
-/** reset a ref to release its object if any.
- * @param x the ref to be resetted.
- */
-template<typename refT> void reset(refT& x)
-{
-    x.release();
-}
 
 /** get the reference count of the object.
  * @param x refers to the object
  * @return the reference count.
  */
-template<typename refT> long ref_count(const refT& x)
+template<typename O, typename A, typename T> long ref_count(const ref_<O,A,T>& x)
 {
     if(x._rp)
         return x._rp->count();
@@ -160,15 +153,15 @@ template<typename refT> long ref_count(const refT& x)
  * @param x the original ref
  * @return the casted one
  */
-template<typename T, typename refT> T cast(const refT& x)
+template<typename R, typename O2, typename A2, typename T2 >
+R cast(const ref_<O2,A2,T2>& x)
 {
-    static_assert(std::is_class<typename T::proton_ref_self_t>(), "The target type is not a ref_ type");
-    if(is_null(x))
-        return T();
-    typedef typename T::obj_t target_t;
+    if(x==none)
+        return R();
+    typedef typename R::obj_t target_t;
     target_t* p=dynamic_cast<target_t*>(x._p);
     if(p)
-        return T(alloc_inner, x._rp, p);
+        return R(alloc_inner, x._rp, p);
     throw std::bad_cast();
 }
 
@@ -176,11 +169,14 @@ template<typename T, typename refT> T cast(const refT& x)
  * @param allocator It must support confiscate(), and allocator::allocate() must be static.
  * @see smart_allocator in <proton/pool.hpp>
  */
-template<typename objT, typename allocator=smart_allocator<objT> > struct ref_ {
-friend void reset<ref_>(ref_& x);
-friend ref_ copy<ref_>(const ref_& x);
-friend long ref_count<ref_>(const ref_& x);
-template<typename T, typename ref_>friend  T cast(const ref_& x);
+template<typename objT, typename allocator, typename traits>
+struct ref_ {
+template<typename O, typename A, typename T>
+    friend ref_<O,A,T> copy(const ref_<O,A,T>& x);
+template<typename O, typename A, typename T>
+    friend long ref_count(const ref_<O,A,T>& x);
+template<typename R, typename O2, typename A2, typename T2 >
+    friend R cast(const ref_<O2,A2,T2>& x);
 
 public:
     typedef ref_ proton_ref_self_t;
@@ -219,6 +215,11 @@ public:
      * Doesn't refer to any object.
      */
     ref_():_rp(NULL), _p(NULL)
+    {
+        PROTON_REF_LOG(9,"default ctor");
+    }
+
+    ref_(init_alloc_none):_rp(NULL), _p(NULL)
     {
         PROTON_REF_LOG(9,"default ctor");
     }
@@ -361,6 +362,12 @@ public:
         return *this;
     }
 
+    ref_& operator=(init_alloc_none)noexcept
+    {
+        release();
+        return *this;
+    }
+
     template<typename T,
         typename=typename std::enable_if<std::is_pod<T>::value>::type
     >
@@ -500,6 +507,22 @@ public:
         return &__o();
     }
 
+    /** x == none.
+     * test whether x is empty.
+     */
+    bool operator==(const init_alloc_none&)const
+    {
+        return _p==NULL;
+    }
+
+    /** x != none.
+     * test whether x is empty.
+     */
+    bool operator!=(const init_alloc_none&)const
+    {
+        return _p!=NULL;
+    }
+
     /** general operator== for refs.
      * Need to implement obj_t == T::obj_t.
      */
@@ -509,7 +532,7 @@ public:
                       "The target type is not a ref_ type");
         if((void*)&(__o())==(void*)&(x.__o()))
             return true;
-        if(is_null(*this)||is_null(x))
+        if(*this==none || x==none)
             return false;
         return __o() == x.__o();
     }
@@ -528,9 +551,9 @@ public:
                       "The target type is not a ref_ type");
         if((void*)&(x.__o())==(void*)&(__o()))
             return false;
-        if(is_null(*this))
+        if(*this==none)
             return true;
-        if(is_null(x))
+        if(x==none)
             return false;
         return __o() < x.__o();
     }
@@ -555,7 +578,7 @@ public:
      */
     template<typename ...T> auto operator()(T&& ...x)const -> decltype((*_p)(x...))
     {
-        PROTON_THROW_IF(is_null(*this), "nullptr for ()");
+        PROTON_THROW_IF(*this==none, "nullptr for ()");
         return __o()(x...);
     }
 
@@ -564,7 +587,7 @@ public:
      */
     template<typename ...T> auto operator()(T&& ...x) -> decltype((*_p)(x...))
     {
-        PROTON_THROW_IF(is_null(*this), "nullptr for ()");
+        PROTON_THROW_IF(*this==none, "nullptr for ()");
         return __o()(x...);
     }
 
@@ -573,7 +596,7 @@ public:
      */
     template<typename T> auto operator[](T&& x)const -> decltype((*_p)[x])
     {
-        PROTON_THROW_IF(is_null(*this), "nullptr for []");
+        PROTON_THROW_IF(*this==none, "nullptr for []");
         return __o()[x];
     }
 
@@ -582,18 +605,18 @@ public:
      */
     template<typename T> auto operator[](T&& x) -> decltype((*_p)[x])
     {
-        PROTON_THROW_IF(is_null(*this), "nullptr for []");
+        PROTON_THROW_IF(*this==none, "nullptr for []");
         return __o()[x];
     }
 
-    /** +
+    /** ref_ + ref_
      */
     template<typename T,
         typename=typename std::enable_if<std::is_same<T, ref_>::value>::type
         >
     ref_ operator+(const T& x)const
     {
-        if(is_null(x) || is_null(*this))
+        if(x==none || *this==none)
             throw std::invalid_argument("want to add null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
@@ -604,12 +627,14 @@ public:
         return ref_(alloc_inner,p,q);
     }
 
+    /** ref_ + pod
+     */
     template<typename T,
-        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        typename=typename std::enable_if<std::is_pod<T>::value>::type
         >
     ref_ operator+(T x)const
     {
-        if(is_null(*this))
+        if(*this==none)
             throw std::invalid_argument("want to add null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
@@ -620,14 +645,14 @@ public:
         return ref_(alloc_inner,p,q);
     }
 
-    /** *
+    /** ref_ * pod
      */
     template<typename T,
-        typename=typename std::enable_if<!std::is_class<T>::value>::type
+        typename=typename std::enable_if<std::is_pod<T>::value>::type
         >
     ref_ operator*(T x)const
     {
-        if(is_null(*this))
+        if(*this==none)
             throw std::invalid_argument("want to add null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
@@ -640,51 +665,196 @@ public:
 
     /** +=
      */
-    template<typename T,
-        typename=typename std::enable_if<std::is_convertible<T, ref_>::value>::type
-        >
-    ref_& operator+=(const T& x)
+    template<typename T>
+    typename std::enable_if<std::is_convertible<T, ref_>::value && !(traits::flag & ref_immutable),
+        ref_&>::type
+        operator+=(const T& x)
     {
-        if(is_null(x) || is_null(*this))
+        if(x==none || *this==none)
             throw std::invalid_argument("want to add null values");
         __o()+=x.__o();
         return *this;
     }
 
-    template<typename T,
-        typename=typename std::enable_if<!std::is_class<T>::value>::type
-        >
-    ref_& operator+=(T x)
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value && !(traits::flag & ref_immutable),
+        ref_&>::type
+        operator+=(T x)
     {
-        if(is_null(*this))
+        if(*this==none)
             throw std::invalid_argument("want to add null values");
         __o()+=x;
         return *this;
     }
 
+    template<typename T>
+    typename std::enable_if<std::is_convertible<T, ref_>::value && (traits::flag & ref_immutable),
+        ref_&>::type
+        operator+=(const T& x)
+    {
+        if(x==none || *this==none)
+            throw std::invalid_argument("want to add null values");
+
+        struct ref_obj_t{
+            detail::refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
+        if(!p)
+            throw std::bad_alloc();
+        {
+            new (&(p->r)) detail::refc_t();
+            new (&p->o) obj_t(__o()+x.__o());
+
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(&(p->r));
+            _p=&(p->o);
+
+            long r=rp_old->release();
+            if(!r){
+                p_old->~objT(); // may throw
+                alloc_t::confiscate(rp_old);
+            }
+        }
+        return *this;
+    }
+
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value && (traits::flag & ref_immutable),
+        ref_&>::type
+        operator+=(T x)
+    {
+        if(*this==none)
+            throw std::invalid_argument("want to add null values");
+
+        struct ref_obj_t{
+            detail::refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
+        if(!p)
+            throw std::bad_alloc();
+        {
+            new (&(p->r)) detail::refc_t();
+            new (&p->o) obj_t(__o()+x);
+
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(&(p->r));
+            _p=&(p->o);
+
+            long r=rp_old->release();
+            if(!r){
+                p_old->~objT(); // may throw
+                alloc_t::confiscate(rp_old);
+            }
+        }
+        return *this;
+    }
+
     /** *=
      */
-    template<typename T,
-        typename=typename std::enable_if<!std::is_class<T>::value>::type
-        >
-    ref_& operator*=(T x)
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value && !(traits::flag & ref_immutable),
+        ref_&>::type
+        operator*=(T x)
     {
-        if(is_null(*this))
+        if(*this==none)
             throw std::invalid_argument("want to add null values");
         __o()*=x;
         return *this;
     }
 
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value && (traits::flag & ref_immutable),
+        ref_&>::type
+        operator*=(T x)
+    {
+        if(*this==none)
+            throw std::invalid_argument("want to add null values");
+
+        struct ref_obj_t{
+            detail::refc_t r;
+            obj_t o;
+        };
+        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+        ref_obj_t* p=real_alloc::allocate(1);
+        if(!p)
+            throw std::bad_alloc();
+        {
+            new (&(p->r)) detail::refc_t();
+            new (&p->o) obj_t(__o()*x);
+
+            detail::refc_t* rp_old=_rp;
+            objT* p_old=_p;
+
+            enter(&(p->r));
+            _p=&(p->o);
+
+            long r=rp_old->release();
+            if(!r){
+                p_old->~objT(); // may throw
+                alloc_t::confiscate(rp_old);
+            }
+        }
+        return *this;
+    }
+
 };
 
+/* [obsolete] use x==none
+ * test a ref null or not.
+ * @param x the ref to be checked
+ * @return true: x doesn't refer to any object, false: x refers to an object.
+ */
+template<typename O, typename A, typename T> bool is_null(const ref_<O,A,T>& x)
+{
+    return x==none;
+}
+
+template<typename O, typename A, typename T> bool operator==(init_alloc_none,const ref_<O,A,T>& x)
+{
+    return x==none;
+}
+
+/* [obsolete] use x!=none
+ * test a ref valid or not.
+ * @param x the ref to be checked
+ * @return true: x refers to an object, false: x doesn't refer to any object.
+ */
+template<typename O, typename A, typename T> bool is_valid(const ref_<O,A,T>& x)
+{
+    return x!=none;
+}
+
+template<typename O, typename A, typename T> bool operator!=(init_alloc_none,const ref_<O,A,T>& x)
+{
+    return x!=none;
+}
+
+/* [obsolete] use x=none;
+ * reset a ref to release its object if any.
+ * @param x the ref to be resetted.
+ */
+template<typename O, typename A, typename T> void reset(ref_<O,A,T>& x)
+{
+    x=none;
+}
+
 /** general output for refs.
- * Need T::obj_t to implenment the method: void output(std::ostream& s)const.
+ * Need O to implenment the method: void output(std::ostream& s)const.
  * Don't forget virtual when needed.
  */
-template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
-                                   const T& y)
+template<typename O, typename A, typename T>
+typename std::enable_if<!(T::flag & ref_not_use_output), std::ostream&>::type
+operator<<(std::ostream& s, const ref_<O,A,T>& y)
 {
-    if(is_null(y)){
+    if(y==none){
         s << "<>" ;
         return s;
     }
@@ -692,18 +862,49 @@ template<typename T>std::ostream& operator<<(typename T::proton_ostream_t& s,
     return s;
 }
 
+/** general output for refs.
+ * Need to support s << O
+ */
+template<typename O, typename A, typename T>
+typename std::enable_if<T::flag & ref_not_use_output, std::ostream&>::type
+operator<<(std::ostream& s, const ref_<O,A,T>& y)
+{
+    if(y==none){
+        s << "<>" ;
+        return s;
+    }
+    s << y.__o();
+    return s;
+}
+
 /** general wchar output for refs.
- * Need T::obj_t to implenment the method: void output(std::wostream& s)const.
+ * Need O to implenment the method: void output(std::ostream& s)const.
  * Don't forget virtual when needed.
  */
-template<typename T>std::wostream& operator<<(typename T::proton_wostream_t& s,
-                                   const T& y)
+template<typename O, typename A, typename T>
+typename std::enable_if<!(T::flag & ref_not_use_output), std::wostream&>::type
+operator<<(std::wostream& s, const ref_<O,A,T>& y)
 {
-    if(is_null(y)){
+    if(y==none){
         s << L"<>" ;
         return s;
     }
     y->output(s);
+    return s;
+}
+
+/** general wchar output for refs.
+ * Need to support s << O
+ */
+template<typename O, typename A, typename T>
+typename std::enable_if<(T::flag & ref_not_use_output), std::wostream&>::type
+operator<<(std::wostream& s, const ref_<O,A,T>& y)
+{
+    if(y==none){
+        s << L"<>" ;
+        return s;
+    }
+    s << y;
     return s;
 }
 
@@ -732,7 +933,7 @@ template<typename T>struct key_hash{
 public:
     size_t operator()(const T& x)const
     {
-        if(is_null(x))
+        if(x==none)
             return 0;
         else{
             typedef decltype(x->key()) ref_t;
@@ -756,7 +957,7 @@ public:
         typedef decltype(std::get<key_seq>(x->key())) ref_t;
         typedef typename std::remove_reference<ref_t>::type const_key_t;
         typedef typename std::remove_cv<const_key_t>::type key_t;
-        if(is_null(x))
+        if(x==none)
             return 0;
         else
             return std::hash<key_t>()(std::get<key_seq>(x->key()));

@@ -196,10 +196,13 @@ void Str_eg()
     a+="456";
     cout << "a=" << a << endl;
     cout << "b=" << b << endl;
+    b=a;
     a=a+c;
     cout << "a=" << a << endl;
     cout << "b=" << b << endl;
     cout << "c*2=" << c*2 << endl;
+    c*=2;
+    cout << "c=" << c << endl;
 }
 
 int main()

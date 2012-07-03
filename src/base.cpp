@@ -14,6 +14,7 @@ int wait_on_err = 2;
 
 init_alloc alloc;
 init_alloc_inner alloc_inner;
+init_alloc_none none;
 
 int detail::unittest_run(vector<unittest_t>& ut)
 {

@@ -906,11 +906,6 @@ public:
     {
         return boost::algorithm::to_upper_copy(*this);
     }
-
-    void output(std::basic_ostream<CharT, Traits>& s)const
-    {
-        s << *this;
-    }
 };
 
 /**
@@ -924,6 +919,11 @@ typedef basic_string_<char> str;
 /** the main wstring type in proton.
  */
 typedef basic_string_<wchar_t> wstr;
+
+template<typename C, typename T, typename A>
+struct ref_traits<basic_string_<C,T,A> >{
+    static constexpr unsigned long long flag=ref_not_use_output | ref_immutable;
+};
 
 /** the main string type for python porting
  */

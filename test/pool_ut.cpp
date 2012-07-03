@@ -105,9 +105,9 @@ int pool_ut()
     g0->print_info();
 
     if(sizeof(long)==8){
-        PROTON_THROW_IF(g0->get_seg_cnt()!=63, "err");
+        PROTON_THROW_IF(g0->get_seg_cnt()!=112, "err");
         PROTON_THROW_IF(g0->get_seg(0)->chunk_size()!=8, "err");
-        PROTON_THROW_IF(g0->get_max_chunk_size()!=138728, "err");
+        PROTON_THROW_IF(g0->get_max_chunk_size()!=136008, "err");
     }
     PROTON_THROW_IF(g0->get_seg(g0->get_max_chunk_size()+1)->chunk_size()!=0, "err");
 
