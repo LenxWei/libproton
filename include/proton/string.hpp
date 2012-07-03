@@ -690,7 +690,7 @@ public:
     /** string % V
      */
     template<typename V>
-    basic_string_ operator%(const V& a)
+    basic_string_ operator%(const V& a)const
     {
         return detail::str_format<CharT, Traits, Allocator>(this->c_str(), a);
     }

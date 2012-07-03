@@ -663,6 +663,22 @@ public:
         return ref_(alloc_inner,p,q);
     }
 
+    /** ref_ * pod
+     */
+    template<typename T>
+    ref_ operator%(const T& x)const
+    {
+        if(*this==none)
+            throw std::invalid_argument("want to % null values");
+        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        if(!p)
+            throw std::bad_alloc();
+        new (p) detail::refc_t();
+        obj_t* q=(obj_t *)(p+1);
+        new (q) obj_t(__o() % x);
+        return ref_(alloc_inner,p,q);
+    }
+
     /** +=
      */
     template<typename T>

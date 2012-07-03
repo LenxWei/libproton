@@ -202,7 +202,9 @@ void Str_eg()
     cout << "b=" << b << endl;
     cout << "c*2=" << c*2 << endl;
     c*=2;
+    c+=" %s";
     cout << "c=" << c << endl;
+    cout << "c % a = " << c % a << endl;
 }
 
 int main()
