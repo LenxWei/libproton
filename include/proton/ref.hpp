@@ -526,15 +526,22 @@ public:
     /** general operator== for refs.
      * Need to implement obj_t == T::obj_t.
      */
-    template<typename T> bool operator==(const T& x)const
+    template<typename O, typename A, typename T> bool operator==(const ref_<O,A,T>& x)const
     {
-        static_assert(std::is_class<typename T::proton_ref_self_t>(),
-                      "The target type is not a ref_ type");
         if((void*)&(__o())==(void*)&(x.__o()))
             return true;
         if(*this==none || x==none)
             return false;
         return __o() == x.__o();
+    }
+
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value, bool>::type
+        operator==(const T& x)const
+    {
+        if(*this==none)
+            return false;
+        return __o() == x;
     }
 
     template<typename T> bool operator!=(const T& x)const
@@ -545,10 +552,8 @@ public:
     /** general operator< for refs.
      * Need to implement obj_t < T::obj_t.
      */
-    template<typename T> bool operator<(const T& x)const
+    template<typename O, typename A, typename T> bool operator<(const ref_<O,A,T>& x)const
     {
-        static_assert(std::is_class<typename T::proton_ref_self_t>(),
-                      "The target type is not a ref_ type");
         if((void*)&(x.__o())==(void*)&(__o()))
             return false;
         if(*this==none)
@@ -556,6 +561,15 @@ public:
         if(x==none)
             return false;
         return __o() < x.__o();
+    }
+
+    template<typename T>
+    typename std::enable_if<std::is_pod<T>::value, bool>::type
+        operator<(const T& x)const
+    {
+        if(*this==none)
+            return true;
+        return __o() < x;
     }
 
     template<typename T> bool operator>=(const T& x)const
