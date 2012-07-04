@@ -616,8 +616,7 @@ public:
         >
     ref_ operator+(const T& x)const
     {
-        if(x==none || *this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(x==none || *this==none,"want to add null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
@@ -634,8 +633,7 @@ public:
         >
     ref_ operator+(T x)const
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to add null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
@@ -652,8 +650,7 @@ public:
         >
     ref_ operator*(T x)const
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to * null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
@@ -668,8 +665,7 @@ public:
     template<typename T>
     ref_ operator%(const T& x)const
     {
-        if(*this==none)
-            throw std::invalid_argument("want to % null values");
+        PROTON_THROW_IF(*this==none, "want to % null values");
         detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
@@ -684,8 +680,7 @@ public:
     template<typename T>
     ref_ operator<<(const T& x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to << null values");
+        PROTON_THROW_IF(*this==none, "want to << null values");
         __o() << x;
         return *this;
     }
@@ -693,10 +688,9 @@ public:
     /** ref_ >> other
      */
     template<typename T>
-    ref_ operator<<(const T& x)
+    ref_ operator>>(const T& x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to << null values");
+        PROTON_THROW_IF(*this==none, "want to >> null values");
         __o() >> x;
         return *this;
     }
@@ -708,8 +702,7 @@ public:
         ref_&>::type
         operator+=(const T& x)
     {
-        if(x==none || *this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(x==none || *this==none, "want to add null values");
         __o()+=x.__o();
         return *this;
     }
@@ -719,8 +712,7 @@ public:
         ref_&>::type
         operator+=(T x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to add null values");
         __o()+=x;
         return *this;
     }
@@ -730,8 +722,7 @@ public:
         ref_&>::type
         operator+=(const T& x)
     {
-        if(x==none || *this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(x==none || *this==none,"want to add null values");
 
         struct ref_obj_t{
             detail::refc_t r;
@@ -765,8 +756,7 @@ public:
         ref_&>::type
         operator+=(T x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to add null values");
 
         struct ref_obj_t{
             detail::refc_t r;
@@ -802,8 +792,7 @@ public:
         ref_&>::type
         operator*=(T x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to *= null values");
         __o()*=x;
         return *this;
     }
@@ -813,8 +802,7 @@ public:
         ref_&>::type
         operator*=(T x)
     {
-        if(*this==none)
-            throw std::invalid_argument("want to add null values");
+        PROTON_THROW_IF(*this==none,"want to *= null values");
 
         struct ref_obj_t{
             detail::refc_t r;
