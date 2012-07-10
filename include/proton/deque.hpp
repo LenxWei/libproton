@@ -488,6 +488,14 @@ public:
  * @example deque.cpp
  */
 
+template<typename T, typename A>
+struct ref_traits<deque_<T,A> >{
+    static constexpr unsigned long long flag=ref_not_use_output;
+};
+
+template<typename T>
+    using List=ref_<deque_<T> >;
+
 /** deque + deque
  */
 template<typename T, typename A, typename X>

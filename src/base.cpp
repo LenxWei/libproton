@@ -3,6 +3,7 @@
 #include <proton/detail/unit_test.hpp>
 #include <proton/getopt.hpp>
 #include <proton/map.hpp>
+#include <proton/string.hpp>
 
 using namespace std;
 

@@ -44,18 +44,18 @@ size_t get_mem()
     fstream f(memfn.c_str(), ios_base::in);
     string line;
 
-    line=strip(readline<string>(f));
-    if(line!="RSS"){
-        PROTON_LOG(1, "bad rss:"<<line);
+    readline(line,f);
+    if(strip(line)!="RSS"){
+        PROTON_LOG(1, "bad rss:"<<strip(line));
     }
 
-    line=strip(readline<string>(f));
+    readline(line,f);
     f.close();
-    if(get_int(rss, line)){
+    if(get_int(rss, strip(line))){
         return (size_t)rss;
     }
     else{
-        PROTON_ERR("bad rss value:"<<line);
+        PROTON_ERR("bad rss value:"<<strip(line));
     }
 }
 #else

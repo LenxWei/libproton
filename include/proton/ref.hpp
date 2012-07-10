@@ -83,7 +83,8 @@ extern init_alloc_none none; ///< explicitly demand to construct an empty object
 
 enum ref_flags{
     ref_not_use_output=0x1,
-    ref_immutable=0x2
+    ref_immutable=0x2,
+    ref_not_cast_obj=0x4
 };
 
 template<typename T>
@@ -469,6 +470,25 @@ public:
         PROTON_REF_LOG(9,"baseT()");
 		return ref_<baseT>(alloc_inner, _rp, static_cast<baseT*>(_p));
 	}
+
+	template<typename=typename std::enable_if<
+            !(traits::flag & ref_not_cast_obj)
+        >::type
+        >
+        operator obj_t&()
+    {
+        return __o();
+    }
+
+	template<typename=typename std::enable_if<
+            !(traits::flag & ref_not_cast_obj)
+        >::type
+        >
+        operator const obj_t&()const
+    {
+        return __o();
+    }
+
 #endif
 
 public:
@@ -1008,6 +1028,50 @@ public:
  * @}
  * @}
  */
+
+namespace detail{
+
+template<typename O, typename A, typename T>struct len_t<ref_<O,A,T> >{
+//    typedef decltype(*(((T*)1)->begin())) item_t;
+    static size_t result(const ref_<O,A,T>& x)
+    {
+        PROTON_THROW_IF(x==none, "no len() for an empty object");
+        return x->size();
+    }
 };
+
+} // ns detail
+
+} // ns proton
+
+namespace std{
+
+template<typename O, typename A, typename T>
+auto begin(const proton::ref_<O,A,T>& a) -> decltype(a->begin())
+{
+    return a->begin();
+}
+
+template<typename O, typename A, typename T>
+auto end(const proton::ref_<O,A,T>& a) -> decltype(a->end())
+{
+    return a->end();
+}
+
+template<typename O, typename A, typename T>
+struct hash<proton::ref_<O,A,T> >{
+public:
+    typedef size_t     result_type;
+    typedef proton::ref_<O,A,T>      argument_type;
+    size_t operator()(const proton::ref_<O,A,T> &s) const noexcept
+    {
+        if(s==proton::none)
+            return 0;
+        return std::hash<O>()(s.__o());
+    }
+};
+
+} // ns std
+
 
 #endif // PROTON_REF_HEADER

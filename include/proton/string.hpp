@@ -18,6 +18,50 @@
 
 namespace proton{
 
+namespace detail{
+    template<typename cT> struct vals;
+
+    template<> struct vals<char>{
+        static constexpr const char* nil="";
+        static constexpr const char* spc=" ";
+        static constexpr const char* ws=" \t\r\n";
+        static constexpr const char* newline="\n";
+        static constexpr const char* per="%";
+        static constexpr const char* d="d";
+        static constexpr const char* f="f";
+        static constexpr const char* u="u";
+        static constexpr const char* o="o";
+        static constexpr const char* x="x";
+        static constexpr const char* X="X";
+        static constexpr const char* s="s";
+
+        static const char* find(const char* s, char x)
+        {
+            return std::strchr(s, x);
+        }
+    };
+
+    template<> struct vals<wchar_t>{
+        static constexpr const wchar_t* nil=L"";
+        static constexpr const wchar_t* spc=L" ";
+        static constexpr const wchar_t* ws=L" \t\r\n";
+        static constexpr const wchar_t* newline=L"\n";
+        static constexpr const wchar_t* per=L"%";
+        static constexpr const wchar_t* d=L"d";
+        static constexpr const wchar_t* f=L"f";
+        static constexpr const wchar_t* u=L"u";
+        static constexpr const wchar_t* o=L"o";
+        static constexpr const wchar_t* x=L"x";
+        static constexpr const wchar_t* X=L"X";
+        static constexpr const wchar_t* s=L"s";
+
+        static const wchar_t* find(const wchar_t* s, wchar_t x)
+        {
+            return std::wcschr(s,x);
+        }
+    };
+}
+
 /** @addtogroup str
  * @{
  */
@@ -251,21 +295,6 @@ template<typename string>string to_upper(const string& s)
     }
 }
 
-template<typename string>string readline(std::istream& f, char delim='\n')
-{
-    string r;
-    std::ios::pos_type start=f.tellg(), end;
-    std::getline(f, r, delim);
-    end=f.tellg();
-    if(end-start>(long)r.length()){
-        char a[2]={delim,0};
-        r.append(a);
-        return r;
-    }
-    else
-        return r;
-}
-
 template <typename C, typename T, typename A>
 C get(const std::basic_string<C,T,A>& x, long i)
 {
@@ -310,48 +339,6 @@ std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first, long
     if((unsigned long)last>s)
         last=s;
     return x.substr(first,last-first);
-}
-
-namespace detail{
-    template<typename cT> struct vals;
-
-    template<> struct vals<char>{
-        static constexpr const char* nil="";
-        static constexpr const char* spc=" ";
-        static constexpr const char* ws=" \t\r\n";
-        static constexpr const char* per="%";
-        static constexpr const char* d="d";
-        static constexpr const char* f="f";
-        static constexpr const char* u="u";
-        static constexpr const char* o="o";
-        static constexpr const char* x="x";
-        static constexpr const char* X="X";
-        static constexpr const char* s="s";
-
-        static const char* find(const char* s, char x)
-        {
-            return std::strchr(s, x);
-        }
-    };
-
-    template<> struct vals<wchar_t>{
-        static constexpr const wchar_t* nil=L"";
-        static constexpr const wchar_t* spc=L" ";
-        static constexpr const wchar_t* ws=L" \t\r\n";
-        static constexpr const wchar_t* per=L"%";
-        static constexpr const wchar_t* d=L"d";
-        static constexpr const wchar_t* f=L"f";
-        static constexpr const wchar_t* u=L"u";
-        static constexpr const wchar_t* o=L"o";
-        static constexpr const wchar_t* x=L"x";
-        static constexpr const wchar_t* X=L"X";
-        static constexpr const wchar_t* s=L"s";
-
-        static const wchar_t* find(const wchar_t* s, wchar_t x)
-        {
-            return std::wcschr(s,x);
-        }
-    };
 }
 
 template<
@@ -547,6 +534,28 @@ struct format_output_t<C,T,std::tuple<V...> >{
 };
 
 } //ns detail
+
+
+/** the main string type in proton.
+ */
+typedef basic_string_<char> str;
+
+/** the main wstring type in proton.
+ */
+typedef basic_string_<wchar_t> wstr;
+
+template<typename C, typename T, typename A>
+struct ref_traits<basic_string_<C,T,A> >{
+    static constexpr unsigned long long flag=ref_not_use_output | ref_immutable;
+};
+
+/** the main string type for python porting
+ */
+typedef ref_<basic_string_<char> > Str;
+
+/** the main wstring type for python porting
+ */
+typedef ref_<basic_string_<wchar_t> > Wstr;
 
 /** main string template
  */
@@ -843,6 +852,56 @@ public:
         return r;
     }
 
+    List<ref_<basic_string_> >
+        Split(const baseT& delim=baseT(), int null_unite=-1)const
+    {
+        long pos = 0, begin, end;
+        typedef ref_<basic_string_> Str;
+
+        List<Str> r;
+
+        basic_string_ spc(delim);
+        if(spc.size()==0){
+            if(null_unite<0)
+                null_unite=1;
+            spc=detail::vals<CharT>::ws;
+        }
+        else{
+            if(null_unite<0)
+                null_unite=0;
+        }
+
+        if(null_unite){
+            do{
+                begin = this->find_first_not_of(spc,pos);
+                if(begin<0)
+                    break;
+                end = this->find_first_of(spc,begin);
+                if(end<0)
+                    end=this->length();
+                r << Str(this->substr(begin, end-begin));
+                pos = end;
+            }
+            while(pos < (long)this->length());
+        }
+        else{
+            while(1){
+                begin = this->find_first_of(spc,pos);
+                if(begin<0){
+                    r << Str(this->substr(pos));
+                    break;
+                }
+                r << Str(this->substr(pos, begin-pos));
+                pos = begin + 1;
+                if(pos>=(long)this->length()){
+                    r << Str(detail::vals<CharT>::nil);
+                    break;
+                }
+            }//while
+        }//else
+        return r;
+    }
+
     /** join a list of strings to one string.
      * @param r     the input string list
      * @return the output string
@@ -912,28 +971,6 @@ public:
  * @example string.cpp
  */
 
-/** the main string type in proton.
- */
-typedef basic_string_<char> str;
-
-/** the main wstring type in proton.
- */
-typedef basic_string_<wchar_t> wstr;
-
-template<typename C, typename T, typename A>
-struct ref_traits<basic_string_<C,T,A> >{
-    static constexpr unsigned long long flag=ref_not_use_output | ref_immutable;
-};
-
-/** the main string type for python porting
- */
-typedef ref_<basic_string_<char> > Str;
-
-/** the main wstring type for python porting
- */
-typedef ref_<basic_string_<wchar_t> > Wstr;
-
-
 /** const CharT* + str
  */
 template<typename T, typename C, typename A>
@@ -993,9 +1030,33 @@ basic_string_<T,C,A>&& cast_(std::basic_string<T,C,A>&& x)
 }
 
 template<typename T, typename C, typename A>
-const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&& x)
+const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&&  x)
 {
     return reinterpret_cast<const basic_string_<T,C,A>&&>(x);
+}
+
+/** read a line from stream.
+ * @return true: not empty, false: empty
+ */
+template<typename C, typename T, typename A>
+bool readline(std::basic_string<C,T,A>& r, std::basic_istream<C,T>& f, C delim=*detail::vals<C>::newline)
+{
+    std::ios::pos_type start=f.tellg();
+    std::getline(f, r, delim);
+    if(!r.empty())
+        return true;
+    return (f.tellg()>start);
+}
+
+template<typename C, typename T, typename A>
+bool readline(ref_<basic_string_<C,T,A> >& r, ref_<std::basic_fstream<C,T> >& f,
+              C delim=*detail::vals<C>::newline)
+{
+    std::ios::pos_type start=f.tellg();
+    std::getline(f, r, delim);
+    if(!r.empty())
+        return true;
+    return (f.tellg()>start);
 }
 
 /**

@@ -200,7 +200,7 @@ template<typename T>struct len_t{
     }
 };
 
-}
+} // ns detail
 
 /** @addtogroup seq
  * @{
