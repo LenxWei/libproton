@@ -23,8 +23,12 @@ namespace detail{
 
     template<> struct vals<char>{
         static constexpr const char* nil="";
+        static constexpr const char* nil_(){return nil;}
+
         static constexpr const char* spc=" ";
         static constexpr const char* ws=" \t\r\n";
+        static constexpr const char* ws_(){return ws;}
+
         static constexpr const char* newline="\n";
         static constexpr const char* per="%";
         static constexpr const char* d="d";
@@ -43,8 +47,11 @@ namespace detail{
 
     template<> struct vals<wchar_t>{
         static constexpr const wchar_t* nil=L"";
+        static constexpr const wchar_t* nil_(){return nil;}
+
         static constexpr const wchar_t* spc=L" ";
         static constexpr const wchar_t* ws=L" \t\r\n";
+        static constexpr const wchar_t* ws_(){return ws;}
         static constexpr const wchar_t* newline=L"\n";
         static constexpr const wchar_t* per=L"%";
         static constexpr const wchar_t* d=L"d";
@@ -793,7 +800,7 @@ public:
         offset_t j=this->find_last_not_of(spc);
 
         if(i<0 || j<0 || j < i )
-            return detail::vals<CharT>::nil;
+            return detail::vals<CharT>::nil_();
 
         return basic_string_(this->begin()+i,this->begin()+j+1);
     }
@@ -814,7 +821,7 @@ public:
         if(spc.size()==0){
             if(null_unite<0)
                 null_unite=1;
-            spc=detail::vals<CharT>::ws;
+            spc=detail::vals<CharT>::ws_();
         }
         else{
             if(null_unite<0)
@@ -844,7 +851,7 @@ public:
                 r.push_back(this->substr(pos, begin-pos));
                 pos = begin + 1;
                 if(pos>=(long)this->length()){
-                    r.push_back(detail::vals<CharT>::nil);
+                    r.push_back(detail::vals<CharT>::nil_());
                     break;
                 }
             }//while
@@ -858,13 +865,13 @@ public:
         long pos = 0, begin, end;
         typedef ref_<basic_string_> Str;
 
-        List<Str> r;
+        List<Str> r(alloc);
 
         basic_string_ spc(delim);
         if(spc.size()==0){
             if(null_unite<0)
                 null_unite=1;
-            spc=detail::vals<CharT>::ws;
+            spc=detail::vals<CharT>::ws_();
         }
         else{
             if(null_unite<0)
@@ -894,7 +901,7 @@ public:
                 r << Str(this->substr(pos, begin-pos));
                 pos = begin + 1;
                 if(pos>=(long)this->length()){
-                    r << Str(detail::vals<CharT>::nil);
+                    r << Str(detail::vals<CharT>::nil_());
                     break;
                 }
             }//while
