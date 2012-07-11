@@ -260,10 +260,24 @@ public:
     template<typename ...argT> explicit ref_(argT&& ...a):ref_(alloc, a...)
     {}
 
-    /** explicit initializer_list forwarding ctor.
+	template<typename=typename std::enable_if<
+            !(traits::flag & ref_not_cast_obj)
+        >::type
+        >
+        ref_(const obj_t& a):ref_(alloc, a)
+    {}
+
+	template<typename=typename std::enable_if<
+            !(traits::flag & ref_not_cast_obj)
+        >::type
+        >
+        ref_(obj_t&& a):ref_(alloc, a)
+    {}
+
+    /** initializer_list forwarding ctor.
      * Construct an obj_t using give args.
      */
-    template<typename T> explicit ref_(init_alloc, std::initializer_list<T> a)
+    template<typename T> ref_(init_alloc, std::initializer_list<T> a)
     {
         PROTON_REF_LOG(9,"alloc initializer_list fwd ctor");
         struct ref_obj_t{
@@ -283,7 +297,7 @@ public:
     /** implicit initializer_list forwarding ctor.
      * Construct an obj_t using give args.
      */
-    template<typename T> explicit ref_(std::initializer_list<T> a):ref_(alloc,a)
+    template<typename T> ref_(std::initializer_list<T> a):ref_(alloc,a)
     {}
 
     /** copy ctor.

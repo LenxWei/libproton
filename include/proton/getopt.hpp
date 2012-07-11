@@ -12,6 +12,10 @@ namespace proton{
  * @{
  */
 
+/** return type of getopt().
+ */
+typedef std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt_t;
+
 /** like getopt in python.
  * Note: the prototype above is wrong due to some bugs of doxygen,
  * use the prototype in the function list (above the "detailed description" line).
@@ -22,9 +26,9 @@ namespace proton{
  * @return ([(option, value)], [args])
  * @throw std::invalid_argument
  */
-std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt(
-           int argc, char* const argv[],
-           const str& optstr, const vector_<str>& longopt={});
+getopt_t getopt(
+       int argc, char* const argv[],
+       const str& optstr, const vector_<str>& longopt={});
 
 /**
  * @example getopt.cpp

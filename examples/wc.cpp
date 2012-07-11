@@ -34,15 +34,17 @@ tuple<long, long, long> count_file(Str fn, bool cb, bool cw, bool cl)
 
 int main(int argc, char** argv)
 {
-    vector_<tuple<str, str> > opts;
-    vector_<str> args;
+    getopt_t g;
     try{
-        tie(opts, args)=getopt(argc, argv, "clw", {"bytes","lines","words","help"});
+        g=getopt(argc, argv, "clw", {"bytes","lines","words","help"});
     }
-    catch(std::invalid_argument& e){
+    catch(invalid_argument& e){
         usage();
         return -1;
     }
+
+    auto opts=at<0>(g);
+    auto args=at<1>(g);
 
     bool count_bytes=true;
     bool count_lines=true;
@@ -55,7 +57,7 @@ int main(int argc, char** argv)
     }
 
     for(auto x : opts){
-        auto s=get<0>(x);
+        auto s=at<0>(x);
         if(s=="-c" || s=="--bytes"){
             count_bytes=true;
         }
@@ -72,16 +74,17 @@ int main(int argc, char** argv)
     }
 
     for(auto x:args){
-        auto r=count_file(Str(x), count_bytes, count_words, count_lines);
+        auto r=count_file(x, count_bytes, count_words, count_lines);
         cout << " " ;
         if(count_lines)
-            cout << get<2>(r) << " ";
+            cout << at<2>(r) << " ";
         if(count_words)
-            cout << get<1>(r) << " ";
+            cout << at<1>(r) << " ";
         if(count_bytes)
-            cout << get<0>(r) << " ";
+            cout << at<0>(r) << " ";
         cout << x << endl;
     }
+
     return 0;
 }
 
