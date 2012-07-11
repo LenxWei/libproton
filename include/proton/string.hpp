@@ -1045,25 +1045,29 @@ const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&&  x)
 /** read a line from stream.
  * @return true: not empty, false: empty
  */
-template<typename C, typename T, typename A>
-bool readline(std::basic_string<C,T,A>& r, std::basic_istream<C,T>& f, C delim=*detail::vals<C>::newline)
+template<typename C, typename T>
+std::basic_string<C,T, smart_allocator<C> > readline(std::basic_istream<C,T>& f, C delim=*detail::vals<C>::newline)
 {
+    std::basic_string<C,T,smart_allocator<C> > r(alloc);
     std::ios::pos_type start=f.tellg();
     std::getline(f, r, delim);
-    if(!r.empty())
-        return true;
-    return (f.tellg()>start);
+    if(f.tellg()>start){
+        r.push_back(delim);
+    }
+    return r;
 }
 
-template<typename C, typename T, typename A>
-bool readline(ref_<basic_string_<C,T,A> >& r, ref_<std::basic_fstream<C,T> >& f,
+template<typename C, typename T>
+ref_<basic_string_<C,T,smart_allocator<C> > > readline(ref_<std::basic_fstream<C,T> >& f,
               C delim=*detail::vals<C>::newline)
 {
-    std::ios::pos_type start=f.tellg();
-    std::getline(f, r, delim);
-    if(!r.empty())
-        return true;
-    return (f.tellg()>start);
+    ref_<basic_string_<C,T,smart_allocator<C> > > r(alloc);
+    std::ios::pos_type start=f->tellg();
+    std::getline(*f, *r, delim);
+    if(f->tellg()>start){
+        r->push_back(delim);
+    }
+    return r;
 }
 
 /**

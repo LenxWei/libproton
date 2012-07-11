@@ -22,8 +22,8 @@ tuple<long, long, long> count_file(Str fn, bool cb, bool cw, bool cl)
     long total_bytes=0, total_words=0, total_lines=0;
 
     File f(fn->c_str());
-    Str line(alloc);
-    while(readline(*line, *f)){
+    Str line;
+    while(len(line=readline(f))){
         total_lines++;
         auto words=line->Split();
         total_words+=len(words);
