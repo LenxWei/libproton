@@ -74,14 +74,15 @@ int main(int argc, char** argv)
     }
 
     for(auto x:args){
-        auto r=count_file(x, count_bytes, count_words, count_lines);
+        long bytes, words, lines;
+        tie(bytes, words, lines)=count_file(x, count_bytes, count_words, count_lines);
         cout << " " ;
         if(count_lines)
-            cout << at<2>(r) << " ";
+            cout << lines << " ";
         if(count_words)
-            cout << at<1>(r) << " ";
+            cout << words << " ";
         if(count_bytes)
-            cout << at<0>(r) << " ";
+            cout << bytes << " ";
         cout << x << endl;
     }
 
