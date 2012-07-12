@@ -389,7 +389,49 @@ template<typename C, typename T, typename V, typename X>
 struct format_t;
 
 template<typename C, typename T, typename V>
-struct format_t<C,T,V,typename std::enable_if<std::is_integral<V>::value, void>::type>
+struct format_t<C,T,V,
+            typename std::enable_if<
+                std::is_integral<V>::value &&
+                sizeof(typename std::remove_reference<V>::type)==1,
+            void>::type
+        >
+{
+    static void output(std::basic_ostream<C,T>& o, const C* & f, char a)
+    {
+        bool printed=false;
+        output_prefix(o,f);
+        if(f==NULL)
+            throw std::invalid_argument("not all arguments converted during formatting");
+        switch(*(f)){
+            case *vals<C>::s:
+            case *vals<C>::f:
+            case *vals<C>::d:
+            case *vals<C>::u:
+                o << std::dec << int(a);
+                break;
+            case *vals<C>::o:
+                o << std::oct << int(a);
+                break;
+            case *vals<C>::x:
+                o << std::hex << std::nouppercase << int(a);
+                break;
+            case *vals<C>::X:
+                o << std::hex << std::uppercase << int(a);
+                break;
+            default:
+                throw std::invalid_argument("unsupported format character");
+        }//inner switch
+        f++;
+    }
+};
+
+template<typename C, typename T, typename V>
+struct format_t<C,T,V,
+            typename std::enable_if<
+                std::is_integral<V>::value &&
+                sizeof(typename std::remove_reference<V>::type)!=1,
+            void>::type
+        >
 {
     static void output(std::basic_ostream<C,T>& o, const C* & f, V a)
     {
@@ -916,16 +958,19 @@ public:
     template<typename string_list>
         basic_string_ join(const string_list& r)const
     {
-        if(r.empty()){
+        if(len(r)==0){
             return basic_string_();
         }
         else{
-            typename string_list::const_iterator it=r.begin();
-            basic_string_ res=*it;
-            ++it;
-            for(;it!=r.end();++it){
-                res+=*this;
-                res+=*it;
+            bool first=true;
+            basic_string_ res;
+            for(auto i : r){
+                if(first){
+                    first=false;
+                }
+                else
+                    res+=*this;
+                res+=i;
             }
             return res;
         }
