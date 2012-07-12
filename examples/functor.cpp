@@ -76,7 +76,7 @@ int main()
     PROTON_THROW_IF(a("abc")!=3, "err");
 
     vector<char> buf={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
-    cout << str(" ").join(List_map([](char x)->str{return "%x"%_t(x);}, buf)) << endl;
+    cout << str(" ").join(List_map([](char x){return "%x"%_t(x);}, buf)) << endl;
     return 0;
 }
 
