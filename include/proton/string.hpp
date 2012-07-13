@@ -1093,7 +1093,7 @@ const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&&  x)
 template<typename C, typename T>
 std::basic_string<C,T, smart_allocator<C> > readline(std::basic_istream<C,T>& f, C delim=*detail::vals<C>::newline)
 {
-    std::basic_string<C,T,smart_allocator<C> > r(alloc);
+    std::basic_string<C,T,smart_allocator<C> > r;
     std::ios::pos_type start=f.tellg();
     std::getline(f, r, delim);
     if(f.tellg()>start){

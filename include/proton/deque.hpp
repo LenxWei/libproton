@@ -501,7 +501,8 @@ template<typename T>
 /** List_map
  */
 template<typename F, typename L>
-auto List_map(F f, const L& x)->List<decltype(f(*std::begin(x)))>
+auto List_map(F f, const L& x)
+    ->List<typename std::remove_reference<decltype(f(*std::begin(x)))>::type>
 {
     typedef typename std::remove_reference<decltype(f(*std::begin(x)))>::type R;
     List<R> r(alloc);
