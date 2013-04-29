@@ -9,7 +9,7 @@ using namespace proton;
 
 /** define a function interface type.
  */
-typedef unsigned int (_str2int)(const char*);
+typedef long unsigned int (_str2int)(const char*);
 
 /** define a functor type.
  */
@@ -22,7 +22,7 @@ typedef fp_<_str2int> str2int_fp;
 /** an function object type inheriting the interface.
  */
 struct _f1: fo_<_str2int>{
-    unsigned int operator()(const char* s)
+    long unsigned int operator()(const char* s)
     {
         return string(s).size();
     }
@@ -34,7 +34,7 @@ typedef ref_<_f1> str2int_fo;
 struct _t1{
     /** the candidate member function.
      */
-    unsigned int f(const char* s)
+    long unsigned int f(const char* s)
     {
         return strlen(s);
     }
