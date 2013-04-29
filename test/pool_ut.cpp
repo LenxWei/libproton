@@ -1,3 +1,4 @@
+#include <string>
 #include <proton/base.hpp>
 #include <proton/pool.hpp>
 #include <proton/ref.hpp>
@@ -280,6 +281,9 @@ int map_ut()
 {
     cout << "-> map_ut" << endl;
     mem_pool* g0=get_pool_<tmp_pool>();
+	tmap(int, int) v0;
+    cout << v0[0] << endl;
+
     tmap(int,tstring) v;
     v[0]="abc";
     g0->purge();

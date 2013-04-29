@@ -3,6 +3,7 @@
 #include <proton/functor.hpp>
 #include <proton/string.hpp>
 #include <proton/deque.hpp>
+#include <vector>
 
 using namespace std;
 using namespace proton;

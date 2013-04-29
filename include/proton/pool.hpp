@@ -434,6 +434,13 @@ public:
         return pool_dup(p);
     }
 
+    template<class U, class... Args>
+    static void construct(pointer p, Args&&... val)
+    {
+        new (p) T(val...);
+    }
+
+    /*
     static void construct(pointer p, const T& val)
     {
         new (p) T(val);
@@ -443,6 +450,7 @@ public:
     {
         new (p) T();
     }
+	*/
 
     static void destroy(pointer p)
     {

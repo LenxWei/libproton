@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include "proton/base.hpp"
-#include "proton/detail/unit_test.hpp"
+#include <proton/base.hpp>
+#include <proton/detail/unit_test.hpp>
 
 int test_log()
 {
