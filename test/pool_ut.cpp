@@ -43,7 +43,7 @@ size_t get_mem()
     int sr=system((string("ps -o rss -p ")+pid+" > "+memfn).c_str());
     fstream f(memfn.c_str(), ios_base::in);
 
-    string line=readline(f);
+    auto line=readline(f);
     if(strip(line)!="RSS"){
         PROTON_LOG(1, "bad rss:"<<strip(line));
     }
