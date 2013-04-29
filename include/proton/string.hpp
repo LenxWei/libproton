@@ -1088,7 +1088,7 @@ const basic_string_<T,C,A>&& cast_(const std::basic_string<T,C,A>&&  x)
 }
 
 /** read a line from stream.
- * @return true: not empty, false: empty
+ * @return the line. If empty it means there is no data in the stream; otherwise a delim is always put in the end.
  */
 template<typename C, typename T>
 std::basic_string<C,T, smart_allocator<C> > readline(std::basic_istream<C,T>& f, C delim=*detail::vals<C>::newline)
