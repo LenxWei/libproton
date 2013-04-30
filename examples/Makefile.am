@@ -1,5 +1,5 @@
-TESTS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple wc
-check_PROGRAMS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple wc
+TESTS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple eg_map eg_unordered_map wc
+check_PROGRAMS = eg_func eg_vector eg_deque eg_string eg_getopt eg_tuple eg_map eg_unordered_map wc
 
 eg_func_SOURCES = functor.cpp
 eg_func_CXXFLAGS = $(BOOST_CPPFLAGS)
@@ -16,6 +16,14 @@ eg_vector_LDADD = $(top_srcdir)/src/libproton.la
 eg_deque_SOURCES = deque.cpp
 eg_deque_CXXFLAGS = $(BOOST_CPPFLAGS)
 eg_deque_LDADD = $(top_srcdir)/src/libproton.la
+
+eg_map_SOURCES = map.cpp
+eg_map_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_map_LDADD = $(top_srcdir)/src/libproton.la
+
+eg_unordered_map_SOURCES = unordered_map.cpp
+eg_unordered_map_CXXFLAGS = $(BOOST_CPPFLAGS)
+eg_unordered_map_LDADD = $(top_srcdir)/src/libproton.la
 
 eg_getopt_SOURCES = getopt.cpp
 eg_getopt_CXXFLAGS = $(BOOST_CPPFLAGS)

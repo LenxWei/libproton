@@ -162,7 +162,7 @@ public:
         return reinterpret_cast<baseT&>(*this);
     }
 
-    PROTON_COPY_DECL(set_)
+    PROTON_COPY_DECL_NV(set_)
 
     /** add an item.
      */

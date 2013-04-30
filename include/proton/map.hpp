@@ -29,14 +29,6 @@ std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>&
     return x;
 }
 
-template <typename _Key, typename _Tp, typename _Cmp, typename _Alloc>
-std::map<_Key, _Tp, _Cmp, _Alloc>& operator<<(std::map<_Key, _Tp, _Cmp, _Alloc>& x,
-                                              std::initializer_list<std::pair<const _Key, _Tp> > item)
-{
-    x.insert(item);
-    return x;
-}
-
 /** general output for map.
  * @param s the output stream
  * @param x the map to be outputed
@@ -154,7 +146,7 @@ public:
         return reinterpret_cast<baseT&>(*this);
     }
 
-    PROTON_COPY_DECL(map_)
+    PROTON_COPY_DECL_NV(map_)
 
     /** remove an item.
      * @param key the key.
@@ -176,7 +168,7 @@ public:
      */
     T get(const K& key)const
     {
-        return this->at[key];
+        return this->at(key);
     }
 
     /** get an item from the map.
@@ -191,7 +183,6 @@ public:
         if(it==this->end())
             return T(dft...);
         T r=it->second;
-        this->erase(it);
         return r;
     }
 
@@ -261,14 +252,13 @@ public:
     void update(oT&& o)
     {
         for(auto i:o){
-            (*this)[i->first]=i->second;
+            (*this)[i.first]=i.second;
         }
     }
 };
 
 /**
  * @example map.cpp
- * [TODO]
  */
 
 /** cast to proton::map_<>& from std::map<>&.
