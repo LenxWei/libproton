@@ -493,19 +493,14 @@ struct ref_traits<deque_<T,A> >{
     static constexpr unsigned long long flag=ref_not_use_output;
 };
 
-/** main List type
- */
-template<typename T>
-    using List=ref_<deque_<T> >;
-
-/** List_map
+/** list_map
  */
 template<typename F, typename L>
-auto List_map(F f, const L& x)
-    ->List<typename std::remove_reference<decltype(f(*std::begin(x)))>::type>
+auto list_map(F f, const L& x)
+    -> deque_<typename std::remove_reference<decltype(f(*std::begin(x)))>::type>
 {
     typedef typename std::remove_reference<decltype(f(*std::begin(x)))>::type R;
-    List<R> r(alloc);
+    deque_<R> r;
     for(auto i :x){
         r << f(i);
     }

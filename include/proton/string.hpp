@@ -598,14 +598,6 @@ struct ref_traits<basic_string_<C,T,A> >{
     static constexpr unsigned long long flag=ref_not_use_output | ref_immutable;
 };
 
-/** the main string type for python porting
- */
-typedef ref_<basic_string_<char> > Str;
-
-/** the main wstring type for python porting
- */
-typedef ref_<basic_string_<wchar_t> > Wstr;
-
 /** main string template
  */
 template<
@@ -901,56 +893,6 @@ public:
         return r;
     }
 
-    List<ref_<basic_string_> >
-        Split(const baseT& delim=baseT(), int null_unite=-1)const
-    {
-        long pos = 0, begin, end;
-        typedef ref_<basic_string_> Str;
-
-        List<Str> r(alloc);
-
-        basic_string_ spc(delim);
-        if(spc.size()==0){
-            if(null_unite<0)
-                null_unite=1;
-            spc=detail::vals<CharT>::ws_();
-        }
-        else{
-            if(null_unite<0)
-                null_unite=0;
-        }
-
-        if(null_unite){
-            do{
-                begin = this->find_first_not_of(spc,pos);
-                if(begin<0)
-                    break;
-                end = this->find_first_of(spc,begin);
-                if(end<0)
-                    end=this->length();
-                r << Str(this->substr(begin, end-begin));
-                pos = end;
-            }
-            while(pos < (long)this->length());
-        }
-        else{
-            while(1){
-                begin = this->find_first_of(spc,pos);
-                if(begin<0){
-                    r << Str(this->substr(pos));
-                    break;
-                }
-                r << Str(this->substr(pos, begin-pos));
-                pos = begin + 1;
-                if(pos>=(long)this->length()){
-                    r << Str(detail::vals<CharT>::nil_());
-                    break;
-                }
-            }//while
-        }//else
-        return r;
-    }
-
     /** join a list of strings to one string.
      * @param r     the input string list
      * @return the output string
@@ -1103,14 +1045,14 @@ std::basic_string<C,T, smart_allocator<C> > readline(std::basic_istream<C,T>& f,
 }
 
 template<typename C, typename T>
-ref_<basic_string_<C,T,smart_allocator<C> > > readline(ref_<std::basic_fstream<C,T> >& f,
+basic_string_<C,T,smart_allocator<C> > readline(ref_<std::basic_fstream<C,T> >& f,
               C delim=*detail::vals<C>::newline)
 {
-    ref_<basic_string_<C,T,smart_allocator<C> > > r(alloc);
+    basic_string_<C,T,smart_allocator<C> > r;
     std::ios::pos_type start=f->tellg();
-    std::getline(*f, *r, delim);
+    std::getline(*f, r, delim);
     if(f->tellg()>start){
-        r->push_back(delim);
+        r.push_back(delim);
     }
     return r;
 }

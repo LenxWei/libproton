@@ -172,7 +172,7 @@ typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 {
 	typedef typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 									   detail::fix_size(begin,end, sizeof...(T))>::type ret_t;
-#ifdef __llvm__
+#ifdef __clang__
 	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(begin, sizeof...(T)))>(x)));
 #else
 	#ifdef __GNUC__

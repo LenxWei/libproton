@@ -17,17 +17,17 @@ void usage()
     << endl;
 }
 
-tuple<long, long, long> count_file(Str fn, bool cb, bool cw, bool cl)
+tuple<long, long, long> count_file(const str& fn, bool cb, bool cw, bool cl)
 {
     long total_bytes=0, total_words=0, total_lines=0;
 
-    File f(fn->c_str());
-    Str line;
+    fstream f(fn.c_str());
+    str line;
     while(len(line=readline(f))){
         total_lines++;
-        auto words=line->Split();
+        auto words=line.split();
         total_words+=len(words);
-        total_bytes=f->tellg();
+        total_bytes=f.tellg();
     }
     return _t(total_bytes,total_words,total_lines);
 }

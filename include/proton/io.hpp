@@ -16,8 +16,6 @@
 
 namespace proton{
 
-typedef ref_<std::fstream> File;
-
 /**
  * @example io.cpp
  * @}

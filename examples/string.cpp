@@ -184,34 +184,10 @@ void wstr_eg()
     }
 }
 
-void Str_eg()
-{
-    cout << ">>> Str examples :" << endl;
-    Str a("123"), b, c;
-    b=a;
-    cout << "a=" << a << endl;
-    cout << "b=" << b << endl;
-    c="012";
-    cout << "c=%s" % c << endl;
-    a+="456";
-    cout << "a=" << a << endl;
-    cout << "b=" << b << endl;
-    b=a;
-    a=a+c;
-    cout << "a=" << a << endl;
-    cout << "b=" << b << endl;
-    cout << "c*2=" << c*2 << endl;
-    c*=2;
-    c+=" %s";
-    cout << "c=" << c << endl;
-    cout << "c % a = " << c % a << endl;
-}
-
 int main()
 {
     str_eg();
     wstr_eg();
-    Str_eg();
     return 0;
 }
 
