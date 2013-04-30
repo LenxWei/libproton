@@ -172,7 +172,15 @@ typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 {
 	typedef typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 									   detail::fix_size(begin,end, sizeof...(T))>::type ret_t;
-	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x))); // [FIXME] in g++, the items in a tuple is in reverse order. for other implementation, need fix.
+#ifdef __llvm__
+	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(begin, sizeof...(T)))>(x)));
+#else
+	#ifdef __GNUC__
+		return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x)));
+	#else
+		static_assert(0, "unknown compiler")
+	#endif
+#endif
 }
 
 /** general output for tuple.

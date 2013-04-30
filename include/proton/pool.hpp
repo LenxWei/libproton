@@ -440,7 +440,7 @@ public:
         new (p) T(val...);
     }
 
-    /*
+/*
     static void construct(pointer p, const T& val)
     {
         new (p) T(val);
@@ -450,7 +450,7 @@ public:
     {
         new (p) T();
     }
-	*/
+*/
 
     static void destroy(pointer p)
     {
