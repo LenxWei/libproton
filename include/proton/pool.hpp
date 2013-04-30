@@ -434,10 +434,10 @@ public:
         return pool_dup(p);
     }
 
-    template<class... Args>
-    static void construct(pointer p, Args&&... val)
+    template<class U, class... Args>
+    static void construct(U* p, Args&&... val)
     {
-        new (p) T(val...);
+        new (p) U(val...);
     }
 
 /*
