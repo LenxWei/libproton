@@ -213,11 +213,43 @@ public:
             this->erase(it);
     }
 
+    /** get an item based on its sequence in the set.
+     *  @param i the index, if i<0, count from the tail (like python)
+     *  @return the i-th item, or throw if i is out of range.
+     */
+    const T& operator[](long i)
+    {
+    	if(i>=0){
+			auto it=this->begin();
+			auto end=this->end();
+			while(1){
+				if(it==end){
+					throw std::out_of_range("The index is out of range.");
+				}
+				if(i==0)
+					return *it;
+				i--;
+				++it;
+			}
+    	}
+    	else{
+    		auto it=this->end();
+    		auto begin=this->begin();
+    		while(1){
+    			if(it==begin){
+    				throw std::out_of_range("This index is out of range.");
+    			}
+    			--it;
+    			i++;
+    			if(i==0)
+    				return *it;
+    		}
+    	}
+    }
 };
 
 /**
  * @example set.cpp
- * [TODO]
  */
 
 /** &=
