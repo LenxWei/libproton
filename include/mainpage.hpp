@@ -14,7 +14,7 @@
 * - http://code.google.com/p/libproton/downloads/list
 * - https://github.com/LenxWei/libproton/downloads
 *
-* Need a compiler supporting c++11, such as gcc 4.7.0 or higher.<br>
+* Need a compiler supporting c++11, such as gcc 4.7, clang 3.2 or higher.<br>
 * Install <a href="http://www.boost.org/">Boost C++ Library</a> 1.48 or higher first.
 *
 * After that, just standard "./configure; make; make check; make install"
@@ -22,7 +22,6 @@
 * @section modules Modules
 * You can find documents about modules <a href="modules.html">here</a>.
 * <hr>
-* @todo 1.1.2 goal: list_, unordered_
 * @todo add tutorial
 * @todo 1.2 milestone
 * @todo add os module
