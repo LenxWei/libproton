@@ -247,7 +247,7 @@ public:
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
             new (&(p->r)) detail::refc_t();
-            new (&p->o) obj_t(a...);
+            new (&p->o) obj_t(a...); // [FIXME] how about exceptions?
             _p=&(p->o);
             enter(&(p->r));
         }
@@ -377,7 +377,7 @@ public:
         return *this;
     }
 
-    ref_& operator=(init_alloc_none)noexcept
+    ref_& operator=(init_alloc_none)noexcept(noexcept(_p->~objT()))
     {
         release();
         return *this;

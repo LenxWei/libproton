@@ -19,6 +19,7 @@ int main()
     auto slice0=sub<0,2>(s); // s[0:2]
     cout << "s[0:2] is " << slice0 << endl;
     PROTON_THROW_IF(len(slice0)!=2, "slice in the head err");
+    PROTON_THROW_IF(at<0>(slice0)!="a", "slice in the head err");
 
     auto slice1=sub<1,-1>(s); // s[1:-1]
     cout << "s[1:-1] is " << slice1 << endl;
