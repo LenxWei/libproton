@@ -96,9 +96,8 @@ constexpr long get_index(long i, long size)
 
 template<long i, typename ...T>
 struct at_index{
-	static_assert(i>=0, "out of range");
 	const std::tuple<T...>* p;
-	typedef decltype(std::get<i>(*p)) type;
+	typedef decltype(std::get<get_index(i,sizeof...(T))>(*p)) type;
 };
 
 constexpr long fix_size(long begin, long end, long size)
@@ -157,7 +156,7 @@ struct len_t<std::tuple<T...> >{
  */
 
 template<long index, typename ...T>
-typename detail::at_index<detail::get_index(index,sizeof...(T)),T...>::type
+typename detail::at_index<index,T...>::type
 	at(const std::tuple<T...>& x)
 {
 	return std::get<detail::get_index(index,sizeof...(T))>(x);
