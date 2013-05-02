@@ -155,6 +155,7 @@ struct len_t<std::tuple<T...> >{
 /** like x[index] in python
  */
 
+#ifndef __clang__
 template<long index, typename ...T>
 typename detail::at_index<index,T...>::type
 	at(const std::tuple<T...>& x)
@@ -181,6 +182,15 @@ typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 	#endif
 #endif
 }
+
+#else
+template<long index, typename ...T>
+typename detail::at_index<index,T...>::type
+	at(const std::tuple<T...>& x)
+{
+	return std::get<index>(x);
+}
+#endif
 
 /** general output for tuple.
  * @param s the output stream

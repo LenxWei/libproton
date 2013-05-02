@@ -13,6 +13,10 @@ int main()
     tuple<str,str,str> s("a","b","c");
 
     cout << "s is " << s << endl;
+    cout << "last item is :" << at<2>(s) << endl;
+    PROTON_THROW_IF(at<2>(s)!="c", "get item err");
+
+#ifndef __clang__
     cout << "last item is :" << at<-1>(s) << endl;
     PROTON_THROW_IF(at<-1>(s)!="c", "get item err");
 
@@ -35,7 +39,7 @@ int main()
 
     tuple<int,int,int,int,int> t(0,1,2,3,4);
     PROTON_THROW_IF((sub<1,3>(t)!=_t(1,2)),"bad sub");
-
+#endif
 /*
     cout << "min is :" << min(s) << endl;
     PROTON_THROW_IF(min(s)!="a", "min err");
