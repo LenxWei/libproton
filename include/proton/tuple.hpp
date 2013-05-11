@@ -62,6 +62,12 @@ constexpr long fix_index(long i, long size)
 			);
 }
 
+template<typename ...T>
+constexpr long fix_index(long i)
+{
+	return fix_index(i, sizeof...(T));
+}
+
 constexpr long sub_index(long i, long size)
 {
     return (i>=size)?
@@ -102,10 +108,16 @@ struct at_index{
 
 constexpr long fix_size(long begin, long end, long size)
 {
-	return fix_index(begin,size)>fix_index(end,size)?
+	return fix_index(begin,size)>fix_index(end,size)  ?
 				0
 			:
 				fix_index(end,size)-fix_index(begin,size);
+}
+
+template<typename ...T>
+constexpr long fix_size(long begin, long end)
+{
+	return fix_size(begin, end, sizeof...(T));
 }
 
 template<typename T, size_t begin, size_t size>
@@ -155,7 +167,6 @@ struct len_t<std::tuple<T...> >{
 /** like x[index] in python
  */
 
-#ifndef __clang__
 template<long index, typename ...T>
 typename detail::at_index<index,T...>::type
 	at(const std::tuple<T...>& x)
@@ -166,12 +177,12 @@ typename detail::at_index<index,T...>::type
 /** get a slice of tuple x[begin:end] in python
  */
 template<long begin, long end=std::numeric_limits<long>::max(), typename ...T>
-typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
-									   detail::fix_size(begin,end, sizeof...(T))>::type
+typename detail::sub<std::tuple<T...>, detail::fix_index<T...>(begin),
+									   detail::fix_size<T...>(begin,end)>::type
 	sub(const std::tuple<T...>& x)
 {
-	typedef typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
-									   detail::fix_size(begin,end, sizeof...(T))>::type ret_t;
+	typedef typename detail::sub<std::tuple<T...>, detail::fix_index<T...>(begin),
+									   detail::fix_size<T...>(begin,end)>::type ret_t;
 #ifdef __clang__
 	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(begin, sizeof...(T)))>(x)));
 #else
@@ -182,16 +193,6 @@ typename detail::sub<std::tuple<T...>, detail::fix_index(begin, sizeof...(T)),
 	#endif
 #endif
 }
-
-#else
-template<long index, typename ...T>
-typename detail::at_index<index,T...>::type
-	at(const std::tuple<T...>& x)
-{
-	return std::get<detail::get_index(index,sizeof...(T))>(x);
-	//return std::get<index>(x);
-}
-#endif
 
 /** general output for tuple.
  * @param s the output stream
