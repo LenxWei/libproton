@@ -62,12 +62,6 @@ constexpr long fix_index(long i, long size)
 			);
 }
 
-template<typename ...T>
-constexpr long fix_index(long i)
-{
-	return fix_index(i, sizeof...(T));
-}
-
 constexpr long sub_index(long i, long size)
 {
     return (i>=size)?
@@ -114,12 +108,6 @@ constexpr long fix_size(long begin, long end, long size)
 				fix_index(end,size)-fix_index(begin,size);
 }
 
-template<typename ...T>
-constexpr long fix_size(long begin, long end)
-{
-	return fix_size(begin, end, sizeof...(T));
-}
-
 template<typename T, size_t begin, size_t size>
 struct sub{
 private:
@@ -149,13 +137,19 @@ struct sub<T,begin,1>{
 	typedef std::tuple<typename std::tuple_element<begin,T>::type > type;
 };
 
-
 template<typename ...T>
 struct len_t<std::tuple<T...> >{
     static size_t result(const std::tuple<T...>& x)
     {
         return sizeof...(T);
     }
+};
+
+template<typename T, long begin, long end>
+struct sub_type{
+public:
+	typedef typename sub<T, fix_index(begin, std::tuple_size<T>::value),
+			fix_size(begin, end, std::tuple_size<T>::value)>::type type;
 };
 
 } // ns detail
@@ -177,12 +171,10 @@ typename detail::at_index<index,T...>::type
 /** get a slice of tuple x[begin:end] in python
  */
 template<long begin, long end=std::numeric_limits<long>::max(), typename ...T>
-typename detail::sub<std::tuple<T...>, detail::fix_index<T...>(begin),
-									   detail::fix_size<T...>(begin,end)>::type
+typename detail::sub_type<std::tuple<T...>, begin, end>::type
 	sub(const std::tuple<T...>& x)
 {
-	typedef typename detail::sub<std::tuple<T...>, detail::fix_index<T...>(begin),
-									   detail::fix_size<T...>(begin,end)>::type ret_t;
+	typedef typename detail::sub_type<std::tuple<T...>, begin, end>::type ret_t;
 #ifdef __clang__
 	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(begin, sizeof...(T)))>(x)));
 #else
