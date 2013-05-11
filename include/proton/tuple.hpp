@@ -145,11 +145,20 @@ struct len_t<std::tuple<T...> >{
     }
 };
 
+template<typename T>
+class tuple_size;
+
+template<typename ...T>
+class tuple_size<std::tuple<T...> >{
+public:
+	static constexpr size_t value=sizeof...(T);
+};
+
 template<typename T, long begin, long end>
 struct sub_type{
 public:
-	typedef typename sub<T, fix_index(begin, std::tuple_size<T>::value),
-			fix_size(begin, end, std::tuple_size<T>::value)>::type type;
+	typedef typename sub<T, fix_index(begin, tuple_size<T>::value),
+			fix_size(begin, end, tuple_size<T>::value)>::type type;
 };
 
 } // ns detail
