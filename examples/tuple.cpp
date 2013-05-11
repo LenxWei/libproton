@@ -19,7 +19,6 @@ int main()
     cout << "last item is :" << at<-1>(s) << endl;
     PROTON_THROW_IF(at<-1>(s)!="c", "get item err");
 
-#ifndef __clang__
     auto slice0=sub<0,2>(s); // s[0:2]
     cout << "s[0:2] is " << slice0 << endl;
     PROTON_THROW_IF(len(slice0)!=2, "slice in the head err");
@@ -39,7 +38,7 @@ int main()
 
     tuple<int,int,int,int,int> t(0,1,2,3,4);
     PROTON_THROW_IF((sub<1,3>(t)!=_t(1,2)),"bad sub");
-#endif
+
 /*
     cout << "min is :" << min(s) << endl;
     PROTON_THROW_IF(min(s)!="a", "min err");
