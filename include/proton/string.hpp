@@ -396,7 +396,7 @@ struct format_t<C,T,V,
             void>::type
         >
 {
-    static void output(std::basic_ostream<C,T>& o, const C* & f, char a)
+    static void output(V a, std::basic_ostream<C,T>& o, const C* & f)
     {
         bool printed=false;
         output_prefix(o,f);
@@ -433,7 +433,7 @@ struct format_t<C,T,V,
             void>::type
         >
 {
-    static void output(std::basic_ostream<C,T>& o, const C* & f, V a)
+    static void output(V a, std::basic_ostream<C,T>& o, const C* & f)
     {
         bool printed=false;
         output_prefix(o,f);
@@ -465,7 +465,7 @@ struct format_t<C,T,V,
 template<typename C, typename T, typename V>
 struct format_t<C,T,V,typename std::enable_if<std::is_floating_point<V>::value, void>::type>
 {
-    static void output(std::basic_ostream<C,T>& o, const C* & f, V a)
+    static void output(V a, std::basic_ostream<C,T>& o, const C* & f)
     {
         bool printed=false;
         output_prefix(o,f);
@@ -500,7 +500,7 @@ struct format_t<C,T,V,typename std::enable_if<std::is_floating_point<V>::value, 
 template<typename C, typename T, typename V>
 struct format_t<C,T,V,typename std::enable_if<!(std::is_floating_point<V>::value ||
                                                 std::is_integral<V>::value), void>::type>{
-    static void output(std::basic_ostream<C,T>& o, const C* & f, const V& a)
+    static void output(const V& a, std::basic_ostream<C,T>& o, const C* & f)
     {
         bool printed=false;
         output_prefix(o,f);
@@ -527,7 +527,7 @@ template<typename C, typename T, typename V>
 struct format_output_t{
     static void output(std::basic_ostream<C,T>& s, const C* f, const V& v)
     {
-        format_t<C,T,V,void>::output(s, f, v);
+        format_t<C,T,V,void>::output(v, s, f);
         output_prefix(s, f);
         if(f)
             throw std::invalid_argument("not enough arguments for format");
@@ -549,7 +549,7 @@ struct format_tuple {
     {
         typedef decltype(at<-I>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
-        format_t<C,T,N1,void>::output(s, f, at<-I>(t));
+        format_t<C,T,N1,void>::output(at<-I>(t), s, f);
         format_tuple<C, T, V, I-1>::output(s, f, t);
     }
 };
@@ -560,7 +560,7 @@ struct format_tuple<C, T, V, 1> {
     {
         typedef decltype(at<-1>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
-        format_t<C,T,N1,void>::output(s, f, at<-1>(t));
+        format_t<C,T,N1,void>::output(at<-1>(t), s, f);
     }
 };
 
