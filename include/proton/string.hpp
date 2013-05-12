@@ -543,14 +543,14 @@ template<typename C, typename T, typename A, typename V>
 }
 
 // helper function to format a tuple of any size
-template<typename C, typename T, typename V, std::size_t I>
+template<typename C, typename T, typename V, long I>
 struct format_tuple {
     static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
     {
-        format_tuple<C, T, V, I-1>::output(s, f, t);
-        typedef decltype(std::get<I-1>(t)) N;
+        typedef decltype(at<-I>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
-        format_t<C,T,N1,void>::output(s, f, std::get<I-1>(t));
+        format_t<C,T,N1,void>::output(s, f, at<-I>(t));
+        format_tuple<C, T, V, I-1>::output(s, f, t);
     }
 };
 
@@ -558,9 +558,9 @@ template<typename C, typename T, typename V>
 struct format_tuple<C, T, V, 1> {
     static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
     {
-        typedef decltype(std::get<0>(t)) N;
+        typedef decltype(at<-1>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
-        format_t<C,T,N1,void>::output(s, f, std::get<0>(t));
+        format_t<C,T,N1,void>::output(s, f, at<-1>(t));
     }
 };
 
