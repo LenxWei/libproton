@@ -545,7 +545,7 @@ template<typename C, typename T, typename A, typename V>
 // helper function to format a tuple of any size
 template<typename C, typename T, typename V, long I>
 struct format_tuple {
-    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    static inline void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
     {
         typedef decltype(at<-I>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
@@ -556,7 +556,7 @@ struct format_tuple {
 
 template<typename C, typename T, typename V>
 struct format_tuple<C, T, V, 1> {
-    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    static inline void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
     {
         typedef decltype(at<-1>(t)) N;
         typedef typename std::remove_reference<N>::type N1;
@@ -566,8 +566,9 @@ struct format_tuple<C, T, V, 1> {
 
 template<typename C, typename T, typename V>
 struct format_tuple<C, T, V, 0> {
-    static void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
+    static inline void output(std::basic_ostream<C,T>& s, const C* & f, const V& t)
     {
+    	// [FIXME] output the string anyway? or throw an err?
     }
 };
 

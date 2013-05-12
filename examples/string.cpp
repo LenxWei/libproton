@@ -53,6 +53,7 @@ void str_eg()
     int k=10;
     cout << "%% to show a forwarded tuple: (%s,%f,%X)" % _f(c,1.1,k) << endl;
 
+    bool caught=false;
     try{
         cout << str("%d %d %o %% %x %X\n") % 1;
     }
@@ -60,7 +61,11 @@ void str_eg()
     {
         // catch more formats
         cout << e.what() << endl;
+        caught=true;
     }
+    PROTON_THROW_IF(!caught, "bad catch more formats");
+
+    caught=false;
     try{
         cout << "%d %d %o %% %x %X\n" % _f(1,2,3);
     }
@@ -68,7 +73,11 @@ void str_eg()
     {
         // catch more formats for tuple
         cout << e.what() << endl;
+        caught=true;
     }
+    PROTON_THROW_IF(!caught, "bad catch more formats for tuple");
+
+    caught=false;
     try{
         cout << "%d %d" % _f(1,2,3);
     }
@@ -76,7 +85,11 @@ void str_eg()
     {
         // catch extra parameters
         cout << e.what() << endl;
+        caught=true;
     }
+    PROTON_THROW_IF(!caught, "bad catch extra parameters");
+
+    caught=false;
     try{
         cout << "%d %d" % _f("abc",2);
     }
@@ -84,7 +97,11 @@ void str_eg()
     {
         // catch bad type
         cout << e.what() << endl;
+        caught=true;
     }
+    PROTON_THROW_IF(!caught, "bad catch unmatch type");
+
+    caught=false;
     try{
         cout << "%t %d" % _f("abc",2);
     }
@@ -92,7 +109,9 @@ void str_eg()
     {
         // catch bad type
         cout << e.what() << endl;
+        caught=true;
     }
+    PROTON_THROW_IF(!caught, "bad catch unknown type");
 }
 
 void wstr_eg()
