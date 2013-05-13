@@ -739,6 +739,7 @@ public:
     }
 
     /** string % V
+     * [TODO] optimization to remove the temporary ostringstream buffer
      */
     template<typename V>
     basic_string_ operator%(const V& a)const
