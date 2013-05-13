@@ -235,23 +235,6 @@ typename detail::sub_tuple_type<T, detail::fix_index(begin, detail::tuple_size<T
 					detail::fix_size(begin, end, detail::tuple_size<T>::value)>::type
 			>::sub(t);
 }
-/*
-template<long begin, long end=std::numeric_limits<long>::max(), typename ...T>
-typename detail::sub_type<std::tuple<T...>, begin, end>::type
-	sub(const std::tuple<T...>& x)
-{
-	typedef typename detail::sub_type<std::tuple<T...>, begin, end>::type ret_t;
-#ifdef __clang__
-	return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(begin, sizeof...(T)))>(x)));
-#else
-	#ifdef __GNUC__
-		return ret_t(*reinterpret_cast<const ret_t*>(&std::get<(detail::sub_index(end-1, sizeof...(T)))>(x)));
-	#else
-		static_assert(0, "unknown compiler")
-	#endif
-#endif
-}
-*/
 
 /** general output for tuple.
  * @param s the output stream
@@ -278,8 +261,8 @@ std::wostream& operator<<(std::wostream& s, const std::tuple<T...>& x)
 
 /** tuple + tuple
  */
-template<typename... T2, typename... T1>
-std::tuple<T1..., T2...> operator+(const std::tuple<T1...>& x, const std::tuple<T2...>& y)
+template<typename T2, typename ...T1>
+auto operator+(const std::tuple<T1...>& x, T2&& y) -> decltype(std::tuple_cat(x,y))
 {
 	return std::tuple_cat(x,y);
 }
