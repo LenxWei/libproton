@@ -211,7 +211,7 @@ struct output_tuple<T, 0> {
 
 /** get a slice of tuple x[begin:end] in python
  */
-
+// [TODO] optimization using forward
 template<long begin, long end=std::numeric_limits<long>::max(), typename T>
 typename detail::sub_tuple_type<T, detail::fix_index(begin, detail::tuple_size<T>::value),
 		detail::fix_size(begin, end, detail::tuple_size<T>::value)>::type sub(const T& t)
