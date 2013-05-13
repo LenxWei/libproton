@@ -28,7 +28,7 @@ int main()
     cout << "s[1:-1] is " << slice1 << endl;
     PROTON_THROW_IF(len(slice1)!=1, "slice in the middle err");
 
-    auto slice=sub<1,3>(s); // s[1:]
+    auto slice=sub<1>(s); // s[1:]
     cout << "s[1:] is " << slice << endl;
     PROTON_THROW_IF(at<-1>(slice)!="c", "slice to the end err");
 
