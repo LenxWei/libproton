@@ -32,9 +32,11 @@ int main()
     cout << "s[1:] is " << slice << endl;
     PROTON_THROW_IF(at<-1>(slice)!="c", "slice to the end err");
 
+#if !defined(__clang__) || (__clang_major__>=3 && __clang_minor__ >= 2)
     auto slice2=slice1+s;
     cout << "s[1:-1]+s is " << slice2 << endl;
     PROTON_THROW_IF(len(slice2)!=4, "slice with step err");
+#endif
 
     tuple<int,int,int,int,int> t(0,1,2,3,4);
     PROTON_THROW_IF((sub<1,3>(t)!=_t(1,2)),"bad sub");
