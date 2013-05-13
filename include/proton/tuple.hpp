@@ -37,22 +37,6 @@ constexpr long fix_index(long i, long size)
 			);
 }
 
-constexpr long sub_index(long i, long size)
-{
-    return (i>=size)?
-				size-1
-			:(
-				(i<0)?
-					(i+size < 0 ?
-						0
-					:
-						i+size
-					)
-				:
-					i
-			);
-}
-
 constexpr long get_index(long i, long size)
 {
     return (i>=size)?
@@ -90,6 +74,10 @@ struct len_t<std::tuple<T...> >{
         return sizeof...(T);
     }
 };
+
+//////////////////
+// a simpler tuple_size, to avoid triggering some bugs of clang
+//////////////////
 
 template<typename T>
 class tuple_size;
@@ -288,28 +276,6 @@ auto _f(T&& ...x) -> decltype(std::forward_as_tuple(x...))
 {
 	return std::forward_as_tuple(x...);
 }
-
-#if 0
-/* vector_ * n
- */
-template<typename T, typename A>
-vector_<T,A> operator*(const std::vector<T,A>& s, size_t n)
-{
-    vector_<T,A> r;
-    r.reserve(s.size()*n);
-    for(size_t i=0; i<n; i++)
-        r.extend(s);
-    return r;
-}
-
-/* n * vector_
- */
-template<typename T, typename A>
-vector_<T,A> operator*(size_t n, const std::vector<T,A>& s)
-{
-    return s*n;
-}
-#endif
 
 /**
  * @example tuple.cpp
