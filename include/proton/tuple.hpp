@@ -224,7 +224,7 @@ struct output_tuple<T, 0> {
 /** get a slice of tuple x[begin:end] in python
  */
 
-template<long begin, long end, typename T>
+template<long begin, long end=std::numeric_limits<long>::max(), typename T>
 typename detail::sub_tuple_type<T, detail::fix_index(begin, detail::tuple_size<T>::value),
 		detail::fix_size(begin, end, detail::tuple_size<T>::value)>::type sub(const T& t)
 {
@@ -278,8 +278,8 @@ std::wostream& operator<<(std::wostream& s, const std::tuple<T...>& x)
 
 /** tuple + tuple
  */
-template<typename T2, typename ...T1>
-auto operator+(const std::tuple<T1...>& x, T2&& y) -> decltype(std::tuple_cat(x,y))
+template<typename... T2, typename... T1>
+std::tuple<T1..., T2...> operator+(const std::tuple<T1...>& x, const std::tuple<T2...>& y)
 {
 	return std::tuple_cat(x,y);
 }
