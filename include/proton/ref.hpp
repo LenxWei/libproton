@@ -72,6 +72,8 @@ public:
  * @{
  */
 
+// [TODO] sref_: a simpler ref template for single-rooted class hierarchies.
+
 class init_alloc{};
 extern init_alloc alloc; ///< explicitly demand to initialize an object.
 
@@ -178,6 +180,8 @@ template<typename O, typename A, typename T>
     friend long ref_count(const ref_<O,A,T>& x);
 template<typename R, typename O2, typename A2, typename T2 >
     friend R cast(const ref_<O2,A2,T2>& x);
+//template<typename T>
+//	friend class weak_;
 
 public:
     typedef ref_ proton_ref_self_t;

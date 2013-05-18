@@ -14,14 +14,14 @@
 namespace proton{
 
 
-template<typename T>
+template<typename objT>
 class para_ {
 private:
 	constexpr static long id_shift=sizeof(long)/2;
 	constexpr static long offset_mask =long((unsigned long)(-1)>>id_shift);
 
 	long _id_and_offset; // lowest half is offset, highest half is id
-	T* _p;
+	objT* _p;
 
 	long compute_id_offset(long id, long offset)
 	{
@@ -29,7 +29,7 @@ private:
 		return (id<<id_shift)+(offset & offset_mask);
 	}
 
-	para_(const long* id, T* p)
+	para_(const long* id, objT* p)
 		:_id_and_offset(compute_id_offset(*id,(char*)p-(char*)id)),
 		 _p(p)
 	{}
@@ -37,10 +37,10 @@ private:
 public:
 
 	template<A,Tr>
-	para_(const ref_<T,A,Tr>& r):para_(r.__rp()->id(), r.__p())
+	para_(const ref_<objT,A,Tr>& r):para_(r.__rp()->id(), r.__p())
 	{}
 
-	bool validate()
+	bool __validate()
 	{
 		long offset=_id_and_offset & offset_mask;
 		long* id=(long*)((char*)p-offset);
@@ -49,19 +49,19 @@ public:
 
 	~para_()
 	{
-		PROTON_THROW_IF(!validate(), "para_ validation failed. please use ref_ instead.")
+		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
 	}
 
     /** operator-> points to the object refered.
      */
-    T* operator->()
+    objT* operator->()
     {
         return _p;
     }
 
     /** operator-> points to the object refered.
      */
-    const T* operator->()const
+    const objT* operator->()const
     {
         return _p;
     }
