@@ -23,6 +23,7 @@
 * You can find documents about modules <a href="modules.html">here</a>.
 * <hr>
 * @todo add tutorial
+* @todo add weak_
 * @todo 1.2 milestone
 * @todo add os module
 * @todo add socket module(?)

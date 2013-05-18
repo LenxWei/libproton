@@ -56,6 +56,9 @@ public:
      */
     objT* operator->()
     {
+#ifdef PROTON_DEBUG_PARA
+		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
+#endif
         return _p;
     }
 
@@ -63,6 +66,9 @@ public:
      */
     const objT* operator->()const
     {
+#ifdef PROTON_DEBUG_PARA
+		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
+#endif
         return _p;
     }
 };

@@ -58,6 +58,8 @@ extern int debug_level; ///< The level controls output of PROTON_LOG().
 extern bool log_console; ///< true: PROTON_LOG/PROTON_THROW_IF/PROTON_ERR will output to console, false: no console output for these macros.
 extern int wait_on_err; ///< 0: nonstop, 1: stop on PROTON_ERR, 2: stop on PROTON_THROW_IF assert
 
+// #define PROTON_DEBUG_PARA // validate before every invoking of para_
+
 /** Control debug macros.
  * 1: enable PROTON_LOG/PROTON_THROW_IF/PROTON_ERR, 0: disable them.
  */

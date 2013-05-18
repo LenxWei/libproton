@@ -13,10 +13,10 @@ using namespace proton::detail;
 
 namespace proton{
 
-const size_t block_size_initial=8*1024; // 8K
-const size_t block_size_max=512*1024; // 512K
-const size_t page_align=4096;
-const size_t chunk_align=(2*sizeof(long));
+constexpr size_t block_size_initial=8*1024; // 8K
+constexpr size_t block_size_max=512*1024; // 512K
+constexpr size_t page_align=4096;
+constexpr size_t chunk_align=(2*sizeof(long));
 
 namespace detail{
 /////////////////////////////////////////////////
