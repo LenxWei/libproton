@@ -1,12 +1,12 @@
 /*
- * para.hpp
+ * weak.hpp
  *
  *  Created on: May 18, 2013
  *      Author: lenx
  */
 
-#ifndef PROTON_PARA_HPP_
-#define PROTON_PARA_HPP_
+#ifndef PROTON_WEAK_HPP_
+#define PROTON_WEAK_HPP_
 
 #include <proton/base.hpp>
 #include <proton/ref.hpp>
@@ -14,66 +14,68 @@
 namespace proton{
 
 
-template<typename objT>
-class para_ {
+template<typename refT>
+class weak_ {
+public:
+	typedef typename refT::refc_t refc_t;
+	typedef typename refT::obj_t obj_t;
+	typedef typename refT::alloc_t alloc_t;
+
 private:
-	constexpr static long id_shift=sizeof(long)/2;
-	constexpr static long offset_mask =long((unsigned long)(-1)>>id_shift);
 
-	long _id_and_offset; // lowest half is offset, highest half is id
-	objT* _p;
-
-	long compute_id_offset(long id, long offset)
-	{
-		// [ATTENTION!] offset should be less than 65536 on 32bit!
-		return (id<<id_shift)+(offset & offset_mask);
-	}
-
-	para_(const long* id, objT* p)
-		:_id_and_offset(compute_id_offset(*id,(char*)p-(char*)id)),
-		 _p(p)
-	{}
+	refc_t* _w;
+	obj_t* _p;
 
 public:
 
-	template<A,Tr>
-	para_(const ref_<objT,A,Tr>& r):para_(r.__rp()->id(), r.__p())
-	{}
-
-	bool __validate()
+	weak_(const refT& r):_w(r._rp), _p(r._p)
 	{
-		long offset=_id_and_offset & offset_mask;
-		long* id=(long*)((char*)p-offset);
-		return ((*id) & offset_mask) == (_id_and_offset >> id_shift);
+		if(_w)
+			_w->weak_enter();
 	}
 
-	~para_()
+	~weak_()
 	{
-		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
+		if(_w){
+			if(!_w->weak_release()){
+				if(!_w->count()){
+	            	alloc_t::confiscate(_w);
+				}
+			}
+			_w=NULL;
+		}
 	}
 
-    /** operator-> points to the object refered.
-     */
-    objT* operator->()
-    {
-#ifdef PROTON_DEBUG_PARA
-		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
-#endif
-        return _p;
-    }
+	refT operator*()const
+	{
+		if(_w && _w->count()){
+			// [FIXME] TOCTTOU might happen here in multi-threading
+			return refT(alloc_inner, _w, _p);
+		}
+		else
+			return none;
+	}
 
-    /** operator-> points to the object refered.
-     */
-    const objT* operator->()const
-    {
-#ifdef PROTON_DEBUG_PARA
-		PROTON_THROW_IF(!__validate(), "para_ validation failed. please use ref_ instead.")
-#endif
-        return _p;
-    }
+	bool operator<(const weak_& w)const
+	{
+		return _w < w._w;
+	}
+
+	bool operator==(const weak_& w)const
+	{
+		return _w == w._w;
+	}
+
+	//[TODO] unordered_map & unordered_set support
 };
+
+template<typename refT>
+weak_<refT> weak(const refT& t)
+{
+	return weak_<refT>(t);
+}
 
 } // ns proton
 
 
-#endif /* PROTON_PARA_HPP_ */
+#endif /* PROTON_WEAK_HPP_ */
