@@ -10,6 +10,7 @@
 #include <tuple>
 #include <type_traits>
 #include <stdexcept>
+#include <atomic>
 #include <initializer_list>
 #include <proton/pool.hpp>
 
@@ -26,6 +27,7 @@ namespace detail{
 class refc_t {
 private:
     long __r;
+
 public:
     refc_t():__r(0)
     {}
@@ -36,16 +38,6 @@ public:
     refc_t& operator=(const refc_t& r)
     {
         return *this;
-    }
-
-    bool operator<(long i)const
-    {
-        return __r < i;
-    }
-
-    bool operator==(long i)const
-    {
-        return __r == i;
     }
 
     void enter()
@@ -62,6 +54,60 @@ public:
     {
         return __r;
     }
+
+    static constexpr long weak_count()
+    {
+    	return 0;
+    }
+};
+
+class wrefc_t {
+private:
+    long __r;
+    long __w;
+
+public:
+    wrefc_t():__r(0),__w(0)
+    {}
+
+    wrefc_t(const wrefc_t& r):__r(0),__w(0)
+    {}
+
+    wrefc_t& operator=(const wrefc_t& r)
+    {
+        return *this;
+    }
+
+    void enter()
+    {
+        ++__r;
+    }
+
+    long release()
+    {
+        return --__r;
+    }
+
+    void weak_enter()
+    {
+        ++__w;
+    }
+
+    long weak_release()
+    {
+        return --__w;
+    }
+
+    long count() const
+    {
+        return __r;
+    }
+
+    long weak_count() const
+    {
+        return __w;
+    }
+
 };
 
 } // ns detail
@@ -94,7 +140,8 @@ struct ref_traits{
     static constexpr unsigned long long flag=0;
 };
 
-template<typename objT, typename allocator=smart_allocator<objT>, typename traits=ref_traits<objT> >
+template<typename objT, typename allocator=smart_allocator<objT>,
+		typename traits=ref_traits<objT>, typename refcT=detail::refc_t >
 struct ref_;
 
 /** declare copy_to().
@@ -129,10 +176,11 @@ template<typename O, typename A, typename T> ref_<O,A,T> copy(const ref_<O,A,T>&
     if(is_null(x))
         return refT();
     typedef typename refT::alloc_t alloc_t;
-    detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(x._rp);
+    typedef typename refT::refc_t refc_t;
+    refc_t* p=(refc_t*)alloc_t::duplicate(x._rp);
     if(!p)
         throw std::bad_alloc();
-    new (p) detail::refc_t();
+    new (p) refc_t();
     typename refT::obj_t* q=(typename refT::obj_t *)(p+1);
     x->copy_to((void*)q);
     return refT(alloc_inner,p,q);
@@ -172,30 +220,37 @@ R cast(const ref_<O2,A2,T2>& x)
  * @param allocator It must support confiscate(), and allocator::allocate() must be static.
  * @see smart_allocator in <proton/pool.hpp>
  */
-template<typename objT, typename allocator, typename traits>
+template<typename objT, typename allocator, typename traits, typename refcT>
 struct ref_ {
-template<typename O, typename A, typename T>
-    friend ref_<O,A,T> copy(const ref_<O,A,T>& x);
-template<typename O, typename A, typename T>
-    friend long ref_count(const ref_<O,A,T>& x);
-template<typename R, typename O2, typename A2, typename T2 >
-    friend R cast(const ref_<O2,A2,T2>& x);
-//template<typename T>
-//	friend class weak_;
+template<typename O, typename A, typename T, typename R>
+    friend ref_<O,A,T, R> copy(const ref_<O,A,T, R>& x);
+template<typename O, typename A, typename T, typename R>
+    friend long ref_count(const ref_<O,A,T,R>& x);
+template<typename C, typename O2, typename A2, typename T2, typename R >
+    friend C cast(const ref_<O2,A2,T2, R>& x);
+template<typename T>
+	friend class weak_<T>;
 
 public:
     typedef ref_ proton_ref_self_t;
     typedef std::ostream proton_ostream_t;
     typedef std::wostream proton_wostream_t;
     typedef objT obj_t;
+    typedef refcT refc_t;
     typedef allocator alloc_t;
 
 protected:
-    detail::refc_t * _rp;
+    refc_t * _rp;
     objT*    _p;
 
+    struct ref_obj_t{
+        refc_t r;
+        obj_t o;
+    };
+    typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
+
 protected:
-    void enter(detail::refc_t* rp)
+    void enter(refc_t* rp)
     {
         _rp=rp;
         if(_rp)
@@ -205,14 +260,28 @@ protected:
     void release()
     {
         if(_rp){
-            long r=_rp->release();
-            if(!r){
+            if(!_rp->release()){
                 _p->~objT();
-                alloc_t::confiscate(_rp);
             }
-            _rp=NULL;
             _p=NULL;
+
+            if(!_rp->weak_count()){
+            	alloc_t::confiscate(_rp);
+            }
+        	_rp=NULL;
         }
+    }
+
+    void swap(ref_& r)
+    {
+    	auto t_rp=r._rp;
+    	auto t_p=r._p;
+
+    	r._rp=_rp;
+    	r._p=_p;
+
+    	_rp=t_rp;
+    	_p=t_p;
     }
 
 public:
@@ -230,7 +299,7 @@ public:
     }
 
     // inner use
-    ref_(init_alloc_inner, detail::refc_t* rp, objT* p):_rp(rp), _p(p)
+    ref_(init_alloc_inner, refc_t* rp, objT* p):_rp(rp), _p(p)
     {
         PROTON_REF_LOG(9,"alloc_inner ctor");
         if(_rp)
@@ -243,18 +312,15 @@ public:
     template<typename ...argT> explicit ref_(init_alloc, argT&& ...a)
     {
         PROTON_REF_LOG(9,"alloc fwd ctor");
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(a...); // [FIXME] how about exceptions?
             _p=&(p->o);
             enter(&(p->r));
         }
+        else
+            throw std::bad_alloc();
     }
 
     /** implicit forwarding ctor.
@@ -284,18 +350,15 @@ public:
     template<typename T> ref_(init_alloc, std::initializer_list<T> a)
     {
         PROTON_REF_LOG(9,"alloc initializer_list fwd ctor");
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(p){
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(a);
             _p=&(p->o);
             enter(&(p->r));
         }
+        else
+            throw std::bad_alloc();
     }
 
     /** implicit initializer_list forwarding ctor.
@@ -339,19 +402,11 @@ public:
     {
         PROTON_REF_LOG(9,"assign lvalue");
         if(r._rp!=_rp){
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
+        	ref_ r1(none);
+        	swap(r1);
 
             enter(r._rp);
             _p=r._p;
-
-            if(rp_old){
-                long r=rp_old->release();
-                if(!r){
-                    p_old->~objT(); // may throw
-                    alloc_t::confiscate(rp_old);
-                }
-            }
         }
         return *this;
     }
@@ -362,21 +417,7 @@ public:
     {
         PROTON_REF_LOG(9,"assign rvalue");
         if(r._rp!=_rp){
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
-
-            _rp=r._rp;
-            _p=r._p;
-            r._rp=NULL;
-            r._p=NULL;
-
-            if(rp_old){
-                long r=rp_old->release();
-                if(!r){
-                    p_old->~objT(); // may throw
-                    alloc_t::confiscate(rp_old);
-                }
-            }
+        	swap(r);
         }
         return *this;
     }
@@ -390,34 +431,21 @@ public:
     template<typename T,
         typename=typename std::enable_if<std::is_pod<T>::value>::type
     >
-    ref_& operator=(const T& a)
+    ref_& operator=(T a)
     {
         PROTON_REF_LOG(9,"assign argument");
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(!p)
             throw std::bad_alloc();
         {
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(a);
 
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
+            ref_ r(none);
+            swap(r);
 
             enter(&(p->r));
             _p=&(p->o);
-
-            if(rp_old){
-                long r=rp_old->release();
-                if(!r){
-                    p_old->~objT(); // may throw
-                    alloc_t::confiscate(rp_old);
-                }
-            }
         }
         return *this;
     }
@@ -590,7 +618,8 @@ public:
     /** general operator< for refs.
      * Need to implement obj_t < T::obj_t.
      */
-    template<typename O, typename A, typename T> bool operator<(const ref_<O,A,T>& x)const
+    template<typename O, typename A, typename T, typename R>
+    bool operator<(const ref_<O,A,T,R>& x)const
     {
         if((void*)&(x.__o())==(void*)&(__o()))
             return false;
@@ -662,6 +691,7 @@ public:
     }
 
     /** ref_ + ref_
+     * [TODO] using move ctor
      */
     template<typename T,
         typename=typename std::enable_if<std::is_same<T, ref_>::value>::type
@@ -669,10 +699,10 @@ public:
     ref_ operator+(const T& x)const
     {
         PROTON_THROW_IF(x==none || *this==none,"want to add null values");
-        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        refc_t* p=(refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
-        new (p) detail::refc_t();
+        new (p) refc_t();
         obj_t* q=(obj_t *)(p+1);
         new (q) obj_t(__o()+x.__o());
         return ref_(alloc_inner,p,q);
@@ -686,10 +716,10 @@ public:
     ref_ operator+(T x)const
     {
         PROTON_THROW_IF(*this==none,"want to add null values");
-        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        refc_t* p=(refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
-        new (p) detail::refc_t();
+        new (p) refc_t();
         obj_t* q=(obj_t *)(p+1);
         new (q) obj_t(__o()+x);
         return ref_(alloc_inner,p,q);
@@ -703,10 +733,10 @@ public:
     ref_ operator*(T x)const
     {
         PROTON_THROW_IF(*this==none,"want to * null values");
-        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        refc_t* p=(refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
-        new (p) detail::refc_t();
+        new (p) refc_t();
         obj_t* q=(obj_t *)(p+1);
         new (q) obj_t(__o()*x);
         return ref_(alloc_inner,p,q);
@@ -718,10 +748,10 @@ public:
     ref_ operator%(const T& x)const
     {
         PROTON_THROW_IF(*this==none, "want to % null values");
-        detail::refc_t* p=(detail::refc_t*)alloc_t::duplicate(_rp);
+        refc_t* p=(refc_t*)alloc_t::duplicate(_rp);
         if(!p)
             throw std::bad_alloc();
-        new (p) detail::refc_t();
+        new (p) refc_t();
         obj_t* q=(obj_t *)(p+1);
         new (q) obj_t(__o() % x);
         return ref_(alloc_inner,p,q);
@@ -776,29 +806,18 @@ public:
     {
         PROTON_THROW_IF(x==none || *this==none,"want to add null values");
 
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(!p)
             throw std::bad_alloc();
         {
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(__o()+x.__o());
 
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
+            ref_ r(none);
+            swap(r);
 
             enter(&(p->r));
             _p=&(p->o);
-
-            long r=rp_old->release();
-            if(!r){
-                p_old->~objT(); // may throw
-                alloc_t::confiscate(rp_old);
-            }
         }
         return *this;
     }
@@ -810,29 +829,18 @@ public:
     {
         PROTON_THROW_IF(*this==none,"want to add null values");
 
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(!p)
             throw std::bad_alloc();
         {
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(__o()+x);
 
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
+            ref_ r(none);
+            swap(r);
 
             enter(&(p->r));
             _p=&(p->o);
-
-            long r=rp_old->release();
-            if(!r){
-                p_old->~objT(); // may throw
-                alloc_t::confiscate(rp_old);
-            }
         }
         return *this;
     }
@@ -856,29 +864,18 @@ public:
     {
         PROTON_THROW_IF(*this==none,"want to *= null values");
 
-        struct ref_obj_t{
-            detail::refc_t r;
-            obj_t o;
-        };
-        typedef typename alloc_t::template rebind<ref_obj_t>::other real_alloc;
         ref_obj_t* p=real_alloc::allocate(1);
         if(!p)
             throw std::bad_alloc();
         {
-            new (&(p->r)) detail::refc_t();
+            new (&(p->r)) refc_t();
             new (&p->o) obj_t(__o()*x);
 
-            detail::refc_t* rp_old=_rp;
-            objT* p_old=_p;
+            ref_ r(none);
+            swap(r);
 
             enter(&(p->r));
             _p=&(p->o);
-
-            long r=rp_old->release();
-            if(!r){
-                p_old->~objT(); // may throw
-                alloc_t::confiscate(rp_old);
-            }
         }
         return *this;
     }
@@ -890,12 +887,14 @@ public:
  * @param x the ref to be checked
  * @return true: x doesn't refer to any object, false: x refers to an object.
  */
-template<typename O, typename A, typename T> bool is_null(const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R> bool
+is_null(const ref_<O,A,T,R>& x)
 {
     return x==none;
 }
 
-template<typename O, typename A, typename T> bool operator==(init_alloc_none,const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R>
+bool operator==(init_alloc_none,const ref_<O,A,T,R>& x)
 {
     return x==none;
 }
@@ -905,12 +904,14 @@ template<typename O, typename A, typename T> bool operator==(init_alloc_none,con
  * @param x the ref to be checked
  * @return true: x refers to an object, false: x doesn't refer to any object.
  */
-template<typename O, typename A, typename T> bool is_valid(const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R>
+bool is_valid(const ref_<O,A,T,R>& x)
 {
     return x!=none;
 }
 
-template<typename O, typename A, typename T> bool operator!=(init_alloc_none,const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R>
+bool operator!=(init_alloc_none,const ref_<O,A,T,R>& x)
 {
     return x!=none;
 }
@@ -919,7 +920,8 @@ template<typename O, typename A, typename T> bool operator!=(init_alloc_none,con
  * reset a ref to release its object if any.
  * @param x the ref to be resetted.
  */
-template<typename O, typename A, typename T> void reset(ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R>
+void reset(ref_<O,A,T,R>& x)
 {
     x=none;
 }
@@ -928,9 +930,9 @@ template<typename O, typename A, typename T> void reset(ref_<O,A,T>& x)
  * Need O to implenment the method: void output(std::ostream& s)const.
  * Don't forget virtual when needed.
  */
-template<typename O, typename A, typename T>
+template<typename O, typename A, typename T, typename R>
 typename std::enable_if<!(T::flag & ref_not_use_output), std::ostream&>::type
-operator<<(std::ostream& s, const ref_<O,A,T>& y)
+operator<<(std::ostream& s, const ref_<O,A,T,R>& y)
 {
     if(y==none){
         s << "<>" ;
@@ -943,9 +945,9 @@ operator<<(std::ostream& s, const ref_<O,A,T>& y)
 /** general output for refs.
  * Need to support s << O
  */
-template<typename O, typename A, typename T>
+template<typename O, typename A, typename T, typename R>
 typename std::enable_if<T::flag & ref_not_use_output, std::ostream&>::type
-operator<<(std::ostream& s, const ref_<O,A,T>& y)
+operator<<(std::ostream& s, const ref_<O,A,T,R>& y)
 {
     if(y==none){
         s << "<>" ;
@@ -959,9 +961,9 @@ operator<<(std::ostream& s, const ref_<O,A,T>& y)
  * Need O to implenment the method: void output(std::ostream& s)const.
  * Don't forget virtual when needed.
  */
-template<typename O, typename A, typename T>
+template<typename O, typename A, typename T, typename R>
 typename std::enable_if<!(T::flag & ref_not_use_output), std::wostream&>::type
-operator<<(std::wostream& s, const ref_<O,A,T>& y)
+operator<<(std::wostream& s, const ref_<O,A,T,R>& y)
 {
     if(y==none){
         s << L"<>" ;
@@ -974,9 +976,9 @@ operator<<(std::wostream& s, const ref_<O,A,T>& y)
 /** general wchar output for refs.
  * Need to support s << O
  */
-template<typename O, typename A, typename T>
+template<typename O, typename A, typename T, typename R>
 typename std::enable_if<(T::flag & ref_not_use_output), std::wostream&>::type
-operator<<(std::wostream& s, const ref_<O,A,T>& y)
+operator<<(std::wostream& s, const ref_<O,A,T,R>& y)
 {
     if(y==none){
         s << L"<>" ;
@@ -1049,9 +1051,9 @@ public:
 
 namespace detail{
 
-template<typename O, typename A, typename T>struct len_t<ref_<O,A,T> >{
+template<typename O, typename A, typename T, typename R>struct len_t<ref_<O,A,T,R> >{
 //    typedef decltype(*(((T*)1)->begin())) item_t;
-    static size_t result(const ref_<O,A,T>& x)
+    static size_t result(const ref_<O,A,T,R>& x)
     {
         PROTON_THROW_IF(x==none, "no len() for an empty object");
         return x->size();
@@ -1064,24 +1066,24 @@ template<typename O, typename A, typename T>struct len_t<ref_<O,A,T> >{
 
 namespace std{
 
-template<typename O, typename A, typename T>
-auto begin(const proton::ref_<O,A,T>& a) -> decltype(a->begin())
+template<typename O, typename A, typename T, typename R>
+inline auto begin(const proton::ref_<O,A,T,R>& a) -> decltype(a->begin())
 {
     return a->begin();
 }
 
-template<typename O, typename A, typename T>
-auto end(const proton::ref_<O,A,T>& a) -> decltype(a->end())
+template<typename O, typename A, typename T, tyename R>
+inline auto end(const proton::ref_<O,A,T,R>& a) -> decltype(a->end())
 {
     return a->end();
 }
 
-template<typename O, typename A, typename T>
-struct hash<proton::ref_<O,A,T> >{
+template<typename O, typename A, typename T, typename R>
+struct hash<proton::ref_<O,A,T,R> >{
 public:
     typedef size_t     result_type;
-    typedef proton::ref_<O,A,T>      argument_type;
-    size_t operator()(const proton::ref_<O,A,T> &s) const noexcept
+    typedef proton::ref_<O,A,T,R>      argument_type;
+    inline size_t operator()(const proton::ref_<O,A,T,R> &s) const noexcept
     {
         if(s==proton::none)
             return 0;
