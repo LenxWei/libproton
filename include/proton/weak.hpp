@@ -26,6 +26,16 @@ private:
 	refc_t* _w;
 	obj_t* _p;
 
+	refT lock()const
+	{
+		if(_w && _w->count()){
+			// [FIXME] TOCTTOU might happen here in multi-threading
+			return refT(alloc_inner, _w, _p);
+		}
+		else
+			return none;
+	}
+
 public:
 
 	weak_(const refT& r):_w(r._rp), _p(r._p)
@@ -46,16 +56,6 @@ public:
 		}
 	}
 
-	refT operator*()const
-	{
-		if(_w && _w->count()){
-			// [FIXME] TOCTTOU might happen here in multi-threading
-			return refT(alloc_inner, _w, _p);
-		}
-		else
-			return none;
-	}
-
 	bool operator<(const weak_& w)const
 	{
 		return _w < w._w;
@@ -73,6 +73,12 @@ template<typename refT>
 weak_<refT> weak(const refT& t)
 {
 	return weak_<refT>(t);
+}
+
+template<typename refT>
+refT lock(const weak_<refT>& w)
+{
+	return w.lock();
 }
 
 } // ns proton
