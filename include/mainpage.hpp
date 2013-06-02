@@ -29,6 +29,7 @@
 * @todo add socket module(?)
 * @todo add server/client module
 * @todo add regex module
+* @todo 1.3 milestone
 * @todo add threading
 * @todo 1.4 milestone
 * @todo add gc support
