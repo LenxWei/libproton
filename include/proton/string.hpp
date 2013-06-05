@@ -1046,19 +1046,6 @@ std::basic_string<C,T, smart_allocator<C> > readline(std::basic_istream<C,T>& f,
     return r;
 }
 
-template<typename C, typename T>
-basic_string_<C,T,smart_allocator<C> > readline(ref_<std::basic_fstream<C,T> >& f,
-              C delim=*detail::vals<C>::newline)
-{
-    basic_string_<C,T,smart_allocator<C> > r;
-    std::ios::pos_type start=f->tellg();
-    std::getline(*f, r, delim);
-    if(f->tellg()>start){
-        r.push_back(delim);
-    }
-    return r;
-}
-
 /**
  * @}
  */
