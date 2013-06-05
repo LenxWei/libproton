@@ -171,7 +171,7 @@ struct ref_;
  */
 template<typename O, typename A, typename T, typename R> ref_<O,A,T,R> copy(const ref_<O,A,T,R>& x)
 {
-    typedef ref_<O,A,T> refT;
+    typedef ref_<O,A,T,R> refT;
 
     if(is_null(x))
         return refT();
@@ -510,10 +510,10 @@ public:
 //          && static_cast<baseT*>((obj_t*)4096)!=(baseT*)4096
         >::type
         >
-        operator ref_<baseT> ()const noexcept
+        operator ref_<baseT, smart_allocator<baseT>, ref_traits<baseT>, refc_t > ()const noexcept
     {
         PROTON_REF_LOG(9,"baseT()");
-		return ref_<baseT>(alloc_inner, _rp, static_cast<baseT*>(_p));
+		return ref_<baseT, smart_allocator<baseT>, ref_traits<baseT>, refc_t>(alloc_inner, _rp, static_cast<baseT*>(_p));
 	}
 
 	template<typename=typename std::enable_if<
@@ -591,7 +591,7 @@ public:
     /** general operator== for refs.
      * Need to implement obj_t == T::obj_t.
      */
-    template<typename O, typename A, typename T> bool operator==(const ref_<O,A,T>& x)const
+    template<typename O, typename A, typename T, typename R> bool operator==(const ref_<O,A,T,R>& x)const
     {
         if((void*)&(__o())==(void*)&(x.__o()))
             return true;
