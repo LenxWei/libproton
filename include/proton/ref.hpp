@@ -169,7 +169,7 @@ struct ref_;
  *          in the obj class.
  * @return a cloned obj of x
  */
-template<typename O, typename A, typename T> ref_<O,A,T> copy(const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R> ref_<O,A,T,R> copy(const ref_<O,A,T,R>& x)
 {
     typedef ref_<O,A,T> refT;
 
@@ -191,7 +191,7 @@ template<typename O, typename A, typename T> ref_<O,A,T> copy(const ref_<O,A,T>&
  * @param x refers to the object
  * @return the reference count.
  */
-template<typename O, typename A, typename T> long ref_count(const ref_<O,A,T>& x)
+template<typename O, typename A, typename T, typename R> long ref_count(const ref_<O,A,T,R>& x)
 {
     if(x._rp)
         return x._rp->count();
@@ -204,15 +204,15 @@ template<typename O, typename A, typename T> long ref_count(const ref_<O,A,T>& x
  * @param x the original ref
  * @return the casted one
  */
-template<typename R, typename O2, typename A2, typename T2 >
-R cast(const ref_<O2,A2,T2>& x)
+template<typename C, typename O2, typename A2, typename T2, typename R2 >
+C cast(const ref_<O2,A2,T2,R2>& x)
 {
     if(x==none)
-        return R();
-    typedef typename R::obj_t target_t;
+        return C();
+    typedef typename C::obj_t target_t;
     target_t* p=dynamic_cast<target_t*>(x._p);
     if(p)
-        return R(alloc_inner, x._rp, p);
+        return C(alloc_inner, x._rp, p);
     throw std::bad_cast();
 }
 
@@ -223,13 +223,13 @@ R cast(const ref_<O2,A2,T2>& x)
 template<typename objT, typename allocator, typename traits, typename refcT>
 struct ref_ {
 template<typename O, typename A, typename T, typename R>
-    friend ref_<O,A,T, R> copy(const ref_<O,A,T, R>& x);
+    friend ref_<O,A,T,R> copy(const ref_<O,A,T,R>& x);
 template<typename O, typename A, typename T, typename R>
     friend long ref_count(const ref_<O,A,T,R>& x);
 template<typename C, typename O2, typename A2, typename T2, typename R >
     friend C cast(const ref_<O2,A2,T2, R>& x);
 template<typename T>
-	friend class weak_<T>;
+	friend class weak_;
 
 public:
     typedef ref_ proton_ref_self_t;
@@ -262,20 +262,19 @@ protected:
         if(_rp){
             if(!_rp->release()){
                 _p->~objT();
-            }
-            _p=NULL;
-
-            if(!_rp->weak_count()){
-            	alloc_t::confiscate(_rp);
+                if(!_rp->weak_count()){
+                	alloc_t::confiscate(_rp);
+                }
             }
         	_rp=NULL;
+            _p=NULL;
         }
     }
 
     void swap(ref_& r)
     {
-    	auto t_rp=r._rp;
-    	auto t_p=r._p;
+    	refc_t* t_rp=r._rp;
+    	obj_t* t_p=r._p;
 
     	r._rp=_rp;
     	r._p=_p;
@@ -1072,7 +1071,7 @@ inline auto begin(const proton::ref_<O,A,T,R>& a) -> decltype(a->begin())
     return a->begin();
 }
 
-template<typename O, typename A, typename T, tyename R>
+template<typename O, typename A, typename T, typename R>
 inline auto end(const proton::ref_<O,A,T,R>& a) -> decltype(a->end())
 {
     return a->end();
