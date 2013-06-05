@@ -13,7 +13,6 @@
 
 namespace proton{
 
-
 template<typename refT>
 class weak_ {
 public:
@@ -53,17 +52,18 @@ public:
 				}
 			}
 			_w=NULL;
+			_p=NULL;
 		}
 	}
 
 	bool operator<(const weak_& w)const
 	{
-		return _w < w._w;
+		return _p < w._p;
 	}
 
 	bool operator==(const weak_& w)const
 	{
-		return _w == w._w;
+		return _p == w._p;
 	}
 
 	//[TODO] unordered_map & unordered_set support
