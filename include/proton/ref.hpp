@@ -62,6 +62,9 @@ public:
 };
 
 class wrefc_t {
+public:
+	typedef int support_weakref;
+
 private:
     long __r;
     long __w;
@@ -230,6 +233,8 @@ template<typename C, typename O2, typename A2, typename T2, typename R >
     friend C cast(const ref_<O2,A2,T2, R>& x);
 template<typename T>
 	friend class weak_;
+template<typename T>
+	friend class para_;
 
 public:
     typedef ref_ proton_ref_self_t;
@@ -407,6 +412,9 @@ public:
             enter(r._rp);
             _p=r._p;
         }
+        else{
+        	_p=r._p;
+        }
         return *this;
     }
 
@@ -417,6 +425,9 @@ public:
         PROTON_REF_LOG(9,"assign rvalue");
         if(r._rp!=_rp){
         	swap(r);
+        }
+        else{
+        	_p=r._p;
         }
         return *this;
     }
