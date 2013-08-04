@@ -288,6 +288,15 @@ protected:
     	_p=t_p;
     }
 
+protected:
+    // inner use
+    ref_(init_alloc_inner, refc_t* rp, objT* p):_rp(rp), _p(p)
+    {
+        PROTON_REF_LOG(9,"alloc_inner ctor");
+        if(_rp)
+            _rp->enter();
+    }
+
 public:
     /** default ctor.
      * Doesn't refer to any object.
@@ -300,14 +309,6 @@ public:
     ref_(init_alloc_none):_rp(NULL), _p(NULL)
     {
         PROTON_REF_LOG(9,"default ctor");
-    }
-
-    // inner use
-    ref_(init_alloc_inner, refc_t* rp, objT* p):_rp(rp), _p(p)
-    {
-        PROTON_REF_LOG(9,"alloc_inner ctor");
-        if(_rp)
-            _rp->enter();
     }
 
     /** explicit forwarding ctor.
@@ -602,6 +603,18 @@ public:
     /** general operator== for refs.
      * Need to implement obj_t == T::obj_t.
      */
+    template<typename T>
+    typename std::enable_if<std::is_class<typename T::proton_ref_self_t>::value, bool>::type
+		operator==(const T& x)const
+    {
+        if((void*)&(__o())==(void*)&(x.__o()))
+            return true;
+        if(*this==none || x==none)
+            return false;
+        return __o() == x.__o();
+    }
+
+/*
     template<typename O, typename A, typename T, typename R> bool operator==(const ref_<O,A,T,R>& x)const
     {
         if((void*)&(__o())==(void*)&(x.__o()))
@@ -610,6 +623,7 @@ public:
             return false;
         return __o() == x.__o();
     }
+*/
 
     template<typename T>
     typename std::enable_if<std::is_pod<T>::value, bool>::type
@@ -628,8 +642,9 @@ public:
     /** general operator< for refs.
      * Need to implement obj_t < T::obj_t.
      */
-    template<typename O, typename A, typename T, typename R>
-    bool operator<(const ref_<O,A,T,R>& x)const
+    template<typename T>
+    typename std::enable_if<std::is_class<typename T::proton_ref_self_t>::value, bool>::type
+		operator<(const T& x)const
     {
         if((void*)&(x.__o())==(void*)&(__o()))
             return false;

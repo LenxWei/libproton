@@ -40,6 +40,7 @@ private:
 	obj_t* _p;
 
 protected:
+
     void enter(refc_t* w)
     {
         _w=w;
@@ -62,6 +63,7 @@ protected:
 
     void swap(para_& p)
     {
+    	// [todo: optimization]
     	refc_t* t_w=p._w;
     	obj_t* t_p=p._p;
 
@@ -80,6 +82,15 @@ public:
 			_w->weak_enter();
 	}
 
+protected:
+    // inner use
+    para_(init_alloc_inner, refc_t* w, objT* p):_w(w), _p(p)
+    {
+        PROTON_REF_LOG(9,"alloc_inner ctor");
+        if(_w)
+            _w->weak_enter();
+    }
+
 public:
     /** default ctor.
      * Doesn't refer to any object.
@@ -92,14 +103,6 @@ public:
     para_(init_alloc_none):_w(NULL), _p(NULL)
     {
         PROTON_REF_LOG(9,"default ctor");
-    }
-
-    // inner use
-    para_(init_alloc_inner, refc_t* w, objT* p):_w(w), _p(p)
-    {
-        PROTON_REF_LOG(9,"alloc_inner ctor");
-        if(_w)
-            _w->weak_enter();
     }
 
     /** copy ctor.
@@ -255,7 +258,9 @@ public:
     /** general operator== for refs.
      * Need to implement obj_t == T::obj_t.
      */
-    template<typename O, typename A, typename T, typename R> bool operator==(const ref_<O,A,T,R>& x)const
+    template<typename T>
+    typename std::enable_if<std::is_class<typename T::proton_ref_self_t>::value, bool>::type
+		operator==(const T& x)const
     {
         if((void*)&(__o())==(void*)&(x.__o()))
             return true;
@@ -281,8 +286,9 @@ public:
     /** general operator< for refs.
      * Need to implement obj_t < T::obj_t.
      */
-    template<typename O, typename A, typename T, typename R>
-    bool operator<(const ref_<O,A,T,R>& x)const
+    template<typename T>
+    typename std::enable_if<std::is_class<typename T::proton_ref_self_t>::value, bool>::type
+		operator<(const T& x)const
     {
         if((void*)&(x.__o())==(void*)&(__o()))
             return false;
