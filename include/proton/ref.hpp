@@ -235,6 +235,8 @@ template<typename T>
 	friend class weak_;
 template<typename T>
 	friend class para_;
+template<typename O, typename A, typename T, typename R>
+	friend class ref_;
 
 public:
     typedef ref_ proton_ref_self_t;

@@ -28,7 +28,7 @@ typedef std::tuple<vector_<std::tuple<str, str> >, vector_<str> > getopt_t;
  */
 getopt_t getopt(
        int argc, char* const argv[],
-       const str& optstr, const vector_<str>& longopt={});
+       const str& optstr, const vector_<str>& longopt=vector_<str>());
 
 /**
  * @example getopt.cpp

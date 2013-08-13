@@ -23,17 +23,13 @@
 * You can find documents about modules <a href="modules.html">here</a>.
 * <hr>
 * @todo add tutorial
-* @todo add weak_
+* @todo add weak_/para_
 * @todo 1.2 milestone
 * @todo add os module
-* @todo add socket module(?)
-* @todo add server/client module
 * @todo add regex module
 * @todo 1.3 milestone
 * @todo add threading
 * @todo 1.4 milestone
-* @todo add gc support
-* @todo 1.6 milestone
 *
 * @defgroup ref Smart reference
 * Provide basic reference support for proton.
