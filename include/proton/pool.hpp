@@ -437,7 +437,7 @@ public:
     template<class U, class... Args>
     static void construct(U* p, Args&&... val)
     {
-        new (p) U(val...);
+        ::new (p) U(std::forward<Args>(val)...);
     }
 
 /*
