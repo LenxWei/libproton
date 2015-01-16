@@ -166,21 +166,41 @@ template<typename string_list>
     }
 }
 
+/** test whether a string starts with a substring.
+ * @param s     the string
+ * @param sub   the substring
+ * @return true if matching
+ */
 template<typename str1, typename str2> bool startswith(const str1& s,const str2& sub)
 {
     return boost::algorithm::starts_with(s, sub);
 }
 
+/** test whether a string starts with a substring case-insensitively.
+ * @param s     the string
+ * @param sub   the substring
+ * @return true if matching
+ */
 template<typename str1, typename str2> bool istartswith(const str1& s,const str2& sub)
 {
     return boost::algorithm::istarts_with(s, sub);
 }
 
+/** test whether a string ends with a substring.
+ * @param s     the string
+ * @param sub   the substring
+ * @return true if matching
+ */
 template<typename str1, typename str2> bool endswith(const str1& s,const str2& sub)
 {
     return boost::algorithm::ends_with(s, sub);
 }
 
+/** test whether a string ends with a substring case-insensitively.
+ * @param s     the string
+ * @param sub   the substring
+ * @return true if matching
+ */
 template<typename str1, typename str2> bool iendswith(const str1& s,const str2& sub)
 {
     return boost::algorithm::iends_with(s, sub);
@@ -253,6 +273,10 @@ template<typename int_t, typename string> bool get_int(int_t& r, const string& s
     return true;
 }
 
+/** get a lower-case copy from string.
+ * @param s the input string
+ * @return the lower-case copy
+ */
 template<typename string> string to_lower(const string& s)
 {
  	long length = s.size();
@@ -277,6 +301,10 @@ template<typename string> string to_lower(const string& s)
     }
 }
 
+/** get a upper-case copy from string.
+ * @param s the input string
+ * @return the upper-case copy
+ */
 template<typename string>string to_upper(const string& s)
 {
  	long length = s.size();
@@ -302,6 +330,11 @@ template<typename string>string to_upper(const string& s)
     }
 }
 
+/** get a char from a string at a given index.
+ * @param x the input string
+ * @param i the index, in python semantics
+ * @return the char
+ */
 template <typename C, typename T, typename A>
 C get(const std::basic_string<C,T,A>& x, long i)
 {
@@ -313,6 +346,11 @@ C get(const std::basic_string<C,T,A>& x, long i)
     return x[i];
 }
 
+/** get a substring from a string.
+ * @param x the input string
+ * @param first the begin position, in python semantics
+ * @return x[first:]
+ */
 template <typename C, typename T, typename A>
 std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first)
 {
@@ -327,6 +365,12 @@ std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first)
     return x.substr(first);
 }
 
+/** get a substring from a string.
+ * @param x the input string
+ * @param first the begin position, in python semantics
+ * @param last the end position, in python semantics
+ * @return x[first:last]
+ */
 template <typename C, typename T, typename A>
 std::basic_string<C,T,A> sub(const std::basic_string<C,T,A>& x, long first, long last)
 {
